@@ -1,7 +1,5 @@
-import { getFirestore, doc,getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
-import { app } from "./firebaseConfig.js";
-
-const db = getFirestore(app);
+import { db } from "./firebaseConfig.js";
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 
 let userData = JSON.parse(sessionStorage.getItem("user-info"))

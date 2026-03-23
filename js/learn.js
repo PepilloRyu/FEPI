@@ -1,3 +1,6 @@
+import { db } from './firebaseConfig.js';
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
 const openSuperDuolingoPage = () => {
   document.getElementById("try-super-button").classList.toggle('clicked');
   setTimeout(() => document.getElementById("try-super-button").classList.toggle('clicked'), 200)
@@ -48,11 +51,15 @@ const openDialogBoxes = (event) => {
 let sectionData;
 async function fetchSectionData(lang, sectionId) {
   try {
-    let response = await fetch(`https://duolingo-serverless-endpoint.vercel.app/api/section-details?lang=${lang}&section=${sectionId}`);
-    sectionData = await response.json();
-    localStorage.setItem("sectionData", JSON.stringify(sectionData));
-    showLessonsInSection();
-
+    const docRef = doc(db, "courses", "algebra");
+    const docSnap = await getDoc(docRef);
+    if(docSnap.exists()) {
+      sectionData = docSnap.data();
+      localStorage.setItem("sectionData", JSON.stringify(sectionData));
+      showLessonsInSection();
+    } else {
+      console.log("No data found for algebra course!");
+    }
   } catch (error) {
     console.error('Error fetching data:', error);
     return;
@@ -128,8 +135,7 @@ const placeSectionList = () => {
   scrollableContainer.insertAdjacentHTML("beforeend", sectionList);
 }
 
-const getUserDataFromSessionStorage = () => {
-  return JSON.parse(sessionStorage.getItem("user-info"))
+const getUserDataFromSessionStorage = () => { let data = localStorage.getItem('mathgo_user') || sessionStorage.getItem('user-info'); let parsed = data ? JSON.parse(data) : {}; return Object.assign({ learnLang: 'es', profileImage: '../assets/svg/profile-image-temp.svg', xp: 0, hearts: 5, gems: 500, completedChapters: 0, completedUnits: 0, currentLesson: 1 }, parsed, { xp: parsed.totalXp ?? parsed.xp ?? 0 });
 }
 
 const placeuserStatistics = () => {
@@ -551,3 +557,12 @@ const animationFromJSON = (ref, path, autoplay = true) => {
 }
 
 animationFromJSON(loadingPage, animationPath);
+
+// Exponer funciones necesarias al scope global (window) ya que ahora es un módulo
+window.openSuperDuolingoPage = openSuperDuolingoPage;
+window.closeAllOpenDialogBoxes = closeAllOpenDialogBoxes;
+window.openDialogBoxes = openDialogBoxes;
+window.showLessonsInSection = showLessonsInSection;
+window.startLesson = startLesson;
+window.placeSectionList = placeSectionList;
+

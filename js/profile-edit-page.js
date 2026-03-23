@@ -1,14 +1,13 @@
-import { getFirestore, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-import { app } from "./firebaseConfig.js";
+import { db, app } from './firebaseConfig.js';
+import { doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
 
-const db = getFirestore(app);
 const storage = getStorage(app);
 
-let userInfo = JSON.parse(sessionStorage.getItem('user-info'));
-const userId = userInfo.userId;
+let userInfo = JSON.parse(localStorage.getItem('mathgo_user')) || JSON.parse(sessionStorage.getItem('user-info')) || { uid: "temp" };
+const userId = userInfo.uid || userInfo.userId;
 console.log(userId);
-const userDocRef = doc(db, 'UsersAuthList', userId);
+const userDocRef = doc(db, 'users', userId);
 
 const imageInput = document.getElementById("choose-file-input");
 

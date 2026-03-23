@@ -92,8 +92,8 @@
   <!-- Script principal con funciones de navegación y Firebase -->
   <script type="module">
     // Importar Firebase
-    import { app } from './js/firebaseConfig.js';
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { auth } from './js/firebaseConfig.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
     
     // Definir funciones globales para los botones
     window.signupButtonAnimation = function() {
@@ -142,7 +142,6 @@
     };
     
     // Verificar si el usuario ya está logueado
-    const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // Usuario ya tiene sesión, redirigir a la página de aprendizaje
@@ -155,27 +154,7 @@
   </script>
 
 
-<!-- Al final del body, antes de cerrar </body> -->
-<script type="module">
-  import { auth } from './js/firebaseConfig.js';
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  
-  // Definir funciones globales
-  window.signupButtonAnimation = function() {
-    window.location.href = './html/signup.html';
-  };
-  
-  window.alreadyAccountButtonAnimation = function() {
-    window.location.href = './html/loginpage.html';
-  };
-  
-  // Verificar si el usuario ya está logueado
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.href = './html/learn.html';
-    }
-  });
-</script>
+<!-- End of scripts -->
   
   <!-- Lottie para animaciones (opcional) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
