@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MathGo - Test de Autenticación</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #4A6CF7;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background: #4A6CF7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            background: #3a5bd9;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            color: #721c24;
+            background: #f8d7da;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #f5c6cb;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+        .info {
+            background: #e8f0fe;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4A6CF7;
+            margin-top: 20px;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 MathGo</h1>
+        <div class="subtitle">Prueba de autenticación</div>
+        
+        <div class="warning">
+            ⚠️ <strong>Importante:</strong> Las contraseñas NO se guardan en Firestore, 
+            solo en Firebase Authentication (más seguro)
+        </div>
+        
+        <!-- Registro -->
+        <div>
+            <h2>📝 Crear cuenta nueva</h2>
+            <input type="text" id="reg-name" placeholder="Nombre completo">
+            <input type="email" id="reg-email" placeholder="Email">
+            <input type="password" id="reg-password" placeholder="Contraseña (mínimo 6 caracteres)">
+            <button onclick="testSignup()">Registrarse</button>
+        </div>
+        
+        <hr>
+        
+        <!-- Login -->
+        <div>
+            <h2>🔐 Iniciar sesión</h2>
+            <input type="email" id="login-email" placeholder="Email">
+            <input type="password" id="login-password" placeholder="Contraseña">
+            <button onclick="testLogin()">Iniciar sesión</button>
+        </div>
+        
+        <div id="result"></div>
+        
+        <div class="info">
+            💡 <strong>Prueba con estos datos:</strong><br>
+            📧 Email: prueba@mathgo.com<br>
+            🔑 Contraseña: 123456<br><br>
+            🔍 Después de registrarte, verifica en:<br>
+            • Authentication → Users (aparecerá el usuario)<br>
+            • Firestore → users (aparecerán los datos SIN contraseña)
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+        
+        window.testSignup = async () => {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            
+            if (!name || !email || !password) {
+                document.getElementById('result').innerHTML = '<div class="error">❌ Todos los campos son obligatorios</div>';
+                return;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('result').innerHTML = '<div class="error">❌ La contraseña debe tener al menos 6 caracteres</div>';
+                return;
+            }
+            
+            document.getElementById('result').innerHTML = '<div>⏳ Registrando usuario...</div>';
+            
+            try {
+                // 1. Crear usuario en Firebase Auth (la contraseña se guarda aquí, segura)
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // 2. Guardar datos públicos en Firestore (SIN contraseña)
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                    level: "beginner",
+                    totalXp: 0,      // IMPORTANTE: número, no string
+                    streak: 0,        // IMPORTANTE: número, no string
+                    joinDate: new Date().toISOString()
+                });
+                
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        ✅ <strong>¡Usuario registrado exitosamente!</strong><br><br>
+                        📌 <strong>UID:</strong> ${user.uid}<br>
+                        👤 <strong>Nombre:</strong> ${name}<br>
+                        📧 <strong>Email:</strong> ${email}<br><br>
+                        🔐 La contraseña está segura en Firebase Auth.<br>
+                        📁 Los datos están en Firestore (sin contraseña).
+                    </div>
+                `;
+                
+                // Limpiar campos
+                document.getElementById('reg-name').value = '';
+                document.getElementById('reg-email').value = '';
+                document.getElementById('reg-password').value = '';
+                
+            } catch (error) {
+                let errorMessage = error.message;
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Este email ya está registrado. Prueba con otro.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'La contraseña es muy débil. Usa al menos 6 caracteres.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'El formato del email no es válido.';
+                }
+                document.getElementById('result').innerHTML = `<div class="error">❌ Error: ${errorMessage}</div>`;
+            }
+        };
+        
+        window.testLogin = async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                document.getElementById('result').innerHTML = '<div class="error">❌ Email y contraseña son obligatorios</div>';
+                return;
+            }
+            
+            document.getElementById('result').innerHTML = '<div>⏳ Iniciando sesión...</div>';
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        ✅ <strong>¡Sesión iniciada exitosamente!</strong><br><br>
+                        📧 <strong>Email:</strong> ${userCredential.user.email}<br>
+                        🆔 <strong>UID:</strong> ${userCredential.user.uid}
+                    </div>
+                `;
+                
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+                
+            } catch (error) {
+                let errorMessage = error.message;
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'No existe una cuenta con este email. Regístrate primero.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Contraseña incorrecta. Intenta de nuevo.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'El formato del email no es válido.';
+                }
+                document.getElementById('result').innerHTML = `<div class="error">❌ Error: ${errorMessage}</div>`;
+            }
+        };
+    </script>
+</body>
+</html>

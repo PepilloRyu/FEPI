@@ -1,4 +1,4 @@
-import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+/*import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { app } from "./firebaseConfig.js";
 
@@ -147,3 +147,85 @@ const validate = (event) => {
 }
 
 mainForm.addEventListener('submit', RegisterUser);
+
+
+*/
+
+
+// js/firebaseSignup.js
+import { auth, db } from './firebaseConfig.js';
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+// Función para registrar usuario
+async function signUpUser(email, password, name) {
+    try {
+        // Crear usuario en Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Guardar datos del usuario en Firestore
+        await setDoc(doc(db, "users", user.uid), {
+            name: name,
+            email: email,
+            level: "beginner",
+            totalXp: 0,
+            streak: 0,
+            currentTopic: "basics",
+            joinDate: new Date().toISOString(),
+            createdAt: new Date()
+        });
+        
+        // Crear progreso inicial
+        await setDoc(doc(db, "user_progress", user.uid), {
+            basics_completed: false,
+            linear_equations_progress: 0,
+            quadratics_unlocked: false,
+            totalLessonsCompleted: 0,
+            totalXp: 0
+        });
+        
+        return { success: true, user };
+    } catch (error) {
+        console.error("Error en registro:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Manejar el formulario de registro
+document.addEventListener('DOMContentLoaded', () => {
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name-input')?.value;
+            const email = document.getElementById('email-input')?.value;
+            const password = document.getElementById('password-input')?.value;
+            const confirmPassword = document.getElementById('confirm-password-input')?.value;
+            
+            if (password !== confirmPassword) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            const result = await signUpUser(email, password, name);
+            
+            if (result.success) {
+                // Guardar datos en localStorage
+                localStorage.setItem('mathgo_user', JSON.stringify({
+                    uid: result.user.uid,
+                    name: name,
+                    email: email,
+                    level: 'beginner'
+                }));
+                // Redirigir a la página de aprendizaje
+                window.location.href = '../html/learn.html';
+            } else {
+                alert('Error al registrarse: ' + result.error);
+            }
+        });
+    }
+});
+
+export { signUpUser };

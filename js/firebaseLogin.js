@@ -1,3 +1,4 @@
+/*
 import {getFirestore, doc, getDoc} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {getAuth, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { app } from "./firebaseConfig.js";
@@ -96,3 +97,82 @@ const validateEntry = (event) =>{
 }
 
 mainForm.addEventListener("submit", signInUser);
+*/
+
+// js/firebaseLogin.js
+import { auth, db } from './firebaseConfig.js';
+import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+// Función para iniciar sesión
+async function loginUser(email, password) {
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Obtener datos adicionales de Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            localStorage.setItem('mathgo_user', JSON.stringify({
+                uid: user.uid,
+                name: userData.name,
+                email: userData.email,
+                level: userData.level,
+                totalXp: userData.totalXp,
+                streak: userData.streak
+            }));
+        }
+        
+        return { success: true, user };
+    } catch (error) {
+        console.error("Error en login:", error);
+        return { success: false, error: error.message, code: error.code };
+    }
+}
+
+// Manejar el formulario de login
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('main-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email-input')?.value;
+            const password = document.getElementById('password-input')?.value;
+            
+            const result = await loginUser(email, password);
+            
+            if (result.success) {
+                window.location.href = '../html/learn.html';
+            } else {
+                let errorMessage = 'Error al iniciar sesión';
+                switch (result.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = 'El formato del email no es válido';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = 'No existe una cuenta con este email';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Contraseña incorrecta';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Demasiados intentos. Intenta más tarde';
+                        break;
+                }
+                alert(errorMessage);
+            }
+        });
+    }
+    
+    // Verificar si el usuario ya está logueado
+    onAuthStateChanged(auth, (user) => {
+        if (user && window.location.pathname.includes('loginpage.html')) {
+            window.location.href = '../html/learn.html';
+        }
+    });
+});
+
+export { loginUser };

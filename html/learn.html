@@ -64,6 +64,16 @@
               <span class="text-in-button"> FAQ </span>
             </span>
           </a>
+
+          <a class="button-in-sidebar" onclick="cerrarSesion()" style="    cursor: pointer;">
+            <span class="icon-and-text-wrap">
+              <div class="icon-in-button">
+                <p>🚪</p>
+              </div>
+              <span class="text-in-button"> Cerrar sesión </span>
+            </span>
+          </a>
+
         </div>
       </div>
       <!------------------------------------- Content-Container ------------------------------------------------>
@@ -181,4 +191,36 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
   <script src="../js/learn.js"></script>
   <script src="../js/updateUserData.js" type="module"></script>
+
+
+  <script type="module">
+    import { auth } from '../js/firebaseConfig.js';
+    import { signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    
+    // Función para cerrar sesión
+    window.cerrarSesion = async function() {
+        try {
+            await signOut(auth);
+            // Eliminar datos del localStorage
+            localStorage.removeItem('mathgo_user');
+            // Redirigir al inicio
+            window.location.href = '../index.html';
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            alert('Error al cerrar sesión: ' + error.message);
+        }
+    };
+    
+    // Verificar si el usuario está logueado
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Si no hay usuario, redirigir al login
+            window.location.href = '../index.html';
+        } else {
+            console.log('Usuario logueado:', user.email);
+        }
+    });
+</script>
 </html>

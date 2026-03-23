@@ -153,6 +153,29 @@
     // Cargar contenido por defecto (español)
     window.setIndexSiteLanguage('./assets/JSON/landing-spanish.json', 'spanish');
   </script>
+
+
+<!-- Al final del body, antes de cerrar </body> -->
+<script type="module">
+  import { auth } from './js/firebaseConfig.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  
+  // Definir funciones globales
+  window.signupButtonAnimation = function() {
+    window.location.href = './html/signup.html';
+  };
+  
+  window.alreadyAccountButtonAnimation = function() {
+    window.location.href = './html/loginpage.html';
+  };
+  
+  // Verificar si el usuario ya está logueado
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = './html/learn.html';
+    }
+  });
+</script>
   
   <!-- Lottie para animaciones (opcional) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
