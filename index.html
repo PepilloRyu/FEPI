@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="./css/main.css" />
     <script src="./js/landingpage.js" defer></script>
     <script src="./js/loadanimationindex.js" defer></script>
-    <title>Duolingo</title>
+    <title>MathGo - Aprende Álgebra</title>
     <link rel="icon" href="./assets/images/favicon.ico" />
   </head>
   <body>
     <header class="landing-header">
-      <!-- //navbar in landing page -->
       <div class="header-navbar">
         <nav class="landing-navbar">
           <a>
             <img
-              alt="Duolingo"
+              alt="MathGo"
               class="landing-header-logo"
-              src="./assets/svg/duolingo_landing_header_logo.svg"
+              src="./assets/svg/LogoMathGo.png"
+              style="height: 40px; width: auto;"
             />
           </a>
           <div class="select-site-language">
@@ -36,45 +36,15 @@
                 <li class="site-language-list-single">
                   <a
                     class="country-name-flag-language"
-                    onclick="setIndexSiteLanguage('assets/JSON/landing-german.json','german')"
-                    ><img
-                      class="country-flag-language-selection"
-                      src="./assets/svg/country-flags/de-flag.svg"
-                    />
-                    German</a
-                  >
-                </li>
-                <li class="site-language-list-single">
-                  <a
-                    class="country-name-flag-language"
-                    onclick="setIndexSiteLanguage('assets/JSON/landing-hindi.json','hindi')"
-                    ><img
-                      class="country-flag-language-selection"
-                      src="./assets/images/india.png"
-                    />
-                    Hindi</a
-                  >
-                </li>
-                <li class="site-language-list-single">
-                  <a
-                    class="country-name-flag-language"
                     onclick="setIndexSiteLanguage('assets/JSON/landing-english.json','english')"
-                    ><img
-                      class="country-flag-language-selection"
-                      src="./assets/images/english.png"
-                    />
-                    English</a
+                    >English</a
                   >
                 </li>
                 <li class="site-language-list-single">
                   <a
                     class="country-name-flag-language"
-                    onclick="setIndexSiteLanguage('assets/JSON/landing-malayalam.json','malayalam')"
-                    ><img
-                      class="country-flag-language-selection"
-                      src="./assets/images/india.png"
-                    />
-                    Malayalam</a
+                    onclick="setIndexSiteLanguage('assets/JSON/landing-spanish.json','spanish')"
+                    >Español</a
                   >
                 </li>
               </ul>
@@ -82,11 +52,13 @@
           </div>
         </nav>
       </div>
-      <!-- content below navbar -->
+
+      <!-- Hero Section - Estilo Brilliant -->
       <div class="header-logging">
         <div class="left-logging-header" id="left-logging-header"></div>
         <div class="right-logging-header">
           <h1 id="header-text"></h1>
+          <p class="hero-subtitle" id="hero-subtitle"></p>
           <div class="right-logging-button-section">
             <div class="get-started-btn-div">
               <button
@@ -107,260 +79,36 @@
               </button>
             </div>
           </div>
+          <p class="hero-stat" id="hero-stat"></p>
         </div>
       </div>
-      <!-- scrollable navbar -->
-      <div class="scrollable-navabar-div">
-        <nav class="scrollable-navbar-nav">
-          <svg
-            class="left-arrow-svg"
-            fill="none"
-            viewBox="0 0 16 16"
-            onclick="scrollNavbar('left')"
-          >
-            <path
-              d="M10 2L4 8L10 14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-            ></path>
-          </svg>
-          <div class="countries-div">
-            <ul class="countries-list" style="transform: translateX(0px)">
-              <li class="available-lang">
-                <a class="conuntry-one" onclick="selectLesson('es')">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 66 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>SPANISH</span>
-                </a>
-              </li>
-              <li class="available-lang">
-                <a class="conuntry-one" onclick="selectLesson('fr')">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 132 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>FRENCH</span>
-                </a>
-              </li>
-              <li class="available-lang">
-                <a class="conuntry-one" onclick="selectLesson('de')">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 198 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>GERMAN</span>
-                </a>
-              </li>
-              <li class="available-lang">
-                <a class="conuntry-one" onclick="selectLesson('ja')">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 264 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>JAPANESE</span>
-                </a>
-              </li>
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 330 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>ITALIAN</span>
-                </a>
-              </li>
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 396 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>KOREAN</span>
-                </a>
-              </li>
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 462 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>CHINESE</span>
-                </a>
-              </li>
 
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 396 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>KOREAN</span>
-                </a>
-              </li>
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 462 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>CHINESE</span>
-                </a>
-              </li>
-
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 132 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>FRENCH</span>
-                </a>
-              </li>
-              <li>
-                <a class="conuntry-one" href="">
-                  <svg
-                    class="country-flag-svg"
-                    viewBox="0 198 82 66"
-                    style="height: 28.9756px; width: 36px"
-                  >
-                    <image
-                      height="3168"
-                      href="  https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg"
-                      width="82"
-                      xlink:href="./assets/svg/Flags_list.svg"
-                    ></image>
-                  </svg>
-                  <span>GERMAN</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-          <svg
-            class="right-arrow-svg"
-            fill="none"
-            viewBox="0 0 16 16"
-            onclick="scrollNavbar('right')"
-          >
-            <path
-              d="M6 2L12 8L6 14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-            ></path>
-          </svg>
-        </nav>
+      <!-- Conceptos destacados - Estilo cuadrícula Brilliant -->
+      <div class="concepts-grid">
+        <div class="concept-card">
+          <div class="concept-icon">📐</div>
+          <h3>Ecuaciones Lineales</h3>
+          <p>Domina la base del álgebra resolviendo ecuaciones paso a paso</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">📈</div>
+          <h3>Funciones y Gráficas</h3>
+          <p>Aprende a visualizar relaciones matemáticas</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">✖️</div>
+          <h3>Factorización</h3>
+          <p>Simplifica expresiones complejas con técnicas efectivas</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🔢</div>
+          <h3>Sistemas de Ecuaciones</h3>
+          <p>Resuelve múltiples ecuaciones simultáneamente</p>
+        </div>
       </div>
-
-      <script>
-        const countriesList = document.querySelector(".countries-list");
-        const itemsToShow = 7;
-        const itemsToScroll = 2;
-        let currentIndex = 0;
-
-        function scrollNavbar(direction) {
-          const itemWidth = countriesList.firstElementChild.offsetWidth + 10; // 10 is the gap between items
-
-          if (direction === "left" && currentIndex > 0) {
-            currentIndex -= itemsToScroll;
-          } else if (
-            direction === "right" &&
-            currentIndex < countriesList.children.length - itemsToShow
-          ) {
-            currentIndex += itemsToScroll;
-          }
-
-          countriesList.style.transform = `translateX(-${
-            currentIndex * itemWidth
-          }px)`;
-        }
-      </script>
     </header>
-    <!-- section below scrollable navbar -->
+
+    <!-- Secciones de características - estilo Brilliant -->
     <section class="duolingo-features">
       <section class="feature-class features-column">
         <div class="duolingo-features-text">
@@ -387,6 +135,7 @@
           </p>
         </div>
       </section>
+
       <section class="feature-class features-column">
         <div class="duolingo-features-text">
           <h2 class="duolingo-features-text-head" id="feature-head-3"></h2>
@@ -399,6 +148,7 @@
           class="duolingo-feature-animation"
         ></div>
       </section>
+
       <section class="feature-class features-column-reverse">
         <div
           id="duolingo-feature-animation-personalised-learning"
@@ -412,7 +162,45 @@
         </div>
       </section>
     </section>
-    <!-- landing page floating with get statrted button -->
+
+    <!-- Sección de cursos de Álgebra -->
+    <section class="algebra-courses">
+      <h2 class="courses-title">Conceptos de Álgebra</h2>
+      <div class="courses-grid">
+        <div class="course-card">
+          <div class="course-level">Fundamentos</div>
+          <h3>Álgebra Básica</h3>
+          <p>Variables, expresiones y operaciones fundamentales</p>
+        </div>
+        <div class="course-card">
+          <div class="course-level">Intermedio</div>
+          <h3>Ecuaciones Lineales</h3>
+          <p>Resolución de ecuaciones de primer grado</p>
+        </div>
+        <div class="course-card">
+          <div class="course-level">Intermedio</div>
+          <h3>Polinomios</h3>
+          <p>Suma, resta, multiplicación y factorización</p>
+        </div>
+        <div class="course-card">
+          <div class="course-level">Avanzado</div>
+          <h3>Ecuaciones Cuadráticas</h3>
+          <p>Fórmula general y métodos de resolución</p>
+        </div>
+        <div class="course-card">
+          <div class="course-level">Avanzado</div>
+          <h3>Funciones</h3>
+          <p>Dominio, rango y representación gráfica</p>
+        </div>
+        <div class="course-card">
+          <div class="course-level">Experto</div>
+          <h3>Sistemas de Ecuaciones</h3>
+          <p>Métodos de sustitución, igualación y eliminación</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Floating CTA Section -->
     <section class="floating-landing-page">
       <div class="floating-footer">
         <div class="footer-get-started-section">
@@ -422,7 +210,6 @@
               <button
                 class="logging-get-started-button button-div"
                 onclick="getStartedButtonAnimation();"
-                id="get-started-button"
               >
                 <span id="bottom-get-started-text"></span>
               </button>
@@ -434,161 +221,57 @@
         </div>
       </div>
     </section>
+
+    <!-- Footer -->
     <div class="lastDiv">
       <div class="divInLastDiv">
         <div class="containList">
           <div class="list-head">
             <div class="headings">
               <div>
-                <div class="mainHeading" id="aboutUs">About us</div>
+                <div class="mainHeading" id="aboutUs">MathGo</div>
                 <ul>
-                  <li>
-                    <a href="">Courses</a>
-                  </li>
-                  <li><a href="">Mission</a></li>
-                  <li><a href="">Approach</a></li>
-                  <li><a href="">Efficacy</a></li>
-                  <li>
-                    <a href="https://careers.duolingo.com/about">Team</a>
-                  </li>
-                  <li>
-                    <a href="https://research.duolingo.com">Research</a>
-                  </li>
-                  <li>
-                    <a href="https://careers.duolingo.com">Careers</a>
-                  </li>
-                  <li>
-                    <a href="https://design.duolingo.com">Brand guidelines</a>
-                  </li>
-                  <li>
-                    <a href="https://store.duolingo.com/">Store</a>
-                  </li>
-                  <li>
-                    <a href="https://press.duolingo.com">Press</a>
-                  </li>
-                  <li>
-                    <a href="https://investors.duolingo.com">Investors</a>
-                  </li>
-                  <li><a href="">Contact us</a></li>
+                  <li><a href="">Acerca de</a></li>
+                  <li><a href="">Nuestro enfoque</a></li>
+                  <li><a href="">Eficacia</a></li>
+                  <li><a href="">Equipo</a></li>
+                  <li><a href="">Contacto</a></li>
                 </ul>
               </div>
             </div>
             <div class="headings">
               <div>
-                <div class="mainHeading">Products</div>
+                <div class="mainHeading">Productos</div>
                 <ul>
-                  <li>
-                    <a class="" href="">Duolingo</a>
-                  </li>
-                  <li>
-                    <a href="https://schools.duolingo.com"
-                      >Duolingo for Schools</a
-                    >
-                  </li>
-                  <li>
-                    <a href="https://englishtest.duolingo.com/en"
-                      >Duolingo English Test</a
-                    >
-                  </li>
-                  <li>
-                    <a href="https://www.duolingo.com/abc">Duolingo ABC</a>
-                  </li>
-                  <li>
-                    <a href="https://www.duolingo.com/math">Duolingo Math</a>
-                  </li>
-                  <li>
-                    <a href="https://podcast.duolingo.com">Podcast</a>
-                  </li>
-                  <li><a href="">Duolingo for Business</a></li>
-                  <li><a href="">Super Duolingo</a></li>
-                  <li><a href="">Gift Super Duolingo</a></li>
+                  <li><a href="">MathGo</a></li>
+                  <li><a href="">MathGo para Escuelas</a></li>
+                  <li><a href="">MathGo Pro</a></li>
                 </ul>
               </div>
             </div>
             <div class="headings">
               <div>
-                <div class="mainHeading">Apps</div>
+                <div class="mainHeading">Ayuda y soporte</div>
                 <ul>
-                  <li>
-                    <a
-                      href="//play.google.com/store/apps/details?hl=en&amp;id=com.duolingo&amp;referrer=utm_source%3Dduolingo.com%26utm_medium%3Dduolingo_web%26utm_content%3Ddownload_button%26utm_campaign%3Dsite_map"
-                      >Duolingo for Android</a
-                    >
-                  </li>
-                  <li>
-                    <a
-                      href="//itunes.apple.com/app/duolingo-learn-spanish-french/id570060128?mt=8"
-                      >Duolingo for iOS</a
-                    >
-                  </li>
-                  <li>
-                    <a
-                      href="https://apps.apple.com/app/duolingo-abc-learn-to-read/id1440502568?pt=1374442&amp;ct=Site%20map&amp;mt=8"
-                      >Duolingo ABC (iOS)</a
-                    >
-                  </li>
+                  <li><a href="">Preguntas frecuentes</a></li>
+                  <li><a href="">Estado del servicio</a></li>
                 </ul>
               </div>
             </div>
             <div class="headings">
               <div>
-                <div class="mainHeading">Help and support</div>
+                <div class="mainHeading">Privacidad y términos</div>
                 <ul>
-                  <li>
-                    <a href="https://support.duolingo.com/hc/en-us"
-                      >Duolingo FAQs</a
-                    >
-                  </li>
-                  <li>
-                    <a href="https://duolingoschools.zendesk.com/hc/en-us"
-                      >Schools FAQs</a
-                    >
-                  </li>
-                  <li>
-                    <a href="https://englishtest.duolingo.com/faq"
-                      >Duolingo English Test FAQs</a
-                    >
-                  </li>
-                  <li>
-                    <a href="https://status.duolingo.com/">Status</a>
-                  </li>
+                  <li><a href="">Términos</a></li>
+                  <li><a href="">Privacidad</a></li>
                 </ul>
               </div>
-            </div>
-            <div class="headings">
               <div>
-                <div class="mainHeading">Privacy and terms</div>
+                <div class="mainHeading">Redes sociales</div>
                 <ul>
-                  <li><a href="">Community guidelines</a></li>
-                  <li><a href="">Terms</a></li>
-                  <li><a href="">Privacy</a></li>
-                  <li>
-                    <a href=""
-                      >Respecting your "do not sell my personal information"
-                      rights</a
-                    >
-                  </li>
-                </ul>
-              </div>
-              <div class="headings"></div>
-              <div>
-                <div class="mainHeading">Social</div>
-                <ul>
-                  <li>
-                    <a href="https://blog.duolingo.com">Blog</a>
-                  </li>
-                  <li>
-                    <a href="https://www.instagram.com/duolingo">Instagram</a>
-                  </li>
-                  <li>
-                    <a href="https://www.facebook.com/duolingo">Facebook</a>
-                  </li>
-                  <li>
-                    <a href="https://twitter.com/duolingo">Twitter</a>
-                  </li>
-                  <li>
-                    <a href="https://www.youtube.com/user/duolingo">YouTube</a>
-                  </li>
+                  <li><a href="">Blog</a></li>
+                  <li><a href="">Instagram</a></li>
+                  <li><a href="">Twitter</a></li>
                 </ul>
               </div>
             </div>
@@ -596,44 +279,17 @@
         </div>
         <div class="languageRow">
           <div>
-            <div class="languageHeading">Site language:</div>
+            <div class="languageHeading">Idioma del sitio:</div>
             <ul>
               <li class="languages">
-                <a
-                  class="singleLang"
-                  onclick="setIndexSiteLanguage('assets/JSON/landing-english.json','english')"
-                  >English</a
-                >
-              </li>
-
-              <li class="languages">
-                <a
-                  class="singleLang"
-                  onclick="setIndexSiteLanguage('assets/JSON/landing-hindi.json','hindi')"
-                  >हिंदी</a
-                >
-              </li>
-
-              <li class="languages">
-                <a
-                  class="singleLang"
-                  onclick="setIndexSiteLanguage('assets/JSON/landing-malayalam.json','malayalam')"
-                  >മലയാളം</a
-                >
+                <a class="singleLang" onclick="setIndexSiteLanguage('assets/JSON/landing-english.json','english')">English</a>
               </li>
               <li class="languages">
-                <a
-                  class="singleLang"
-                  onclick="setIndexSiteLanguage('assets/JSON/landing-german.json','german')"
-                  >DEUTSCH</a
-                >
+                <a class="singleLang" onclick="setIndexSiteLanguage('assets/JSON/landing-spanish.json','spanish')">Español</a>
               </li>
             </ul>
           </div>
-          <img
-            class="owlFace"
-            src="https://d35aaqx5ub95lt.cloudfront.net/images/5c2cfda26cf9f55f51622d89f44fb5ad.svg"
-          />
+          <div class="mathgo-symbol">✖️²</div>
         </div>
       </div>
     </div>
@@ -641,4 +297,3 @@
   <script src="./js/pointerpage.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
 </html>
-
