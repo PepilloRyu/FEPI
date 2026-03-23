@@ -173,3 +173,32 @@
     width: 32px !important;
   }
 }
+
+
+.mathgo-logo-link {
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.mathgo-logo-link:hover {
+  transform: scale(1.02);
+}
+
+.mathgo-logo-text {
+  font-family: "din-round-bold", sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  color: #4A6CF7;
+  text-shadow: 2px 2px 0 rgba(74, 108, 247, 0.2);
+  letter-spacing: -0.02em;
+}
+
+
+
+/* Para versión responsive */
+@media (max-width: 768px) {
+  .mathgo-logo-text {
+    font-size: 22px;
+  }
+}
