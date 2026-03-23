@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./scss/landingpage.css" />
     <link rel="stylesheet" href="./css/main.css" />
-    <script src="./js/landingpage.js" defer></script>
     <title>MathGo - Aprende Álgebra</title>
     <link rel="icon" href="./assets/images/favicon.ico" />
   </head>
@@ -22,7 +21,6 @@
       <!-- Hero Section -->
       <div class="header-logging">
         <div class="left-logging-header" id="left-logging-header">
-          <!-- Aquí puedes agregar una imagen para el héroe -->
           <img src="./assets/images/duo-logo.png" alt="Math learning" style="max-width: 100%; height: auto;" />
         </div>
         <div class="right-logging-header">
@@ -30,7 +28,7 @@
           <p class="hero-subtitle" id="hero-subtitle"></p>
           <div class="right-logging-button-section">
             <div class="get-started-btn-div">
-              <button class="logging-get-started-button button-div" onclick="getStartedButtonAnimation();" id="get-started-button">
+              <button class="logging-get-started-button button-div" onclick="signupButtonAnimation();" id="get-started-button">
                 <span id="get-started-text"></span>
               </button>
             </div>
@@ -59,7 +57,19 @@
           <img src="./assets/images/math-learning.png" alt="Aprende haciendo" style="width: 100%; height: auto; border-radius: 20px;" />
         </div>
       </section>
-
+      
+      <!-- Feature 3: Aprendizaje personalizado -->
+      <section class="feature-class features-column-reverse">
+        <div class="duolingo-feature-animation">
+          <img src="./assets/images/math-personalized.png" alt="Aprendizaje personalizado" style="width: 100%; height: auto; border-radius: 20px;" />
+        </div>
+        <div class="duolingo-features-text">
+          <h2 class="duolingo-features-text-head" id="feature-head-3"></h2>
+          <p class="duolingo-features-text-body">
+            <span id="feature-body-3"></span>
+          </p>
+        </div>
+      </section>
       <!-- Feature 2: Mantén la motivación -->
       <section class="feature-class features-column">
         <div class="duolingo-features-text">
@@ -73,20 +83,77 @@
         </div>
       </section>
 
-      <!-- Feature 3: Aprendizaje personalizado -->
-      <section class="feature-class features-column-reverse">
-        <div class="duolingo-feature-animation">
-          <img src="./assets/images/math-personalized.png" alt="Aprendizaje personalizado" style="width: 100%; height: auto; border-radius: 20px;" />
-        </div>
-        <div class="duolingo-features-text">
-          <h2 class="duolingo-features-text-head" id="feature-head-3"></h2>
-          <p class="duolingo-features-text-body">
-            <span id="feature-body-3"></span>
-          </p>
-        </div>
-      </section>
     </section>
 
   </body>
   <script src="./js/pointerpage.js"></script>
+  <script src="./js/landingpage.js"></script>
+  
+  <!-- Script principal con funciones de navegación y Firebase -->
+  <script type="module">
+    // Importar Firebase
+    import { app } from './js/firebaseConfig.js';
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    
+    // Definir funciones globales para los botones
+    window.signupButtonAnimation = function() {
+      window.location.href = './html/signup.html';
+    };
+    
+    window.alreadyAccountButtonAnimation = function() {
+      window.location.href = './html/loginpage.html';
+    };
+    
+    // Función para cargar el contenido del JSON
+    window.setIndexSiteLanguage = function(jsonPath, language) {
+      fetch(jsonPath)
+        .then(response => response.json())
+        .then(data => {
+          if (document.getElementById('header-text')) 
+            document.getElementById('header-text').innerText = data['header-text'];
+          if (document.getElementById('hero-subtitle')) 
+            document.getElementById('hero-subtitle').innerText = data['hero-subtitle'];
+          if (document.getElementById('get-started-text')) 
+            document.getElementById('get-started-text').innerText = data['get-started-text'];
+          if (document.getElementById('bottom-get-started-text')) 
+            document.getElementById('bottom-get-started-text').innerText = data['bottom-get-started-text'];
+          if (document.getElementById('already-have-account-text')) 
+            document.getElementById('already-have-account-text').innerText = data['already-have-account-text'];
+          if (document.getElementById('feature-head-1')) 
+            document.getElementById('feature-head-1').innerText = data['feature-head-1'];
+          if (document.getElementById('feature-body-1')) 
+            document.getElementById('feature-body-1').innerText = data['feature-body-1'];
+          if (document.getElementById('feature-head-2')) 
+            document.getElementById('feature-head-2').innerText = data['feature-head-2'];
+          if (document.getElementById('feature-body-2')) 
+            document.getElementById('feature-body-2').innerText = data['feature-body-2'];
+          if (document.getElementById('feature-head-3')) 
+            document.getElementById('feature-head-3').innerText = data['feature-head-3'];
+          if (document.getElementById('feature-body-3')) 
+            document.getElementById('feature-body-3').innerText = data['feature-body-3'];
+          if (document.getElementById('float-heading')) 
+            document.getElementById('float-heading').innerText = data['float-heading'];
+          if (document.getElementById('hero-stat')) 
+            document.getElementById('hero-stat').innerText = data['hero-stat'];
+          if (document.getElementById('site-language')) 
+            document.getElementById('site-language').innerText = data['site-language'];
+        })
+        .catch(error => console.error('Error cargando JSON:', error));
+    };
+    
+    // Verificar si el usuario ya está logueado
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Usuario ya tiene sesión, redirigir a la página de aprendizaje
+        window.location.href = './html/learn.html';
+      }
+    });
+    
+    // Cargar contenido por defecto (español)
+    window.setIndexSiteLanguage('./assets/JSON/landing-spanish.json', 'spanish');
+  </script>
+  
+  <!-- Lottie para animaciones (opcional) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
 </html>
