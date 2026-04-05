@@ -66,12 +66,12 @@
             </span>
           </a>
 
-          <a class="button-in-sidebar" id="logout-button" style="cursor: pointer;">
+          <a class="button-in-sidebar"  onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/svg/Logout.svg" alt="logout-icon" />
+                <img src="../assets/svg/Logout.svg" alt="home-icon" />
               </div>
-              <span class="text-in-button">Cerrar sesión</span>
+              <span class="text-in-button"> Cerrar sesión </span>
             </span>
           </a>
         </div>
@@ -81,16 +81,6 @@
         <!----------------------------------- Right sidebar ------------------------------------------------>
         <div class="right-sidebar">
           <div class="right-sidebar-header">
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/country-flags/transparent.svg"
-                    class="country-flag"
-                  />
-                </div>
-              </span>
-            </a>
             <a href="" class="button-in-sidebar">
               <span class="icon-and-text-wrap">
                 <div class="icon-in-button">
@@ -115,53 +105,34 @@
                 <span class="text-in-button gem-text"> 0 </span>
               </span>
             </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/heart-filled-red.svg"
-                    alt="home-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button heart-text"> 0 </span>
-              </span>
-            </a>
           </div>
           <div class="try-super-box">
             <img
-              src="../assets/svg/super-icon.svg"
-              alt="super-text"
-              id="try-super-image-one"
-            />
-            <img
-              src="../assets/svg/super-duo-owl.svg"
+              src="../assets/images/emocionado.png"
               alt="super-duo-owl"
               id="try-super-image-two"
             />
             <div class="content-text">
-              <h2>Try Super for free</h2>
+              <h2>🔥 Mantén tu racha</h2>
               <div class="description">
-                No ads, personalized practice, and unlimited Legendary!
+                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
               </div>
-              <button id="try-super-button" onclick="openSuperDuolingoPage();">
-                Try 2 weeks free
+              <button id="streak-button" onclick="verRacha();">
+                Ver mi racha actual →
               </button>
             </div>
           </div>
           <div class="try-super-box">
             <div class="league-header-with-link">
-              <h2>Liga</h2>
-              <h2><a href="./leaderboard.html">Ver Ligas</a></h2>
+              <h2>🎯 Proximos objetivos</h2>
+              <h2><a href="./leaderboard.html">Ver Todos</a></h2>
             </div>
             <div class="league-header-with-link">
-              <img
-                src="../assets/svg/amethyst-league-icon.svg"
-                alt="amethyst-league-icon"
-              />
               <div class="league-text-container">
                 <div class="description">
-                  Compite con otros jugadores
+                  🎯 Completar "Ecuaciones lineales" (3 lecciones restantes)<br>
+                  🎯 Ganar 200 XP hoy (llevas 120)<br>
+                  🎯 Mantener racha de 7 días (estás en 5)
                 </div>
               </div>
             </div>

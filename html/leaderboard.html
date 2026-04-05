@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Duolingo leaderboard</title>
+    <title>MathGo - Liga de Álgebra</title>
     <link rel="icon" href="../assets/images/favicon.ico" />
     <link rel="stylesheet" href="../css/learn.css" />
     <link rel="stylesheet" href="../css/main.css" />
@@ -20,273 +20,252 @@
             </a>
           </nav>
         </div>
+        
         <div class="sidebar-buttons">
-          <a href="./learn.html" class="button-in-sidebar">
+          <a href="../html/learn.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
                 <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
               </div>
-              <span class="text-in-button"> Aprender </span>
+              <span class="text-in-button">Aprender</span>
             </span>
           </a>
-          <a href="leaderboard.html" class="button-in-sidebar">
+          
+          <a href="../html/leaderboard.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap selected">
               <div class="icon-in-button">
-                <img src="../assets/svg/badge-in-sidebar.svg" alt="home-icon" />
+                <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
               </div>
-              <span class="text-in-button"> Ligas </span>
+              <span class="text-in-button">Ligas</span>
             </span>
           </a>
-          <a href="profile-page.html" class="button-in-sidebar">
+          
+          <a href="../html/profile-page.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img
-                id="profile-image"
-                  src="../assets/svg/profile-image-temp.svg"
-                  alt="home-icon"
-                  class="profile"
-                />
+                <img id="profile-image" src="../assets/svg/profile-image-temp.svg" alt="profile-icon" class="profile" />
               </div>
-              <span class="text-in-button"> Perfil </span>
+              <span class="text-in-button">Perfil</span>
             </span>
           </a>
-          <a href="./shoppingpage.html" class="button-in-sidebar">
+          
+          <a href="../html/shoppingpage.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/svg/shop-in-sidebar.svg" alt="home-icon" />
+                <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
               </div>
-              <span class="text-in-button"> Tienda </span>
+              <span class="text-in-button">Tienda</span>
             </span>
           </a>
-          <a href="./faq.html" class="button-in-sidebar">
+          
+          <a href="../html/faq.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/images/sidebar-icon-faq.png" alt="home-icon" />
+                <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
               </div>
-              <span class="text-in-button"> Soporte </span>
+              <span class="text-in-button">Soporte</span>
             </span>
           </a>
-          <a class="button-in-sidebar"  onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
+
+          <a class="button-in-sidebar" onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/svg/Logout.svg" alt="home-icon" />
+                <img src="../assets/svg/Logout.svg" alt="logout-icon" />
               </div>
-              <span class="text-in-button"> Cerrar sesión </span>
+              <span class="text-in-button">Cerrar sesión</span>
             </span>
           </a>
         </div>
       </div>
+      
       <!------------------------------------- Content-Container ------------------------------------------------>
       <div class="content-container">
         <!----------------------------------- Right sidebar ------------------------------------------------>
         <div class="right-sidebar">
-
-
           <div class="right-sidebar-header">
             <a href="" class="button-in-sidebar">
               <span class="icon-and-text-wrap">
                 <div class="icon-in-button">
                   <img
-                    src="../assets/svg/country-flags/transparent.svg"
-                    class="country-flag"
-                  />
-                </div>
-              </span>
-            </a>
-            <!-- XP -->
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
                     src="../assets/svg/lesson-xp.svg"
-                    alt="home-icon"
+                    alt="xp-icon"
                     class="profile"
                   />
                 </div>
-                <span class="text-in-button fire-text"> 400 </span>
+                <span class="text-in-button fire-text" id="user-xp">0</span>
               </span>
             </a>
-
-            <!-- GEMAS -->
             <a href="" class="button-in-sidebar">
               <span class="icon-and-text-wrap">
                 <div class="icon-in-button">
                   <img
                     src="../assets/svg/gems-icon.svg"
-                    alt="home-icon"
+                    alt="gems-icon"
                     class="profile"
                   />
                 </div>
-                <span class="text-in-button gem-text"> 7393 </span>
-              </span>
-            </a>
-
-            <!-- CORAZONES -->
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/heart-filled-red.svg"
-                    alt="home-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button heart-text"> 5 </span>
+                <span class="text-in-button gem-text" id="user-gems">0</span>
               </span>
             </a>
           </div>
+          
           <div class="try-super-box">
-            <div class ="divprofileheader">
-              <h2 class="headprofile">Set </h2>
-              <span class="clearspan">
-                <span class="spaninspan">clear</span>
-              </span>
+            <img
+              src="../assets/images/emocionado.png"
+              alt="math-learning"
+              id="try-super-image-two"
+            />
+            <div class="content-text">
+              <h2>🔥 Mantén tu racha</h2>
+              <div class="description">
+                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
+              </div>
+              <button id="streak-button" onclick="verRacha();">
+                Ver mi racha actual →
+              </button>
             </div>
-            <div class="divprofile">
-              <div class="divforpic">
-                <img class="picture"  id="profilePicture"  src="../assets/svg/profile-image-temp.svg"" alt="">
-                <div class="statuscontainer">
-                  <img class="profilestatus" id="addImage" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/a35f1db4398fd29e66f1abc33a0d11a2.svg">
+          </div>
+          
+          <div class="try-super-box">
+            <div class="league-header-with-link">
+              <h2>🎯 Próximos objetivos</h2>
+              <h2><a href="./learn.html">Ver Todos →</a></h2>
+            </div>
+            <div class="league-header-with-link">
+              <div class="league-text-container">
+                <div class="description">
+                  🎯 Completar "Ecuaciones lineales" (3 lecciones restantes)<br>
+                  🎯 Ganar 200 XP hoy (llevas 120)<br>
+                  🎯 Mantener racha de 7 días (estás en 5)
                 </div>
               </div>
-              <div class="classcontainstatus" style="grid-template-columns: repeat(6, 1fr);">
-                <button  onclick=changeImage()>
-                  <img class="statusimage " src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/2439bac00452e99ba7bf6a7ed0b04196.svg">
-                </button>
-                <button >
-                  <img class="statusimage " src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/2ceb401cae52712705b66a77df83ce40.svg">
-                </button>
-                <button >
-                  <img class="statusimage " src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/6b8a8db5ac7f847e7e87efe97c8b451a.svg">
-                </button>
-                <button >
-                  <img class="statusimage " src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/a8e5c18e80054228b2c61168846ff643.svg">
-                </button>
-                <button >
-                  <img class="statusimage " src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/573de2bc90b2499eeb2b3738cff90133.svg">
-                </button>
-                <button >
-                  <svg viewBox="0 264 82 66" data-test="flag-ja" class="" style="height: 30.5854px; width: 38px;">
-                    <image height="3168" href="https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg" width="82" xlink:href="https://d35aaqx5ub95lt.cloudfront.net/vendor/87938207afff1598611ba626a8c4827c.svg">
-
-                    </image></svg></button></div>
-            </div> 
+            </div>
+          </div>
         </div>
-           
         
-        <!-- --------------------------------right sidebar end---------------------------- -->
-          
-        <!----------------------------------- Scrollable area showing units ------------------------------------------------>
-       
-      </div>
-      <div class="scrollable-lesson-div">
-        <div class="center-container">
+        <!----------------------------------- Scrollable area showing leaderboard ------------------------------------------------>
+        <div class="scrollable-lesson-div">
+          <div class="center-container">
             <div class="center-container-firstdiv">
-                    <div class="diffmedals">
-                        <div class="medalsdiv" style="--offset: 0;">
-                          <div class="medaldiv">
-                            <img class="p9XXu" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/838ba65643baef4c8442317df514cab5.svg">
-                        </div>
-                            <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg">
-                            <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg">
-                            <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg">
-                            <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg">
-                            <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg">
-                            
-                            
-                        </div>
-                    </div>
-                    <div class="_250dJ">Liga</div>
-                    <div class="_2Xv_D"></div>
-                    
-                    <hr class="_3cgRx">
+              <div class="diffmedals">
+                <div class="medalsdiv" style="--offset: 0;">
+                  <div class="medaldiv">
+                    <img class="p9XXu" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/838ba65643baef4c8442317df514cab5.svg" alt="league-icon">
+                  </div>
+                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
+                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
+                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
+                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
+                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
+                </div>
+              </div>
+              <div class="_250dJ">Liga de Álgebra</div>
+              <div class="_2Xv_D"></div>
+              <hr class="_3cgRx">
             </div>
             <div class="centre-container-secdiv" id="centre-container-secdiv">
-                                                    </div>
-
-            
-
-
+              <!-- Aquí se cargarán los datos del leaderboard dinámicamente -->
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
     </div>
     
+    <!-- Bottom navigation para móvil -->
     <div class="sidebar-buttons bottom-nav">
       <a href="learn.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap">
           <div class="icon-in-button">
             <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
           </div>
-      
         </span>
       </a>
       <a href="leaderboard.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap selected">
           <div class="icon-in-button">
-            <img src="../assets/svg/badge-in-sidebar.svg" alt="home-icon" />
+            <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
           </div>
-      
         </span>
       </a>
       <a href="profile-page.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap">
           <div class="icon-in-button">
             <img
-              id="profile-image"
+              id="profile-image-bottom"
               src="../assets/svg/profile-image-temp.svg"
-              alt="home-icon"
+              alt="profile-icon"
               class="profile"
             />
           </div>
-      
         </span>
       </a>
       <a href="./shoppingpage.html" class="button-in-sidebar">
-      <span class="icon-and-text-wrap">
-        <div class="icon-in-button">
-          <img src="../assets/svg/shop-in-sidebar.svg" alt="home-icon" />
-        </div>
-      </span>
+        <span class="icon-and-text-wrap">
+          <div class="icon-in-button">
+            <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
+          </div>
+        </span>
       </a>
       <a href="./faq.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap">
           <div class="icon-in-button">
-            <img src="../assets/images/sidebar-icon-faq.png" alt="home-icon" />
+            <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
           </div>
-      
         </span>
       </a>
-    </div>      
-    <script type="module"  src="../js/leaderboard.js"></script>
-  <script type="module">
-    import { auth } from '../js/firebaseConfig.js';
-    import { signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    </div>
     
-    // Función para cerrar sesión
-    window.cerrarSesion = async function() {
+    <div class="loading-screen hidden">
+      <div class="text-animation-container">
+        <div class="lesson-loading-svg" id="owl-walk-animation"></div>
+        <span>Did You Know: El álgebra viene de la palabra árabe "al-jabr" que significa "reintegración" o "completamiento".</span>
+      </div>
+    </div>
+
+    <script type="module" src="../js/leaderboard.js"></script>
+    <script type="module">
+      import { auth, db } from '../js/firebaseConfig.js';
+      import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+      import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+      
+      // Función para cerrar sesión
+      window.cerrarSesion = async function() {
         try {
-            await signOut(auth);
-            // Eliminar datos del localStorage
-            localStorage.removeItem('mathgo_user');
-            // Redirigir al inicio
-            window.location.href = '../index.html';
+          await signOut(auth);
+          localStorage.removeItem('mathgo_user');
+          window.location.href = '../index.html';
         } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-            alert('Error al cerrar sesión: ' + error.message);
+          console.error('Error al cerrar sesión:', error);
+          alert('Error al cerrar sesión: ' + error.message);
         }
-    };
-    
-    // Verificar si el usuario está logueado
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    
-    onAuthStateChanged(auth, (user) => {
+      };
+      
+      // Función para ver racha
+      window.verRacha = function() {
+        alert("🔥 Tu racha actual: 5 días!\n\nSigue así para desbloquear logros especiales.");
+      };
+      
+      // Cargar datos del usuario (XP y Gemas)
+      onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            // Si no hay usuario, redirigir al login
-            window.location.href = '../index.html';
+          window.location.href = '../index.html';
         } else {
-            console.log('Usuario logueado:', user.email);
+          console.log('Usuario logueado:', user.email);
+          
+          // Cargar XP y Gemas desde Firestore
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              document.getElementById('user-xp').textContent = userData.totalXp || 0;
+              document.getElementById('user-gems').textContent = userData.gems || 0;
+            }
+          } catch (error) {
+            console.error('Error cargando datos:', error);
+          }
         }
-    });
-</script>    
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
   </body>
 </html>

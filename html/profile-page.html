@@ -1,17 +1,16 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile Page</title>
+    <title>MathGo - Mi Perfil</title>
     <link rel="icon" href="../assets/images/favicon.ico" />
     <link rel="stylesheet" href="../css/profile-page.css" />
     <link rel="stylesheet" href="../css/main.css" />
     <link rel="stylesheet" href="../css/learn.css" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- <script src="../js/learn.js"></script> -->
     <script type="module" src="../js/profile-page.js"></script>
     <script src="../js/profile-page-values.js"></script>
-    <script type="module" src="../js/firebaseLogout.js"></script>
   </head>
   <body>
     <div class="main-container">
@@ -30,15 +29,15 @@
               <div class="icon-in-button">
                 <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
               </div>
-              <span class="text-in-button"> Aprender </span>
+              <span class="text-in-button">Aprender</span>
             </span>
           </a>
           <a href="./leaderboard.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/svg/badge-in-sidebar.svg" alt="home-icon" />
+                <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
               </div>
-              <span class="text-in-button"> Ligas </span>
+              <span class="text-in-button">Ligas</span>
             </span>
           </a>
           <a href="./profile-page.html" class="button-in-sidebar">
@@ -50,15 +49,15 @@
                   id="left-profile-image"
                 />
               </div>
-              <span class="text-in-button"> Perfil </span>
+              <span class="text-in-button">Perfil</span>
             </span>
           </a>
           <a href="./shoppingpage.html" class="button-in-sidebar">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/svg/shop-in-sidebar.svg" alt="home-icon" />
+                <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
               </div>
-              <span class="text-in-button"> Tienda </span>
+              <span class="text-in-button">Tienda</span>
             </span>
           </a>
           <a href="./faq.html" class="button-in-sidebar">
@@ -66,18 +65,18 @@
               <div class="icon-in-button">
                 <img
                   src="../assets/images/sidebar-icon-faq.png"
-                  alt="home-icon"
+                  alt="faq-icon"
                 />
               </div>
-              <span class="text-in-button"> Soporte </span>
+              <span class="text-in-button">Soporte</span>
             </span>
           </a>
-          <a class="button-in-sidebar"  onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
+          <a class="button-in-sidebar" onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
             <span class="icon-and-text-wrap">
               <div class="icon-in-button">
-                <img src="../assets/svg/Logout.svg" alt="home-icon" />
+                <img src="../assets/svg/Logout.svg" alt="logout-icon" />
               </div>
-              <span class="text-in-button"> Cerrar sesión </span>
+              <span class="text-in-button">Cerrar sesión</span>
             </span>
           </a>
         </div>
@@ -91,22 +90,12 @@
               <span class="icon-and-text-wrap">
                 <div class="icon-in-button">
                   <img
-                    src="../assets/svg/country-flags/transparent.svg"
-                    class="country-flag"
-                  />
-                </div>
-              </span>
-            </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
                     src="../assets/svg/lesson-xp.svg"
-                    alt="home-icon"
+                    alt="xp-icon"
                     class="profile"
                   />
                 </div>
-                <span class="text-in-button fire-text"> 0 </span>
+                <span class="text-in-button fire-text" id="xp-value-sidebar">0</span>
               </span>
             </a>
             <a href="" class="button-in-sidebar">
@@ -114,86 +103,60 @@
                 <div class="icon-in-button">
                   <img
                     src="../assets/svg/gems-icon.svg"
-                    alt="home-icon"
+                    alt="gems-icon"
                     class="profile"
                   />
                 </div>
-                <span class="text-in-button gem-text"> 0 </span>
-              </span>
-            </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/heart-filled-red.svg"
-                    alt="home-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button heart-text"> 0 </span>
+                <span class="text-in-button gem-text" id="gems-value-sidebar">0</span>
               </span>
             </a>
           </div>
+          
           <div class="try-super-box">
             <img
-              src="../assets/svg/super-icon.svg"
-              alt="super-text"
-              id="try-super-image-one"
-            />
-            <img
-              src="../assets/svg/super-duo-owl.svg"
-              alt="super-duo-owl"
+              src="../assets/images/emocionado.png"
+              alt="math-learning"
               id="try-super-image-two"
             />
             <div class="content-text">
-              <h2>Try Super for free</h2>
+              <h2>🔥 Mantén tu racha</h2>
               <div class="description">
-                No ads, personalized practice, and unlimited Legendary!
+                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
               </div>
-              <button
-                id="try-super-button"
-                onclick="window.location.href='./superduolingo.html'"
-              >
-                Try 2 weeks free
+              <button id="streak-button" onclick="verRacha();">
+                Ver mi racha actual →
               </button>
             </div>
           </div>
+          
           <div class="try-super-box">
             <div class="league-header-with-link">
-              <h2>Liga</h2>
-              <h2><a href="./leaderboard.html">Ver ligas</a></h2>
+              <h2>🎯 Próximos objetivos</h2>
+              <h2><a href="./learn.html">Ver Todos →</a></h2>
             </div>
             <div class="league-header-with-link">
-              <img
-                src="../assets/svg/amethyst-league-icon.svg"
-                alt="amethyst-league-icon"
-              />
               <div class="league-text-container">
                 <div class="description">
-                  Compite con otros jugadores
+                  🎯 Completar "Ecuaciones lineales" (3 lecciones restantes)<br>
+                  🎯 Ganar 200 XP hoy (llevas 120)<br>
+                  🎯 Mantener racha de 7 días (estás en 5)
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Middle Section -->
+        <!-- Middle Section - Perfil -->
         <div class="profile-middle-container">
           <div class="profile-middle-flex">
             <div class="user-info-div">
               <div class="user-info-text">
                 <h1 class="profile-username">
-                  <span class="first-and-last-name" id="first-and-last-name"
-                    >Nombre</span
-                  >
+                  <span class="first-and-last-name" id="first-and-last-name">Nombre</span>
                   <div class="email" id="email">Email</div>
                 </h1>
                 <div class="join-date-container">
-                  <img
-                    src="../assets/svg/join-date.svg"
-                    class="date-image"
-                    alt=""
-                  />
+                  <img src="../assets/svg/join-date.svg" class="date-image" alt="" />
                   <div class="join-date" id="join-date">Joined</div>
                 </div>
               </div>
@@ -202,7 +165,7 @@
                 <img src="" alt="" id="profile-image" />
                 <div class="edit-account-div">
                   <a href="../html/profile-edit-page.html">
-                    <img src="../assets/svg/edit-button-logo.svg" alt="" />
+                    <img src="../assets/svg/edit-button-logo.svg" alt="Editar perfil" />
                   </a>
                 </div>
               </div>
@@ -210,21 +173,15 @@
 
             <div class="statistics-section">
               <div class="statistics-heading-div">
-                <h2 class="statistics-heading">Estadisticas</h2>
+                <h2 class="statistics-heading">Estadísticas</h2>
               </div>
 
               <div class="statistics-content-div">
                 <div>
                   <div class="statistics-section-one">
-                    <img
-                      src="../assets/svg/gems-icon.svg"
-                      class="statistics-streak-icon"
-                      alt=""
-                    />
+                    <img src="../assets/svg/gems-icon.svg" class="statistics-streak-icon" alt="" />
                     <div class="statistics-section-one-content">
-                      <h4 class="statistics-value gem-text" id="streak-value">
-                        0
-                      </h4>
+                      <h4 class="statistics-value gem-text" id="gems-value">0</h4>
                       <div class="statistics-text">Gemas</div>
                     </div>
                   </div>
@@ -232,73 +189,63 @@
 
                 <div>
                   <div class="statistics-section-one">
-                    <img
-                      src="../assets/svg/lesson-xp.svg"
-                      class="statistics-streak-icon"
-                      alt=""
-                    />
+                    <img src="../assets/svg/lesson-xp.svg" class="statistics-streak-icon" alt="" />
                     <div class="statistics-section-one-content">
-                      <h4 class="statistics-value" id="xp-value">xp</h4>
+                      <h4 class="statistics-value" id="xp-value">0</h4>
                       <div class="statistics-text">Total XP</div>
                     </div>
                   </div>
                 </div>
+                
                 <div>
                   <div class="statistics-section-one">
-                    <img
-                      src="../assets/svg/bronze-league.svg"
-                      class="statistics-streak-icon"
-                      alt=""
-                    />
+                    <img src="../assets/svg/streak-fire-active.svg" class="statistics-streak-icon" alt="" />
                     <div class="statistics-section-one-content">
-                      <h4 class="statistics-value">Liga</h4>
-                      <div class="statistics-text">Liga actual</div>
+                      <h4 class="statistics-value" id="streak-value">0</h4>
+                      <div class="statistics-text">Racha actual</div>
                     </div>
                   </div>
-                  
                 </div>
+                
                 <div>
-                  <div class="statistics-section-one disabled">
-                    <img
-                      src="../assets/svg/top-finishes-disabled.svg"
-                      class="statistics-streak-icon"
-                      alt=""
-                    />
+                  <div class="statistics-section-one">
+                    <img src="../assets/svg/badge-in-sidebar.svg" class="statistics-streak-icon" alt="" />
                     <div class="statistics-section-one-content">
-                      <h4 class="statistics-value">0</h4>
-                      <div class="statistics-text">Top 3 Finishes</div>
+                      <h4 class="statistics-value" id="league-value">Principiante</h4>
+                      <div class="statistics-text">Liga actual</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <a class="logout-button" id="logout-button-mobile">
+            
+            <a class="logout-button" id="logout-button-mobile" onclick="cerrarSesion()">
               <span class="icon-and-text-wrap">
-                  <div class="icon-in-button">
-                  <img src="../assets/svg/Logout.svg" alt="home-icon" />
-                  </div>
-                  <span class="text-in-button text-logout"> LOG OUT </span>
+                <div class="icon-in-button">
+                  <img src="../assets/svg/Logout.svg" alt="logout-icon" />
+                </div>
+                <span class="text-in-button text-logout">CERRAR SESIÓN</span>
               </span>
             </a>
           </div>         
         </div>
       </div>
     </div>
+    
+    <!-- Bottom navigation para móvil -->
     <div class="sidebar-buttons bottom-nav">
       <a href="learn.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap">
           <div class="icon-in-button">
             <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
           </div>
-      
         </span>
       </a>
       <a href="leaderboard.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap">
           <div class="icon-in-button">
-            <img src="../assets/svg/badge-in-sidebar.svg" alt="home-icon" />
+            <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
           </div>
-      
         </span>
       </a>
       <a href="profile-page.html" class="button-in-sidebar">
@@ -307,57 +254,88 @@
             <img
               id="profile-bottom"
               src="../assets/svg/profile-image-temp.svg"
-              alt="home-icon"
+              alt="profile-icon"
               class="profile"
             />
           </div>
-      
         </span>
       </a>
       <a href="./shoppingpage.html" class="button-in-sidebar">
-      <span class="icon-and-text-wrap">
-        <div class="icon-in-button">
-          <img src="../assets/svg/shop-in-sidebar.svg" alt="home-icon" />
-        </div>
-      </span>
+        <span class="icon-and-text-wrap">
+          <div class="icon-in-button">
+            <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
+          </div>
+        </span>
       </a>
       <a href="./faq.html" class="button-in-sidebar">
         <span class="icon-and-text-wrap">
           <div class="icon-in-button">
-            <img src="../assets/images/sidebar-icon-faq.png" alt="home-icon" />
+            <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
           </div>
         </span>
       </a>
-      </div>  
-  </body>
-  <script type="module">
-    import { auth } from '../js/firebaseConfig.js';
-    import { signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    
-    // Función para cerrar sesión
-    window.cerrarSesion = async function() {
+    </div>
+
+    <script type="module">
+      import { auth, db } from '../js/firebaseConfig.js';
+      import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+      import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+      
+      // Función para cerrar sesión
+      window.cerrarSesion = async function() {
         try {
-            await signOut(auth);
-            // Eliminar datos del localStorage
-            localStorage.removeItem('mathgo_user');
-            // Redirigir al inicio
-            window.location.href = '../index.html';
+          await signOut(auth);
+          localStorage.removeItem('mathgo_user');
+          window.location.href = '../index.html';
         } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-            alert('Error al cerrar sesión: ' + error.message);
+          console.error('Error al cerrar sesión:', error);
+          alert('Error al cerrar sesión: ' + error.message);
         }
-    };
-    
-    // Verificar si el usuario está logueado
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    
-    onAuthStateChanged(auth, (user) => {
+      };
+      
+      // Función para ver racha
+      window.verRacha = function() {
+        alert("🔥 Tu racha actual: " + (document.getElementById('streak-value').textContent || "0") + " días!\n\nSigue así para desbloquear logros especiales.");
+      };
+      
+      // Cargar datos del usuario
+      onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            // Si no hay usuario, redirigir al login
-            window.location.href = '../index.html';
+          window.location.href = '../index.html';
         } else {
-            console.log('Usuario logueado:', user.email);
+          console.log('Usuario logueado:', user.email);
+          
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              
+              // Actualizar sidebar
+              document.getElementById('xp-value-sidebar').textContent = userData.totalXp || 0;
+              document.getElementById('gems-value-sidebar').textContent = userData.gems || 0;
+              
+              // Actualizar estadísticas
+              document.getElementById('gems-value').textContent = userData.gems || 0;
+              document.getElementById('xp-value').textContent = userData.totalXp || 0;
+              document.getElementById('streak-value').textContent = userData.streak || 0;
+              document.getElementById('league-value').textContent = userData.league || "Principiante";
+              
+              // Actualizar información del perfil si existe
+              if (document.getElementById('first-and-last-name')) {
+                document.getElementById('first-and-last-name').textContent = userData.name || user.email.split('@')[0];
+              }
+              if (document.getElementById('email')) {
+                document.getElementById('email').textContent = user.email;
+              }
+              if (document.getElementById('join-date')) {
+                document.getElementById('join-date').textContent = userData.joinDate || "Recién llegado";
+              }
+            }
+          } catch (error) {
+            console.error('Error cargando datos:', error);
+          }
         }
-    });
-</script>
+      });
+    </script>
+  </body>
 </html>
