@@ -1,0 +1,151 @@
+/* ==========================================
+   SIDEBAR COLABSABLE AL HOVER (estilo Index.css)
+   ========================================== */
+
+/* Sidebar contraído por defecto */
+.sidebar {
+  width: 70px;
+  transition: width 0.3s ease;
+  overflow-x: hidden;
+  white-space: nowrap;
+  background: #2B3745; /* Color del navbar del ejemplo */
+  border-right: none;
+}
+
+/* Al hacer hover, se expande */
+.sidebar:hover {
+  width: 260px;
+}
+
+/* El contenido principal se desplaza junto con el sidebar */
+.content-container {
+  margin-left: 70px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Cuando el sidebar está expandido, el contenido se mueve */
+.sidebar:hover + .content-container {
+  margin-left: 260px;
+}
+
+/* ========== AJUSTES INTERNOS DEL SIDEBAR ========== */
+
+/* Ocultar los textos de los botones cuando está contraído */
+.sidebar .text-in-button {
+  display: none;
+}
+
+/* Mostrar textos al expandir */
+.sidebar:hover .text-in-button {
+  display: inline-block;
+  margin-left: 12px;
+}
+
+/* Centrar los íconos cuando está contraído */
+.sidebar .icon-in-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar:hover .icon-in-button {
+  width: auto;
+  justify-content: flex-start;
+}
+
+/* Ajustar el padding de los botones para que se vean bien */
+.sidebar .icon-and-text-wrap {
+  padding: 12px 0 12px 12px;
+  gap: 0;
+}
+
+.sidebar:hover .icon-and-text-wrap {
+  padding: 12px 16px;
+  gap: 16px;
+}
+
+/* Logo: ocultar el texto y mostrar solo el ícono cuando está contraído */
+.sidebar .mathgo-logo-text {
+  display: none;
+}
+
+.sidebar .logo-icon {
+  font-size: 28px;
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+}
+
+.sidebar:hover .mathgo-logo-text {
+  display: inline-block;
+}
+
+.sidebar:hover .logo-icon {
+  width: auto;
+  margin-right: 8px;
+}
+
+/* Encabezado del sidebar */
+.sidebar-header {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 20px 0;
+  text-align: center;
+}
+
+.sidebar:hover .sidebar-header {
+  text-align: left;
+  padding-left: 20px;
+}
+
+/* Enlaces del sidebar */
+.button-in-sidebar {
+  margin: 0;
+  border-radius: 0;
+}
+
+.button-in-sidebar:hover {
+  background: #5E72BB;
+  transform: none;
+}
+
+/* Íconos y colores */
+.sidebar, .sidebar-header {
+  background-color: #2B3745;
+}
+
+.text-in-button, .mathgo-logo-text {
+  color: white;
+}
+
+.icon-in-button img {
+  filter: brightness(0) invert(1);
+  width: 20px;
+  height: 20px;
+}
+
+/* Selección activa */
+.icon-and-text-wrap.selected {
+  background: #5E72BB;
+}
+.icon-and-text-wrap.selected .text-in-button {
+  color: white;
+}
+
+/* Ajuste del right-sidebar (no se ve afectado por el hover, se mantiene igual) */
+.right-sidebar {
+  margin-left: 0;
+}
+
+/* Asegurar que el contenedor principal use flex para que el contenido se adapte */
+.main-container {
+  display: flex;
+}
+
+/* Opcional: si quieres que el bottom-nav también se ajuste */
+.bottom-nav {
+  margin-left: 70px;
+  transition: margin-left 0.3s;
+}
+.sidebar:hover ~ .bottom-nav {
+  margin-left: 260px;
+}
