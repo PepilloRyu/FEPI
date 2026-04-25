@@ -164,26 +164,23 @@ async function signUpUser(email, password, name) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Guardar datos del usuario en Firestore
-        await setDoc(doc(db, "users", user.uid), {
-            name: name,
-            email: email,
-            level: "beginner",
-            totalXp: 0,
-            streak: 0,
-            currentTopic: "basics",
-            joinDate: new Date().toISOString(),
-            createdAt: new Date()
+        // Obtener el token JWT seguro de Firebase
+        const token = await user.getIdToken();
+
+        // Llamar a nuestro Backend para registrar al usuario en Firestore (Arquitectura Limpia)
+        const response = await fetch("http://localhost:5000/api/Users/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ name: name })
         });
-        
-        // Crear progreso inicial
-        await setDoc(doc(db, "user_progress", user.uid), {
-            basics_completed: false,
-            linear_equations_progress: 0,
-            quadratics_unlocked: false,
-            totalLessonsCompleted: 0,
-            totalXp: 0
-        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error del servidor al registrar: ${errorText}`);
+        }
         
         return { success: true, user };
     } catch (error) {
@@ -194,7 +191,7 @@ async function signUpUser(email, password, name) {
 
 // Manejar el formulario de registro
 document.addEventListener('DOMContentLoaded', () => {
-    const signupForm = document.getElementById('signup-form');
+    const signupForm = document.getElementById('main-form');
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -202,12 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('name-input')?.value;
             const email = document.getElementById('email-input')?.value;
             const password = document.getElementById('password-input')?.value;
-            const confirmPassword = document.getElementById('confirm-password-input')?.value;
-            
-            if (password !== confirmPassword) {
-                alert('Las contraseñas no coinciden');
-                return;
-            }
             
             const result = await signUpUser(email, password, name);
             

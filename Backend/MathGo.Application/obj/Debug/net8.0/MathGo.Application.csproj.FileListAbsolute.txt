@@ -1,0 +1,16 @@
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/bin/Debug/net8.0/MathGo.Application.deps.json
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/bin/Debug/net8.0/MathGo.Application.dll
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/bin/Debug/net8.0/MathGo.Application.pdb
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/bin/Debug/net8.0/MathGo.Domain.dll
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/bin/Debug/net8.0/MathGo.Domain.pdb
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.csproj.AssemblyReference.cache
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.GeneratedMSBuildEditorConfig.editorconfig
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.AssemblyInfoInputs.cache
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.AssemblyInfo.cs
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.csproj.CoreCompileInputs.cache
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.sourcelink.json
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.csproj.CopyComplete
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.dll
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/refint/MathGo.Application.dll
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/MathGo.Application.pdb
+/home/arisdl12/Escritorio/MathGo/FEPI/Backend/MathGo.Application/obj/Debug/net8.0/ref/MathGo.Application.dll

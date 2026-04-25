@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/MathGo.Api.props" />
+</Project>

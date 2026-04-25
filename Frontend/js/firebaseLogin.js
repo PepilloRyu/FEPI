@@ -100,9 +100,8 @@ mainForm.addEventListener("submit", signInUser);
 */
 
 // js/firebaseLogin.js
-import { auth, db } from './firebaseConfig.js';
+import { auth } from './firebaseConfig.js';
 import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 // Función para iniciar sesión
 async function loginUser(email, password) {
@@ -110,18 +109,24 @@ async function loginUser(email, password) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Obtener datos adicionales de Firestore
-        const userDoc = await getDoc(doc(db, "users", user.uid));
+        // Obtener el token JWT seguro de Firebase
+        const token = await user.getIdToken();
         
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
+        // Obtener datos del perfil desde nuestro Backend
+        const response = await fetch("http://localhost:5000/api/Users/me", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const userData = await response.json();
             localStorage.setItem('mathgo_user', JSON.stringify({
                 uid: user.uid,
-                name: userData.name,
+                name: userData.displayName,
                 email: userData.email,
-                level: userData.level,
-                totalXp: userData.totalXp,
-                streak: userData.streak
+                globalScore: userData.globalScore
             }));
         }
         
