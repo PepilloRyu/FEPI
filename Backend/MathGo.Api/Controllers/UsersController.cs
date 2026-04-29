@@ -44,8 +44,9 @@ public class UsersController : ControllerBase
         {
             Uid = uid,
             Email = email,
-            DisplayName = request.Name,
-            GlobalScore = 0,
+            Name = request.Name,
+            Role = "student",
+            Gamification = new UserGamification(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

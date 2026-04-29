@@ -53,6 +53,7 @@ public static class FirebaseServiceCollectionExtensions
         services.AddScoped<ITheoryRepository, TheoryRepository>();
         services.AddScoped<IPracticeRepository, PracticeRepository>();
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
 
         return services;
     }
