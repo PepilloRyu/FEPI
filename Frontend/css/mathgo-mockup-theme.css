@@ -1,0 +1,272 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fraunces:wght@600&display=swap');
+
+:root{
+  --primary:#4f46e5;
+  --violet:#8b5cf6;
+  --green:#58cc02;
+  --bg:#f7f8fc;
+  --line:#e6e8f3;
+  --text:#15162c;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.mockup-layout{
+  display:grid;
+  grid-template-columns:240px 1fr 320px;
+  min-height:100vh;
+}
+
+.mockup-sidebar{
+  background:#fff;
+  border-right:1px solid var(--line);
+  padding:24px 16px;
+  display:flex;
+  flex-direction:column;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.brand-mark{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),var(--violet));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:24px;
+}
+
+.brand-name{
+  font-size:28px;
+  font-weight:900;
+}
+
+.brand-name span{
+  color:var(--primary);
+}
+
+.mockup-nav{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.mockup-nav a{
+  text-decoration:none;
+  color:#333;
+  padding:14px;
+  border-radius:14px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.mockup-nav a.active{
+  background:#eef0ff;
+  color:var(--primary);
+}
+
+.mockup-nav a:hover{
+  background:#f0f2fa;
+}
+
+.sidebar-footer{
+  margin-top:auto;
+}
+
+.sidebar-footer a{
+  display:block;
+  padding:14px;
+  font-weight:800;
+}
+
+.main-content{
+  padding:28px;
+}
+
+.stats-bar{
+  display:flex;
+  gap:16px;
+  margin-bottom:24px;
+}
+
+.stat-chip{
+  background:#fff;
+  border-radius:999px;
+  padding:10px 18px;
+  font-weight:900;
+  border:1px solid var(--line);
+}
+
+.stat-chip.xp{
+  margin-left:auto;
+  color:var(--green);
+}
+
+.hero-banner{
+  background:linear-gradient(135deg,var(--primary),var(--violet));
+  color:#fff;
+  padding:24px 28px;
+  border-radius:24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:40px;
+}
+
+.hero-banner h1{
+  margin:8px 0 0;
+  font-size:34px;
+  font-family:'Fraunces',serif;
+}
+
+.hero-banner button{
+  border:none;
+  border-radius:14px;
+  padding:14px 18px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.lesson-path{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:28px;
+}
+
+.lesson{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.lesson.right{
+  transform:translateX(100px);
+}
+
+.circle{
+  width:82px;
+  height:82px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  color:#fff;
+  font-weight:900;
+}
+
+.completed .circle{
+  background:#58cc02;
+}
+
+.current .circle{
+  background:#f59e0b;
+}
+
+.locked .circle{
+  background:#cfd4e6;
+}
+
+.lesson p{
+  font-weight:800;
+  margin:0;
+}
+
+.right-panel{
+  background:#fff;
+  border-left:1px solid var(--line);
+  padding:24px 20px;
+}
+
+.profile-card,
+.card{
+  border:2px solid var(--line);
+  border-radius:20px;
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.profile-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.avatar{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#06b6d4,var(--primary));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:900;
+}
+
+.card h2{
+  margin-top:0;
+  font-size:18px;
+}
+
+.mission{
+  margin-bottom:18px;
+}
+
+.bar{
+  height:12px;
+  background:#edf0f8;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.bar span{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,#58cc02,#84e04c);
+}
+
+.center{
+  text-align:center;
+}
+
+@media (max-width:1100px){
+  .mockup-layout{
+    grid-template-columns:1fr;
+  }
+
+  .right-panel{
+    border-left:none;
+  }
+
+  .mockup-sidebar{
+    border-right:none;
+  }
+
+  .lesson.right{
+    transform:none;
+  }
+}

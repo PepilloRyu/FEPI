@@ -1,199 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MathGo</title>
-    <link rel="icon" href="../assets/images/favicon.ico" />
-    <link rel="stylesheet" href="../css/learn.css" />
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/mathgo-redesign.css" />
-  </head>
-  <body>
-    <div class="main-container">
-      <!------------------------------------- Left Sidebar ------------------------------------------------>
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <nav class="landing-navbar">
-            <a href="/" class="mathgo-logo-link">
-              <i class="logo-icon">📐</i>
-              <span class="mathgo-logo-text">MathGo</span>
-            </a>
-          </nav>
-        </div>
-        
-        <div class="sidebar-buttons">
-          <a href="../html/learn.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap" id="learn-button">
-              <div class="icon-in-button">
-                <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
-              </div>
-              <span class="text-in-button">Aprender</span>
-            </span>
-          </a>
-          
-          <a href="../html/leaderboard.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
-              </div>
-              <span class="text-in-button">Ligas</span>
-            </span>
-          </a>
-          
-          <a href="../html/profile-page.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img id="profile-image" src="../assets/svg/profile-image-temp.svg" alt="profile-icon" class="profile" />
-              </div>
-              <span class="text-in-button">Perfil</span>
-            </span>
-          </a>
-          
-          <a href="../html/shoppingpage.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
-              </div>
-              <span class="text-in-button">Tienda</span>
-            </span>
-          </a>
-          
-          <a href="../html/faq.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
-              </div>
-              <span class="text-in-button">Soporte</span>
-            </span>
-          </a>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo</title>
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/learn.css" />
+  <link rel="stylesheet" href="../css/mathgo-mockup-theme.css" />
+  <link rel="stylesheet" href="../css/frontend-polish.css?v=sidebar-deep-fix" />
+</head>
 
-          <a class="button-in-sidebar"  onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/Logout.svg" alt="home-icon" />
-              </div>
-              <span class="text-in-button"> Cerrar sesión </span>
-            </span>
-          </a>
-        </div>
-      </div>
-      <!------------------------------------- Content-Container ------------------------------------------------>
-      <div class="content-container">
-        <!----------------------------------- Right sidebar ------------------------------------------------>
-        <div class="right-sidebar">
-          <div class="right-sidebar-header">
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/lesson-xp.svg"
-                    alt="home-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button fire-text"> 0 </span>
-              </span>
-            </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/gems-icon.svg"
-                    alt="home-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button gem-text"> 0 </span>
-              </span>
-            </a>
-          </div>
-          <div class="try-super-box">
-            <img
-              src="../assets/images/emocionado.png"
-              alt="super-duo-owl"
-              id="try-super-image-two"
-            />
-            <div class="content-text">
-              <h2>🔥 Mantén tu racha</h2>
-              <div class="description">
-                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
-              </div>
-              <button id="streak-button" onclick="verRacha();">
-                Ver mi racha actual →
-              </button>
-            </div>
-          </div>
-          <div class="try-super-box">
-            <div class="league-header-with-link">
-              <h2>🎯 Proximos objetivos</h2>
-              <h2><a href="./leaderboard.html">Ver Todos</a></h2>
-            </div>
-            <div class="league-header-with-link">
-              <div class="league-text-container">
-                <div class="description">
-                  🎯 Completar "Ecuaciones lineales" (3 lecciones restantes)<br>
-                  🎯 Ganar 200 XP hoy (llevas 120)<br>
-                  🎯 Mantener racha de 7 días (estás en 5)
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!----------------------------------- Scrollable area showing units ------------------------------------------------>
-        <div
-          class="scrollable-lesson-div active"
-          onclick="closeAllOpenDialogBoxes()"
-        ></div>
-      </div>
-    </div>
-    <div class="loading-screen hidden">
-      <div class="text-animation-container">
-        <div class="lesson-loading-svg" id="owl-walk-animation"></div>
-        <span
-          >Did You Know : Spanish is the second most spoken language globally,
-          with over 460 million native speakers.</span
-        >
-      </div>
-    </div>
-    <script
-      src="https://cdn.jsdelivr.net/npm/js-circle-progress/dist/circle-progress.min.js"
-      type="module"
-    ></script>
-  </body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
-  <script src="../js/learn.js" type="module"></script>
-  <script src="../js/updateUserData.js" type="module"></script>
+<body>
+  <div class="mockup-layout">
 
+    <aside class="mockup-sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-name">Math<span>Go</span></div>
+      </div>
+
+      <nav class="mockup-nav" aria-label="Navegación principal">
+        <a href="../html/learn.html" class="active" aria-current="page">
+          <span>🏠</span>
+          Aprender
+        </a>
+
+        <a href="../html/leaderboard.html">
+          <span>🏆</span>
+          Ligas
+        </a>
+
+        <a href="../html/profile-page.html">
+          <span>👤</span>
+          Perfil
+        </a>
+
+        <a href="../html/shoppingpage.html">
+          <span>💎</span>
+          Tienda
+        </a>
+
+        <a href="../html/faq.html">
+          <span>❔</span>
+          Soporte
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a onclick="cerrarSesion()" style="cursor:pointer;">
+          ⛔ Cerrar sesión
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <div class="stats-bar">
+        <div class="stat-chip">❤️ <strong>5</strong></div>
+        <div class="stat-chip">🔥 <strong>23</strong></div>
+        <div class="stat-chip">💎 <strong>340</strong></div>
+        <div class="stat-chip xp">⚡ <strong>1840 XP</strong></div>
+      </div>
+
+      <section class="hero-banner">
+        <div>
+          <small>Unidad 2 · Sección 3</small>
+          <h1>Ecuaciones de primer grado</h1>
+        </div>
+
+        <button>📖 Guía didáctica</button>
+      </section>
+
+      <section class="lesson-path">
+
+        <div class="lesson completed">
+          <div class="circle">✓</div>
+          <p>Variables y constantes</p>
+        </div>
+
+        <div class="lesson completed right">
+          <div class="circle">✓</div>
+          <p>Términos semejantes</p>
+        </div>
+
+        <div class="lesson completed">
+          <div class="circle">✓</div>
+          <p>Equilibrio de la ecuación</p>
+        </div>
+
+        <div class="lesson current right">
+          <div class="circle">★</div>
+          <p>Despejar x con suma</p>
+        </div>
+
+        <div class="lesson locked">
+          <div class="circle">🔒</div>
+          <p>Despejar x con multiplicación</p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <aside class="right-panel">
+
+      <div class="profile-card">
+        <div class="avatar">CR</div>
+        <div>
+          <h3>Chrystian R.</h3>
+          <span>Nivel 8</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Misiones diarias</h2>
+
+        <div class="mission">
+          <p>Gana 30 XP</p>
+          <div class="bar"><span style="width:60%"></span></div>
+        </div>
+
+        <div class="mission">
+          <p>Completa 3 lecciones perfectas</p>
+          <div class="bar"><span style="width:33%"></span></div>
+        </div>
+
+        <div class="mission">
+          <p>Resuelve 10 ecuaciones</p>
+          <div class="bar"><span style="width:80%"></span></div>
+        </div>
+      </div>
+
+      <div class="card center">
+        <h2>💚 Liga Esmeralda</h2>
+        <p>Puesto #4 de 30</p>
+      </div>
+
+    </aside>
+
+  </div>
 
   <script type="module">
     import { auth } from '../js/firebaseConfig.js';
-    import { signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    
-    // Función para cerrar sesión
+    import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
     window.cerrarSesion = async function() {
-        try {
-            await signOut(auth);
-            // Eliminar datos del localStorage
-            localStorage.removeItem('mathgo_user');
-            // Redirigir al inicio
-            window.location.href = '../index.html';
-        } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-            alert('Error al cerrar sesión: ' + error.message);
-        }
+      await signOut(auth);
+      localStorage.removeItem('mathgo_user');
+      window.location.href = '../index.html';
     };
-    
-    // Verificar si el usuario está logueado
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    
+
     onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            // Si no hay usuario, redirigir al login
-            window.location.href = '../index.html';
-        } else {
-            console.log('Usuario logueado:', user.email);
-        }
+      if (!user) {
+        window.location.href = '../index.html';
+      }
     });
-</script>
+  </script>
+    <script src="../js/frontend-ui-fixes.js"></script>
+  </body>
 </html>

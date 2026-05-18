@@ -1,41 +1,75 @@
 import { db } from './firebaseConfig.js';
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-let userInfo = JSON.parse(localStorage.getItem('mathgo_user')) || JSON.parse(sessionStorage.getItem('user-info')) || { uid: "temp" };
-const userId = userInfo.uid || userInfo.userId;
+const FALLBACK_AVATAR = '../assets/svg/profile-image-temp.svg';
 
+const readStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('mathgo_user')) || JSON.parse(sessionStorage.getItem('user-info')) || {};
+  } catch (error) {
+    return {};
+  }
+};
+
+let userInfo = readStoredUser();
+const userId = userInfo.uid || userInfo.userId || 'temp';
 const userDocRef = doc(db, 'users', userId);
 
-const profileImage = document.getElementById('profile-image');
-const profileImageBottom = document.getElementById('profile-bottom');
-const leftProfileImage = document.getElementById('left-profile-image');
+const setText = (id, value) => {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
+};
 
-document.addEventListener('DOMContentLoaded', function() {
+const setImage = (id, value) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.src = value || FALLBACK_AVATAR;
+    element.onerror = () => { element.src = FALLBACK_AVATAR; };
+  }
+};
 
-    if (userInfo) {
+const displayName = (data = {}) => data.name || data.displayName || data.username || (data.email ? data.email.split('@')[0] : 'Usuario MathGo');
+const displayEmail = (data = {}) => data.email || 'Sin correo registrado';
+const displayXp = (data = {}) => data.totalXp ?? data.xp ?? 0;
+const displayGems = (data = {}) => data.gems ?? 0;
+const displayStreak = (data = {}) => data.streak ?? 0;
 
-        document.getElementById('first-and-last-name').innerHTML = userInfo.name;
-        document.getElementById('email').innerHTML = userInfo.email;
+const formatJoinDate = (creationDate) => {
+  if (!creationDate) return 'Recién llegado';
+  if (typeof creationDate === 'string') return creationDate;
+  if (creationDate.seconds) {
+    return new Date(creationDate.seconds * 1000).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  return 'Recién llegado';
+};
 
-        document.getElementById('xp-value').innerHTML = userInfo.xp;
-        
-        // Check if creationDate is available and is a valid timestamp object
-        if (userInfo.creationDate && typeof userInfo.creationDate === 'object') {
-            const milliseconds = userInfo.creationDate.seconds * 1000 + userInfo.creationDate.nanoseconds / 1000000;
-            const formattedCreationDate = new Date(milliseconds).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        
-            document.getElementById('join-date').innerHTML = formattedCreationDate;
+function hydrateProfile(data = {}) {
+  const merged = { ...userInfo, ...data };
+  setText('first-and-last-name', displayName(merged));
+  setText('email', displayEmail(merged));
+  setText('xp-value', displayXp(merged));
+  setText('gems-value', displayGems(merged));
+  setText('streak-value', displayStreak(merged));
+  setText('league-value', merged.league || 'Principiante');
+  setText('join-date', merged.joinDate || formatJoinDate(merged.creationDate));
+  setImage('profile-image', merged.profileImage || merged.photoURL);
+  setImage('profile-bottom', merged.profileImage || merged.photoURL);
+  setImage('profile-image-bottom', merged.profileImage || merged.photoURL);
+  setImage('left-profile-image', merged.profileImage || merged.photoURL);
+}
 
-        } else {
-            document.getElementById('join-date').innerHTML = "Unknown Date";
-        }
-
-        profileImage.src = userInfo.profileImage;
-        profileImageBottom.src = userInfo.profileImage;
-        leftProfileImage.src = userInfo.profileImage;
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  hydrateProfile(userInfo);
 });
+
+try {
+  onSnapshot(userDocRef, (snapshot) => {
+    if (snapshot.exists()) hydrateProfile(snapshot.data());
+  });
+} catch (error) {
+  console.warn('Perfil usando datos locales de respaldo.', error);
+}

@@ -7,72 +7,53 @@
     <link rel="icon" href="../assets/images/favicon.ico" />
     <link rel="stylesheet" href="../scss/faq.css" />
     <link rel="stylesheet" href="../css/learn.css" />
+    <link rel="stylesheet" href="../css/mathgo-mockup-theme.css" />
     <link rel="stylesheet" href="../css/main.css" />
     <link rel="stylesheet" href="../css/mathgo-redesign.css" />
-  </head>
+    <link rel="stylesheet" href="../css/frontend-polish.css?v=sidebar-deep-fix" />
+</head>
   <body>
     <div class="main-container">
       <!-- LEFT SIDEBAR -->
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <nav class="landing-navbar">
-            <a href="/" class="mathgo-logo-link">
-              <i class="logo-icon">📐</i>
-              <span class="mathgo-logo-text">MathGo</span>
-            </a>
-          </nav>
+            <aside class="mockup-sidebar">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div class="brand-name">Math<span>Go</span></div>
         </div>
-        <div class="sidebar-buttons">
-          <a href="./learn.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
-              </div>
-              <span class="text-in-button">Aprender</span>
-            </span>
-          </a>
-          <a href="./leaderboard.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
-              </div>
-              <span class="text-in-button">Ligas</span>
-            </span>
-          </a>
-          <a href="./profile-page.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img id="profile-image" src="../assets/svg/profile-image-temp.svg" alt="profile-icon" class="profile" />
-              </div>
-              <span class="text-in-button">Perfil</span>
-            </span>
-          </a>
-          <a href="./shoppingpage.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
-              </div>
-              <span class="text-in-button">Tienda</span>
-            </span>
-          </a>
-          <a href="./faq.html" class="button-in-sidebar">
-            <span class="icon-and-text-wrap selected">
-              <div class="icon-in-button">
-                <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
-              </div>
-              <span class="text-in-button">Soporte</span>
-            </span>
-          </a>
-          <a class="button-in-sidebar" onclick="cerrarSesion()" id="logout-button" style="cursor: pointer;">
-            <span class="icon-and-text-wrap">
-              <div class="icon-in-button">
-                <img src="../assets/svg/Logout.svg" alt="logout-icon" />
-              </div>
-              <span class="text-in-button">Cerrar sesión</span>
-            </span>
+
+        <nav class="mockup-nav" aria-label="Navegación principal">
+        <a href="../html/learn.html">
+          <span>🏠</span>
+          Aprender
+        </a>
+
+        <a href="../html/leaderboard.html">
+          <span>🏆</span>
+          Ligas
+        </a>
+
+        <a href="../html/profile-page.html">
+          <span>👤</span>
+          Perfil
+        </a>
+
+        <a href="../html/shoppingpage.html">
+          <span>💎</span>
+          Tienda
+        </a>
+
+        <a href="../html/faq.html" class="active" aria-current="page">
+          <span>❔</span>
+          Soporte
+        </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <a onclick="window.cerrarSesion && window.cerrarSesion()" id="logout-button" style="cursor:pointer;">
+            ⛔ Cerrar sesión
           </a>
         </div>
-      </div>
+      </aside>
 
       <!-- CONTENIDO PRINCIPAL + RIGHT SIDEBAR -->
       <div class="content-container">
@@ -195,5 +176,6 @@
         }
       });
     </script>
+      <script src="../js/frontend-ui-fixes.js"></script>
   </body>
 </html>

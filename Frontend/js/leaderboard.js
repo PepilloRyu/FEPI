@@ -1,144 +1,128 @@
 import arrayForProfiles from './leaderBfetch.js';
-// console.log(arrayForProfiles);
-const profileList = arrayForProfiles;
-const getUserDataFromSessionStorage = () => {
-  return JSON.parse(sessionStorage.getItem("user-info"))
-}
-const getLanguageFlagPath=(languageCode)=>{
-  console.log(`../assets/svg/country-flags/${languageCode}-flag.svg`)
-  return `../assets/svg/country-flags/${languageCode}-flag.svg`
-}
 
-const placeuserStatistics = () => {
-  let userData = getUserDataFromSessionStorage();
-  document.querySelectorAll("#profile-image").forEach(item => item.src = userData.profileImage);
-  document.querySelector(".country-flag").src=getLanguageFlagPath(userData.learnLang);
-  document.querySelectorAll(".fire-text").forEach(item => item.textContent = userData.xp);
-  document.querySelectorAll(".heart-text").forEach(item => item.textContent = userData.hearts);
-  document.querySelectorAll(".gem-text").forEach(item => item.textContent = userData.gems);
-  const profilePicture = document.getElementById('profilePicture');
-  profilePicture.src = userData.profileImage;
-}
+const FALLBACK_AVATAR = '../assets/svg/profile-image-temp.svg';
 
-  sortingArray();
-  placeuserStatistics();
-function sortingArray(){
-  profileList.forEach(profile=>{
-    profileList.sort((a, b) => b.xp - a.xp );
-  })
-  renderLeaderboard(profileList);
-}
-
-  function renderLeaderboard(profileList) {
-    console.log("entered into function");
-    
-    const leaderboardList = document.getElementById("centre-container-secdiv");
-
-    profileList.forEach((entry, index) => {
-      const listItem = document.createElement("a");
-      listItem.classList.add('eachprofile');
-      listItem.setAttribute('id',`eachprofile_${index + 1}`);
-      const profindex =document.createElement('div');
-      
-      if((index+1) <=3 ){
-        if((index+1) == 1){
-          profindex.classList.add('indImage');
-          const indImage = document.createElement('img');
-          indImage.classList.add('indImage');
-          indImage.src='//d35aaqx5ub95lt.cloudfront.net/images/leagues/9e4f18c0bc42c7508d5fa5b18346af11.svg';
-          profindex.appendChild(indImage);
-        }else if((index+1) == 2){
-          profindex.classList.add('indImage');
-          const indImage = document.createElement('img');
-          indImage.classList.add('indImage');
-          indImage.src='https://d35aaqx5ub95lt.cloudfront.net/images/leagues/cc7b8f8582e9cfb88408ab851ec2e9bd.svg';
-          profindex.appendChild(indImage);
-        }else {
-          profindex.classList.add('indImage');
-          const indImage = document.createElement('img');
-          indImage.classList.add('indImage');
-          indImage.src='https://d35aaqx5ub95lt.cloudfront.net/images/leagues/eef523c872b71178ef5acb2442d453a2.svg';
-          profindex.appendChild(indImage);
-        }
-                   
-      }
-      else{
-        profindex.classList.add('profindex');
-        profindex.textContent=`${index+1}`;
-      }
-      const pic =document.createElement('div');
-      pic.classList.add('divforimg');
-      const profpic =document.createElement('img');
-      profpic.classList.add('image');
-      profpic.src=entry.profileImage;
-
-      const bubblepicdiv =document.createElement("div");
-      bubblepicdiv.classList.add('divforbubble');
-      const bubblepic =document.createElement('img');
-      bubblepic.classList.add('bubble');
-      bubblepic.setAttribute('id','bubble');
-      bubblepic.src='//d35aaqx5ub95lt.cloudfront.net/images/leagues/a35f1db4398fd29e66f1abc33a0d11a2.svg';
-      bubblepicdiv.appendChild(bubblepic);
-      
-
-      pic.appendChild(profpic);
-      pic.appendChild(bubblepicdiv);
-      const namediv =document.createElement("div");
-      namediv.classList.add('divforname');
-      const namespan =document.createElement("span");
-      namespan.classList.add('spanforname');
-      namespan.textContent =`${entry.name}`;
-      namediv.appendChild(namespan);
-      const xpSpan =document.createElement('span');
-      xpSpan.classList.add('spanforxp');
-      xpSpan.textContent = `${entry.xp}`;
-      // listItem.appendChild(bubblepicdiv);
-      listItem.appendChild(profindex);
-      listItem.appendChild(pic);
-      listItem.appendChild(namediv);
-      listItem.appendChild(xpSpan);
-      leaderboardList.appendChild(listItem);
-      
-      //For Highlighting logined profile
-      let userData = JSON.parse(sessionStorage.getItem("user-info"));
-      let userId = userData.userId;
-      if(userId == entry.userId){
-          const profHighlight = document.getElementById(`eachprofile_${index + 1}`);
-          profHighlight.style.border = '1px solid red';
-          profHighlight.style.borderColor = ' #84d8ff';
-          profHighlight.style.backgroundColor = ' #ddf4ff';
-          
-
-      } 
-
-      
-    });
+const safeUserData = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem('user-info')) || JSON.parse(localStorage.getItem('mathgo_user')) || {};
+  } catch (error) {
+    return {};
   }
-  
-  
-  function change(num){
-    changeImage(num,profileList);
-  }
+};
 
-  
-  
-  
-  function changeImage(num,profileList){
-    const addImage = document.getElementById('addImage');
-    const getImage = document.getElementById('bubble');
-    logInName = 'Alice';  
-    profileList.forEach(profile => {
-      
-      if(profile.name ==  logInName){
-        console.log(profile.name);
-        if(num == 1){
-          getImage.src='https://d35aaqx5ub95lt.cloudfront.net/images/leagues/2439bac00452e99ba7bf6a7ed0b04196.svg';
-          addImage.src='https://d35aaqx5ub95lt.cloudfront.net/images/leagues/2439bac00452e99ba7bf6a7ed0b04196.svg';
-        }
+const getDisplayName = (entry = {}) => {
+  return entry.name || entry.displayName || entry.username || (entry.email ? entry.email.split('@')[0] : '') || 'Usuario MathGo';
+};
 
-      }
-    })
-  }
-    
+const getXp = (entry = {}) => {
+  return Number(entry.xp ?? entry.totalXp ?? entry.experience ?? 0) || 0;
+};
 
-  
+const getAvatar = (entry = {}) => {
+  return entry.profileImage || entry.photoURL || FALLBACK_AVATAR;
+};
+
+const setTextIfExists = (selector, value) => {
+  document.querySelectorAll(selector).forEach((item) => {
+    item.textContent = value;
+  });
+};
+
+const setSrcIfExists = (selector, value) => {
+  document.querySelectorAll(selector).forEach((item) => {
+    item.src = value;
+  });
+};
+
+const getLanguageFlagPath = (languageCode) => {
+  const code = languageCode || 'transparent';
+  return `../assets/svg/country-flags/${code}-flag.svg`;
+};
+
+function placeUserStatistics() {
+  const userData = safeUserData();
+  setSrcIfExists('#profile-image, #profile-image-bottom, #profilePicture', getAvatar(userData));
+  const flag = document.querySelector('.country-flag');
+  if (flag) flag.src = getLanguageFlagPath(userData.learnLang);
+  setTextIfExists('.fire-text', getXp(userData));
+  setTextIfExists('.heart-text', userData.hearts ?? 5);
+  setTextIfExists('.gem-text', userData.gems ?? 0);
+}
+
+function buildFallbackProfiles() {
+  const userData = safeUserData();
+  return [
+    { name: getDisplayName(userData), xp: getXp(userData) || 120, profileImage: getAvatar(userData), userId: userData.userId || userData.uid || 'current' },
+    { name: 'Ana', xp: 980, profileImage: FALLBACK_AVATAR, userId: 'demo-1' },
+    { name: 'Luis', xp: 760, profileImage: FALLBACK_AVATAR, userId: 'demo-2' },
+    { name: 'Marta', xp: 610, profileImage: FALLBACK_AVATAR, userId: 'demo-3' }
+  ];
+}
+
+function renderLeaderboard(profiles) {
+  const leaderboardList = document.getElementById('centre-container-secdiv');
+  if (!leaderboardList) return;
+  leaderboardList.innerHTML = '';
+
+  const cleanProfiles = (profiles && profiles.length ? profiles : buildFallbackProfiles())
+    .filter(Boolean)
+    .map((entry) => ({ ...entry, xp: getXp(entry) }))
+    .sort((a, b) => getXp(b) - getXp(a));
+
+  const userData = safeUserData();
+  const currentUserId = userData.userId || userData.uid;
+
+  cleanProfiles.forEach((entry, index) => {
+    const listItem = document.createElement('a');
+    listItem.classList.add('eachprofile');
+    listItem.href = '#';
+    listItem.setAttribute('id', `eachprofile_${index + 1}`);
+
+    const profindex = document.createElement('div');
+    if (index < 3) {
+      profindex.classList.add('indImage');
+      const medal = document.createElement('span');
+      medal.textContent = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+      medal.style.fontSize = '30px';
+      profindex.appendChild(medal);
+    } else {
+      profindex.classList.add('profindex');
+      profindex.textContent = `${index + 1}`;
+    }
+
+    const pic = document.createElement('div');
+    pic.classList.add('divforimg');
+    const profpic = document.createElement('img');
+    profpic.classList.add('image');
+    profpic.src = getAvatar(entry);
+    profpic.alt = getDisplayName(entry);
+    profpic.onerror = () => { profpic.src = FALLBACK_AVATAR; };
+    pic.appendChild(profpic);
+
+    const namediv = document.createElement('div');
+    namediv.classList.add('divforname');
+    const namespan = document.createElement('span');
+    namespan.classList.add('spanforname');
+    namespan.textContent = getDisplayName(entry);
+    namediv.appendChild(namespan);
+
+    const xpSpan = document.createElement('span');
+    xpSpan.classList.add('spanforxp');
+    xpSpan.textContent = `${getXp(entry)} XP`;
+
+    listItem.appendChild(profindex);
+    listItem.appendChild(pic);
+    listItem.appendChild(namediv);
+    listItem.appendChild(xpSpan);
+
+    if (currentUserId && currentUserId === (entry.userId || entry.uid)) {
+      listItem.style.borderColor = '#84d8ff';
+      listItem.style.backgroundColor = '#ddf4ff';
+    }
+
+    leaderboardList.appendChild(listItem);
+  });
+}
+
+placeUserStatistics();
+renderLeaderboard(arrayForProfiles);
