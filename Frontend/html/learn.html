@@ -64,39 +64,34 @@
 
       <section class="hero-banner">
         <div>
-          <small>Unidad 2 · Sección 3</small>
-          <h1>Ecuaciones de primer grado</h1>
+          <small>Curso de Álgebra</small>
+          <h1>Elige tu mundo</h1>
         </div>
-
-        <button>📖 Guía didáctica</button>
       </section>
 
-      <section class="lesson-path">
+      <section class="worlds-grid">
 
-        <div class="lesson completed">
-          <div class="circle">✓</div>
-          <p>Variables y constantes</p>
-        </div>
+        <a href="world-1.html" class="world-card world-card--unlocked">
+          <div class="world-card__icon">📐</div>
+          <div class="world-card__body">
+            <div class="world-card__num">Mundo 1</div>
+            <h2 class="world-card__title">Las Bases del Álgebra</h2>
+            <p class="world-card__sub">Del pensamiento aritmético al algebraico</p>
+            <div class="world-card__levels">3 niveles</div>
+          </div>
+          <div class="world-card__arrow">→</div>
+        </a>
 
-        <div class="lesson completed right">
-          <div class="circle">✓</div>
-          <p>Términos semejantes</p>
-        </div>
-
-        <div class="lesson completed">
-          <div class="circle">✓</div>
-          <p>Equilibrio de la ecuación</p>
-        </div>
-
-        <div class="lesson current right">
-          <div class="circle">★</div>
-          <p>Despejar x con suma</p>
-        </div>
-
-        <div class="lesson locked">
-          <div class="circle">🔒</div>
-          <p>Despejar x con multiplicación</p>
-        </div>
+        <a href="world-2.html" class="world-card world-card--locked">
+          <div class="world-card__icon">🔢</div>
+          <div class="world-card__body">
+            <div class="world-card__num">Mundo 2</div>
+            <h2 class="world-card__title">Números Reales</h2>
+            <p class="world-card__sub">Clasificación, propiedades y jerarquía</p>
+            <div class="world-card__levels">5 niveles</div>
+          </div>
+          <div class="world-card__arrow">🔒</div>
+        </a>
 
       </section>
 
@@ -140,9 +135,94 @@
 
   </div>
 
+  <style>
+    .worlds-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .world-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 20px 22px;
+      text-decoration: none;
+      color: inherit;
+      background: #fff;
+      transition: box-shadow .15s, border-color .15s, transform .1s;
+    }
+    .world-card--unlocked {
+      border-color: #84d8ff;
+      background: linear-gradient(135deg, #f0faff 0%, #fff 100%);
+      box-shadow: 0 4px 0 #cdeeff;
+    }
+    .world-card--unlocked:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #cdeeff;
+    }
+    .world-card--locked {
+      opacity: .7;
+      cursor: default;
+    }
+    .world-card__icon {
+      font-size: 38px;
+      flex-shrink: 0;
+    }
+    .world-card__body {
+      flex: 1;
+    }
+    .world-card__num {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: #1cb0f6;
+      margin-bottom: 2px;
+    }
+    .world-card--locked .world-card__num {
+      color: #afafaf;
+    }
+    .world-card__title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 4px;
+      color: #4b4b4b;
+    }
+    .world-card__sub {
+      font-size: 13px;
+      color: #777;
+      margin: 0 0 8px;
+    }
+    .world-card__levels {
+      display: inline-block;
+      background: #ddf4ff;
+      color: #1483c2;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .world-card--locked .world-card__levels {
+      background: #f0f0f0;
+      color: #afafaf;
+    }
+    .world-card__arrow {
+      font-size: 22px;
+      color: #1cb0f6;
+      flex-shrink: 0;
+    }
+    .world-card--locked .world-card__arrow {
+      color: #afafaf;
+    }
+  </style>
+
   <script type="module">
-    import { auth } from '../js/firebaseConfig.js';
+    import { auth, db } from '../js/firebaseConfig.js';
     import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
     window.cerrarSesion = async function() {
       await signOut(auth);
@@ -150,9 +230,30 @@
       window.location.href = '../index.html';
     };
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = '../index.html';
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = '../index.html'; return; }
+
+      try {
+        const snap = await getDoc(doc(db, "mathgo_progress", user.uid));
+        const data = snap.exists() ? snap.data() : {};
+        const w1 = data?.worlds?.["1"] ?? {};
+        const w2 = data?.worlds?.["2"] ?? {};
+        const world2Unlocked = w1.allComplete === true || w2.jumpExam?.passed === true;
+
+        if (world2Unlocked) {
+          const card = document.querySelector('a[href="world-2.html"]');
+          if (card) {
+            card.classList.remove("world-card--locked");
+            card.classList.add("world-card--unlocked");
+            card.querySelector(".world-card__num").style.color = "#1cb0f6";
+            card.querySelector(".world-card__arrow").textContent = "→";
+            card.querySelector(".world-card__arrow").style.color = "#1cb0f6";
+            card.querySelector(".world-card__levels").style.cssText = "background:#ddf4ff;color:#1483c2";
+            card.style.cursor = "pointer";
+          }
+        }
+      } catch (e) {
+        console.warn("No se pudo cargar el progreso:", e);
       }
     });
   </script>

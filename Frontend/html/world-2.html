@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo – Mundo 2: Números Reales</title>
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/mathgo-player.css" />
+</head>
+<body>
+  <div id="app" class="mg-app"></div>
+  <div id="exam-modal" class="hidden"></div>
+
+  <script type="module">
+    import { auth, db } from '../js/firebaseConfig.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { initEngine } from '../js/mathgo-engine.js';
+    import { WORLD, FUTURE_NODES, getVisual } from '../js/worlds/world-2-data.js';
+    import { WORLD as PREREQ_WORLD } from '../js/worlds/world-1-data.js';
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = '../index.html'; return; }
+
+      await initEngine({
+        worldData: WORLD,
+        futureNodes: FUTURE_NODES,
+        getVisual,
+        worldId: 2,
+        prereqWorldId: 1,
+        prereqWorldData: PREREQ_WORLD,
+        user,
+        db,
+        onSignOut: async () => {
+          await signOut(auth);
+          localStorage.removeItem('mathgo_user');
+          window.location.href = '../index.html';
+        },
+      });
+    });
+  </script>
+</body>
+</html>
