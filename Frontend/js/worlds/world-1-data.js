@@ -13,13 +13,13 @@ export const WORLD = {
           visual: "values", key: "Una letra puede valer lo que tú quieras. Es un número comodín." },
         { icon: "🔤", tag: "Teoría 2 / 4", title: "El alfabeto matemático",
           body: "Trabajamos con números y letras, y hay una convención para saber qué representa cada letra.",
-          visual: "alphabet", key: "Si ves una x, piensa "esto es lo que busco". Si ves una a, piensa "esto ya lo conozco"." },
+          visual: "alphabet", key: 'Si ves una x, piensa "esto es lo que busco". Si ves una a, piensa "esto ya lo conozco".' },
         { icon: "🌐", tag: "Teoría 3 / 4", title: "Traducir operaciones",
           body: "El álgebra es un idioma. Aprende a traducir las palabras más comunes a símbolos.",
-          visual: "translate", key: ""El cuadrado de a" NO es 2·a. Es a·a = a². El exponente dice cuántas veces se multiplica." },
+          visual: "translate", key: '"El cuadrado de a" NO es 2·a. Es a·a = a². El exponente dice cuántas veces se multiplica.' },
         { icon: "✖️", tag: "Teoría 4 / 4", title: "Multiplicación abreviada",
-          body: "En álgebra casi nunca escribimos el signo ×. Un número pegado a una letra significa "multiplica".",
-          visual: "mult", key: "3a significa "tres veces a". No es 3 + a. Pegados = multiplicación." },
+          body: 'En álgebra casi nunca escribimos el signo ×. Un número pegado a una letra significa "multiplica".',
+          visual: "mult", key: '3a significa "tres veces a". No es 3 + a. Pegados = multiplicación.' },
       ],
       challenges: [
         { type: "mc", tag: "Reto 1 · Concepto",
@@ -29,12 +29,12 @@ export const WORLD = {
         { type: "build", tag: "Reto 2 · Traducción (toca)",
           prompt: "Traduce al lenguaje algebraico: la suma de a, b y m.",
           bank: ["a", "b", "m", "c", "+", "+"], operands: ["a", "b", "m"],
-          hint: ""Suma" significa unir las tres cantidades con el signo +. El orden no importa." },
+          hint: '"Suma" significa unir las tres cantidades con el signo +. El orden no importa.' },
         { type: "match", tag: "Reto 3 · Empareja (arrastra)",
           prompt: "Arrastra cada símbolo hasta la frase que le corresponde.",
           pairs: [{ desc: "la suma de a y b", sym: "a + b" }, { desc: "el cuadrado de a", sym: "a²" }, { desc: "el triple de a", sym: "3a" }, { desc: "el cubo de b", sym: "b³" }],
           symOrder: ["3a", "a + b", "b³", "a²"],
-          hint: "El exponente ² significa "al cuadrado"; un número pegado como 3a es una multiplicación." },
+          hint: 'El exponente ² significa "al cuadrado"; un número pegado como 3a es una multiplicación.' },
         { type: "slots", tag: "Reto 4 · Completa (arrastra)",
           prompt: "Arrastra los bloques a los huecos para escribir: el cuadrado de a más el cubo de b.",
           slots: 2, bank: ["b³", "2a", "a²", "3b"], answer: ["a²", "b³"],
@@ -72,7 +72,7 @@ export const WORLD = {
           options: [{ label: "Signos de operación", correct: false }, { label: "Signos de relación", correct: true }, { label: "Signos de agrupación", correct: false }],
           hint: "Estos signos comparan dos cantidades para decir cuál es mayor, menor o si son iguales." },
         { type: "vf", tag: "Reto 2 · Verdadero o Falso",
-          prompt: "La expresión  a < b + c  se lee "a es mayor que b + c".",
+          prompt: 'La expresión  a < b + c  se lee "a es mayor que b + c".',
           options: [{ label: "Verdadero", correct: false }, { label: "Falso", correct: true }],
           hint: "El pico de < apunta a la cantidad menor: a < b + c significa que a es MENOR que b + c." },
         { type: "mc", tag: "Reto 3 · El intruso",
@@ -80,10 +80,10 @@ export const WORLD = {
           options: [{ label: "( )", correct: false }, { label: "[ ]", correct: false }, { label: "{ }", correct: false }, { label: ">", correct: true }],
           hint: "Los signos de agrupación encierran operaciones para resolverlas primero. El > compara, no agrupa." },
         { type: "buildSeq", tag: "Reto 4 · Traducción (toca)",
-          prompt: "Traduce usando signos de relación: "La suma de x y y es mayor que m".",
+          prompt: 'Traduce usando signos de relación: "La suma de x y y es mayor que m".',
           bank: ["x", "y", "m", "+", ">", "<"],
           answers: [["x", "+", "y", ">", "m"], ["y", "+", "x", ">", "m"]],
-          hint: "Primero la suma x + y, luego el signo "mayor que" (>) y al final m." },
+          hint: 'Primero la suma x + y, luego el signo "mayor que" (>) y al final m.' },
         { type: "mc", tag: "Reto 5 · Evaluar una fórmula 🏆",
           prompt: "El área de un rectángulo es A = b × h. Si la base b = 3 y la altura h = 2, ¿cuánto vale A?",
           options: [{ label: "5", correct: false }, { label: "6", correct: true }, { label: "8", correct: false }, { label: "9", correct: false }],
@@ -101,7 +101,7 @@ export const WORLD = {
           body: "Todo término tiene cuatro partes: el signo, el coeficiente, la parte literal y el grado.",
           visual: "anatomy", key: "Reglas ninja: si no hay signo, es positivo (a = +a). Si no hay número al frente, el coeficiente es 1 (abc = 1abc)." },
         { icon: "📊", tag: "Teoría 3 / 4", title: "El grado de un término",
-          body: "El grado absoluto te dice qué tan "grande" es un término. Para calcularlo, suma los exponentes de todas sus letras. Y ojo: si una letra no tiene exponente escrito, su exponente es 1 (a = a¹).",
+          body: 'El grado absoluto te dice qué tan "grande" es un término. Para calcularlo, suma los exponentes de todas sus letras. Y ojo: si una letra no tiene exponente escrito, su exponente es 1 (a = a¹).',
           visual: "degree", key: "Suma SOLO los exponentes de las letras. El coeficiente NO cuenta para el grado." },
         { icon: "👨‍👩‍👧", tag: "Teoría 4 / 4", title: "Familias de expresiones",
           body: "Según cuántos términos tengan, las expresiones reciben nombres distintos.",
@@ -163,7 +163,7 @@ export function getVisual(kind) {
     <div class="mg-band cat"><div class="h">RELACIÓN</div><div class="l">= &nbsp; &gt; &nbsp; &lt;</div></div>
     <div class="mg-band cat"><div class="h">AGRUPACIÓN</div><div class="l">( ) &nbsp; [ ] &nbsp; { }</div></div></div>`;
   if (kind === "relation") {
-    const rows = [[""igual a"", "a = b"], [""mayor que"", "x + y &gt; m"], [""menor que"", "a &lt; b + c"]];
+    const rows = [['"igual a"', "a = b"], ['"mayor que"', "x + y &gt; m"], ['"menor que"', "a &lt; b + c"]];
     return `<div class="mg-vis">${rows.map(r => `<div class="mg-tr"><span class="l">${r[0]}</span><span class="r">${r[1]}</span></div>`).join("")}</div>`;
   }
   if (kind === "grouping") return `<div class="mg-row-pills">
