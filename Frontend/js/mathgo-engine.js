@@ -90,7 +90,7 @@ export async function initEngine({
 
   function levelState(li) {
     if (S.completed[li]) return "completed";
-    if (li === 0 || S.completed[li - 1]) return "current";
+    if (isAdmin || li === 0 || S.completed[li - 1]) return "current";
     return "locked";
   }
 
