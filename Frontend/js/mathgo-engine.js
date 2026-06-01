@@ -16,17 +16,23 @@ export async function initEngine({
 
   app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="brand-mark">M</div><span>Cargando…</span></div></div>`;
 
-  // ---- Cargar rol y progreso en paralelo ----
+  // ---- Cargar rol y progreso en paralelo (fallos independientes) ----
   let raw = {};
   let isAdmin = false;
-  try {
-    const [progressSnap, userSnap] = await Promise.all([
-      getDoc(doc(db, "mathgo_progress", uid)),
-      getDoc(doc(db, "users", uid)),
-    ]);
-    if (progressSnap.exists()) raw = progressSnap.data();
-    if (userSnap.exists()) isAdmin = userSnap.data().role === "admin";
-  } catch (e) { console.warn("Error cargando datos:", e); }
+  const [progressResult, userResult] = await Promise.allSettled([
+    getDoc(doc(db, "mathgo_progress", uid)),
+    getDoc(doc(db, "users", uid)),
+  ]);
+  if (progressResult.status === "fulfilled" && progressResult.value.exists()) {
+    raw = progressResult.value.data();
+  } else if (progressResult.status === "rejected") {
+    console.warn("Error cargando progreso:", progressResult.reason);
+  }
+  if (userResult.status === "fulfilled" && userResult.value.exists()) {
+    isAdmin = userResult.value.data().role === "admin";
+  } else if (userResult.status === "rejected") {
+    console.warn("Error cargando rol (revisa reglas de Firestore para users/{uid}):", userResult.reason);
+  }
 
   const worldProg = () => raw?.worlds?.[worldId] ?? {};
 
