@@ -16,17 +16,25 @@ export async function initEngine({
 
   app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="brand-mark">M</div><span>Cargando…</span></div></div>`;
 
-  // ---- Cargar progreso ----
+  // ---- Cargar rol y progreso en paralelo ----
   let raw = {};
+  let isAdmin = false;
   try {
-    const snap = await getDoc(doc(db, "mathgo_progress", uid));
-    if (snap.exists()) raw = snap.data();
-  } catch (e) { console.warn("Error cargando progreso:", e); }
+    const [progressSnap, userSnap] = await Promise.all([
+      getDoc(doc(db, "mathgo_progress", uid)),
+      getDoc(doc(db, "users", uid)),
+    ]);
+    if (progressSnap.exists()) raw = progressSnap.data();
+    if (userSnap.exists()) isAdmin = userSnap.data().role === "admin";
+  } catch (e) { console.warn("Error cargando datos:", e); }
 
   const worldProg = () => raw?.worlds?.[worldId] ?? {};
 
   // ---- Desbloqueo ----
+  // Admin: acceso total a todos los mundos.
+  // Student: progresión normal (nivel anterior completo o examen de salto aprobado).
   const isUnlocked =
+    isAdmin ||
     worldId === 1 ||
     (raw?.worlds?.[prereqWorldId]?.allComplete === true) ||
     (raw?.worlds?.[worldId]?.jumpExam?.passed === true);
