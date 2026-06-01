@@ -249,32 +249,36 @@
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = '../index.html'; return; }
 
-      try {
-        const snap = await getDoc(doc(db, "mathgo_progress", user.uid));
-        const data = snap.exists() ? snap.data() : {};
-        const w1 = data?.worlds?.["1"] ?? {};
-        const w2 = data?.worlds?.["2"] ?? {};
-        const w3 = data?.worlds?.["3"] ?? {};
-        const world2Unlocked = w1.allComplete === true || w2.jumpExam?.passed === true;
-        const world3Unlocked = w2.allComplete === true || w3.jumpExam?.passed === true;
+      const [progressResult, userResult] = await Promise.allSettled([
+        getDoc(doc(db, "mathgo_progress", user.uid)),
+        getDoc(doc(db, "users", user.uid)),
+      ]);
 
-        function unlockCard(selector) {
-          const card = document.querySelector(selector);
-          if (!card) return;
-          card.classList.remove("world-card--locked");
-          card.classList.add("world-card--unlocked");
-          card.querySelector(".world-card__num").style.color = "#1cb0f6";
-          card.querySelector(".world-card__arrow").textContent = "→";
-          card.querySelector(".world-card__arrow").style.color = "#1cb0f6";
-          card.querySelector(".world-card__levels").style.cssText = "background:#ddf4ff;color:#1483c2";
-          card.style.cursor = "pointer";
-        }
+      const data = (progressResult.status === "fulfilled" && progressResult.value.exists())
+        ? progressResult.value.data() : {};
+      const isAdmin = (userResult.status === "fulfilled" && userResult.value.exists())
+        ? userResult.value.data().role === "admin" : false;
 
-        if (world2Unlocked) unlockCard('a[href="world-2.html"]');
-        if (world3Unlocked) unlockCard('#card-world-3');
-      } catch (e) {
-        console.warn("No se pudo cargar el progreso:", e);
+      const w1 = data?.worlds?.["1"] ?? {};
+      const w2 = data?.worlds?.["2"] ?? {};
+      const w3 = data?.worlds?.["3"] ?? {};
+      const world2Unlocked = isAdmin || w1.allComplete === true || w2.jumpExam?.passed === true;
+      const world3Unlocked = isAdmin || w2.allComplete === true || w3.jumpExam?.passed === true;
+
+      function unlockCard(selector) {
+        const card = document.querySelector(selector);
+        if (!card) return;
+        card.classList.remove("world-card--locked");
+        card.classList.add("world-card--unlocked");
+        card.querySelector(".world-card__num").style.color = "#1cb0f6";
+        card.querySelector(".world-card__arrow").textContent = "→";
+        card.querySelector(".world-card__arrow").style.color = "#1cb0f6";
+        card.querySelector(".world-card__levels").style.cssText = "background:#ddf4ff;color:#1483c2";
+        card.style.cursor = "pointer";
       }
+
+      if (world2Unlocked) unlockCard('a[href="world-2.html"]');
+      if (world3Unlocked) unlockCard('#card-world-3');
     });
   </script>
     <script src="../js/frontend-ui-fixes.js"></script>
