@@ -120,6 +120,17 @@
           <div class="world-card__arrow">🔒</div>
         </a>
 
+        <a href="world-5.html" class="world-card world-card--locked" id="card-world-5">
+          <div class="world-card__icon">🔢</div>
+          <div class="world-card__body">
+            <div class="world-card__num">Mundo 5</div>
+            <h2 class="world-card__title">Matrices y Sistemas Avanzados</h2>
+            <p class="world-card__sub">Organiza el caos en filas y columnas</p>
+            <div class="world-card__levels">4 niveles</div>
+          </div>
+          <div class="world-card__arrow">🔒</div>
+        </a>
+
       </section>
 
     </main>
@@ -274,9 +285,11 @@
       const w2 = data?.worlds?.["2"] ?? {};
       const w3 = data?.worlds?.["3"] ?? {};
       const w4 = data?.worlds?.["4"] ?? {};
+      const w5 = data?.worlds?.["5"] ?? {};
       const world2Unlocked = isAdmin || w1.allComplete === true || w2.jumpExam?.passed === true;
       const world3Unlocked = isAdmin || w2.allComplete === true || w3.jumpExam?.passed === true;
       const world4Unlocked = isAdmin || w3.allComplete === true || w4.jumpExam?.passed === true;
+      const world5Unlocked = isAdmin || w4.allComplete === true || w5.jumpExam?.passed === true;
 
       function unlockCard(selector) {
         const card = document.querySelector(selector);
@@ -293,6 +306,7 @@
       if (world2Unlocked) unlockCard('a[href="world-2.html"]');
       if (world3Unlocked) unlockCard('#card-world-3');
       if (world4Unlocked) unlockCard('#card-world-4');
+      if (world5Unlocked) unlockCard('#card-world-5');
     });
   </script>
     <script src="../js/frontend-ui-fixes.js"></script>
