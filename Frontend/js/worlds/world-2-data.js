@@ -233,11 +233,6 @@ export const WORLD = {
   ],
 };
 
-export const FUTURE_NODES = [
-  { node: "Operaciones con Reales" },
-  { node: "Ecuaciones de 2.° grado" },
-];
-
 export function getVisual(kind) {
   if (kind === "numhist") return `<div class="mg-vis">
     <div class="mg-tr"><span class="l">ℕ Naturales &nbsp;·&nbsp; {1, 2, 3, 4, 5…}</span><span class="r" style="color:var(--owl-green)">contar</span></div>

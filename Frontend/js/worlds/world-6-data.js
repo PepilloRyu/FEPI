@@ -302,11 +302,6 @@ export const WORLD = {
   ],
 };
 
-export const FUTURE_NODES = [
-  { node: "Funciones Trigonométricas" },
-  { node: "Números Complejos Avanzados" },
-];
-
 export function getVisual(kind) {
   // ── Nivel 1: Números Complejos ───────────────────────────────────────────
   if (kind === "complex-def") return `<div class="mg-vis">

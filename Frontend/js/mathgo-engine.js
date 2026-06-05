@@ -5,7 +5,7 @@ const EXAM_SIZE = 12;
 const PASS_THRESHOLD = Math.ceil(EXAM_SIZE * 0.83); // 10 de 12
 
 export async function initEngine({
-  worldData, futureNodes = [], getVisual,
+  worldData, getVisual,
   worldId, prereqWorldId = null, prereqWorldData = null,
   user, db, onSignOut,
 }) {
@@ -385,12 +385,6 @@ export async function initEngine({
       const click  = st === "locked" ? "" : `onclick="MG.node(${li})"`;
       return `<div class="lesson ${st} ${offClass}" ${click}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
     }).join("");
-    const futureHtml = futureNodes.map((f, i) => {
-      const idx = totalLevels + i;
-      const offClass = idx % 2 === 0 ? "" : (Math.floor(idx / 2) % 2 === 0 ? "off2" : "off1");
-      return `<div class="lesson locked ${offClass}"><div class="circle">🔒</div><p>${f.node}</p></div>`;
-    }).join("");
-
     app.innerHTML = `
       <div class="mockup-layout mg-fade">
         ${sidebar()}
@@ -408,7 +402,7 @@ export async function initEngine({
             </div>
             <button onclick="MG.toast('Guía disponible próximamente')">📖 Guía</button>
           </section>
-          <section class="lesson-path">${nodes}${futureHtml}</section>
+          <section class="lesson-path">${nodes}</section>
         </main>
         ${rightPanel(completedCount)}
       </div>`;

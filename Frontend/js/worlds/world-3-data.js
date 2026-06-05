@@ -247,11 +247,6 @@ export const WORLD = {
   ],
 };
 
-export const FUTURE_NODES = [
-  { node: "Desigualdades Lineales" },
-  { node: "Funciones Cuadráticas" },
-];
-
 export function getVisual(kind) {
   // ── Nivel 1: Funciones y Ecuaciones ─────────────────────────────────────
   if (kind === "func-eval") return `<div class="mg-vis">

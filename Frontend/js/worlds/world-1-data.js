@@ -143,11 +143,6 @@ export const WORLD = {
   ],
 };
 
-export const FUTURE_NODES = [
-  { node: "Términos semejantes" },
-  { node: "Ecuaciones de 1.er grado" },
-];
-
 export function getVisual(kind) {
   if (kind === "values") return `<div class="mg-row-pills"><span class="mg-pill">x = 5</span><span class="mg-pill">x = 100</span><span class="mg-pill q">x = ?</span></div>`;
   if (kind === "alphabet") return `<div class="mg-vis">

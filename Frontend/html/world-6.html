@@ -15,7 +15,7 @@
     import { auth, db } from '../js/firebaseConfig.js';
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
     import { initEngine } from '../js/mathgo-engine.js';
-    import { WORLD, FUTURE_NODES, getVisual } from '../js/worlds/world-6-data.js';
+    import { WORLD, getVisual } from '../js/worlds/world-6-data.js';
     import { WORLD as PREREQ_WORLD } from '../js/worlds/world-5-data.js';
 
     onAuthStateChanged(auth, async (user) => {
@@ -23,7 +23,6 @@
 
       await initEngine({
         worldData: WORLD,
-        futureNodes: FUTURE_NODES,
         getVisual,
         worldId: 6,
         prereqWorldId: 5,

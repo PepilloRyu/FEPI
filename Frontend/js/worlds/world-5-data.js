@@ -321,11 +321,6 @@ export const WORLD = {
   ],
 };
 
-export const FUTURE_NODES = [
-  { node: "Vectores y Espacios" },
-  { node: "Transformaciones Lineales" },
-];
-
 export function getVisual(kind) {
   // ── Nivel 1: Matrices ────────────────────────────────────────────────────
   if (kind === "matrix-def") return `<div class="mg-vis">

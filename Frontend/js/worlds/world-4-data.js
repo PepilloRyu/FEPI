@@ -311,11 +311,6 @@ export const WORLD = {
   ],
 };
 
-export const FUTURE_NODES = [
-  { node: "Inecuaciones Cuadráticas" },
-  { node: "Funciones Trigonométricas" },
-];
-
 export function getVisual(kind) {
   // ── Nivel 1: Función Cuadrática ─────────────────────────────────────────
   if (kind === "parabola-intro") return `<div class="mg-vis">
