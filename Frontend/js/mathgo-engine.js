@@ -34,16 +34,6 @@ export async function initEngine({
     console.warn("Error cargando rol (revisa reglas de Firestore para users/{uid}):", userResult.reason);
   }
 
-  // ── DEBUG ─────────────────────────────────────────────────────────────────
-  console.log("[MathGo] uid:", uid);
-  console.log("[MathGo] userResult.status:", userResult.status);
-  if (userResult.status === "fulfilled") {
-    console.log("[MathGo] users/{uid} exists:", userResult.value.exists());
-    console.log("[MathGo] users/{uid} data:", userResult.value.exists() ? userResult.value.data() : "(vacío)");
-  }
-  console.log("[MathGo] isAdmin:", isAdmin);
-  // ─────────────────────────────────────────────────────────────────────────
-
   const worldProg = () => raw?.worlds?.[worldId] ?? {};
 
   // ---- Desbloqueo ----
