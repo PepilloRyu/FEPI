@@ -279,8 +279,13 @@
 
       const data = (progressResult.status === "fulfilled" && progressResult.value.exists())
         ? progressResult.value.data() : {};
-      const isAdmin = (userResult.status === "fulfilled" && userResult.value.exists())
-        ? userResult.value.data().role === "admin" : false;
+      const userData = (userResult.status === "fulfilled" && userResult.value.exists())
+        ? userResult.value.data() : {};
+      const isAdmin = userData.role === "admin";
+      const displayName = userData.name || user.displayName || user.email || "Usuario";
+      const initials = displayName.slice(0, 2).toUpperCase();
+      document.querySelector('.profile-card .avatar').textContent = initials;
+      document.querySelector('.profile-card h3').textContent = displayName;
 
       const w1 = data?.worlds?.["1"] ?? {};
       const w2 = data?.worlds?.["2"] ?? {};

@@ -19,6 +19,7 @@ export async function initEngine({
   // ---- Cargar rol y progreso en paralelo (fallos independientes) ----
   let raw = {};
   let isAdmin = false;
+  let firestoreName = null;
   const [progressResult, userResult] = await Promise.allSettled([
     getDoc(doc(db, "mathgo_progress", uid)),
     getDoc(doc(db, "users", uid)),
@@ -29,7 +30,9 @@ export async function initEngine({
     console.warn("Error cargando progreso:", progressResult.reason);
   }
   if (userResult.status === "fulfilled" && userResult.value.exists()) {
-    isAdmin = userResult.value.data().role === "admin";
+    const ud = userResult.value.data();
+    isAdmin = ud.role === "admin";
+    firestoreName = ud.name ?? null;
   } else if (userResult.status === "rejected") {
     console.warn("Error cargando rol (revisa reglas de Firestore para users/{uid}):", userResult.reason);
   }
@@ -100,7 +103,7 @@ export async function initEngine({
   }
 
   function rightPanel(completedCount = 0) {
-    const name = user.displayName || user.email || "Usuario";
+    const name = firestoreName || user.displayName || user.email || "Usuario";
     const initials = name.slice(0, 2).toUpperCase();
     const xpPct = Math.min(100, Math.round((S.xp % 100) / 100 * 100));
     return `<aside class="right-panel">
