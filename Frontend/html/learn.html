@@ -52,7 +52,7 @@
 
       <div class="stats-bar">
         <div class="stat-chip">❤️ <strong>5</strong></div>
-        <div class="stat-chip">🔥 <strong>23</strong></div>
+        <div class="stat-chip">🔥 <strong id="stat-streak">–</strong></div>
         <div class="stat-chip">💎 <strong>340</strong></div>
         <div class="stat-chip xp">⚡ <strong>1840 XP</strong></div>
       </div>
@@ -261,7 +261,7 @@
   <script type="module">
     import { auth, db } from '../js/firebaseConfig.js';
     import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
     window.cerrarSesion = async function() {
       await signOut(auth);
@@ -286,6 +286,22 @@
       const initials = displayName.slice(0, 2).toUpperCase();
       document.querySelector('.profile-card .avatar').textContent = initials;
       document.querySelector('.profile-card h3').textContent = displayName;
+
+      // ---- Racha diaria ----
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      const lastDate  = data.lastActiveDate ?? null;
+      let dailyStreak = data.dailyStreak ?? 0;
+      if (lastDate !== todayStr) {
+        const dayGap = lastDate
+          ? Math.round((new Date(todayStr + 'T12:00:00') - new Date(lastDate + 'T12:00:00')) / 86400000)
+          : null;
+        dailyStreak = dayGap === 1 ? dailyStreak + 1 : 1;
+        try {
+          await setDoc(doc(db, "mathgo_progress", user.uid),
+            { dailyStreak, lastActiveDate: todayStr }, { merge: true });
+        } catch (e) { console.warn("Error guardando racha diaria:", e); }
+      }
+      document.getElementById('stat-streak').textContent = dailyStreak;
 
       const w1 = data?.worlds?.["1"] ?? {};
       const w2 = data?.worlds?.["2"] ?? {};

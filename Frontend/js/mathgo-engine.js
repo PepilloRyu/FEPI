@@ -37,6 +37,21 @@ export async function initEngine({
     console.warn("Error cargando rol (revisa reglas de Firestore para users/{uid}):", userResult.reason);
   }
 
+  // ---- Racha diaria ----
+  const todayStr = new Date().toLocaleDateString('en-CA'); // "YYYY-MM-DD" en hora local
+  const lastDate = raw.lastActiveDate ?? null;
+  let dailyStreak = raw.dailyStreak ?? 0;
+  if (lastDate !== todayStr) {
+    const dayGap = lastDate
+      ? Math.round((new Date(todayStr + 'T12:00:00') - new Date(lastDate + 'T12:00:00')) / 86400000)
+      : null;
+    dailyStreak = dayGap === 1 ? dailyStreak + 1 : 1;
+    try {
+      await setDoc(doc(db, "mathgo_progress", uid),
+        { dailyStreak, lastActiveDate: todayStr }, { merge: true });
+    } catch (e) { console.warn("Error guardando racha diaria:", e); }
+  }
+
   const worldProg = () => raw?.worlds?.[worldId] ?? {};
 
   // ---- Desbloqueo ----
@@ -118,7 +133,7 @@ export async function initEngine({
         <div class="mission"><p>Completa 1 lección perfecta</p>
           <div class="bar"><span style="width:${completedCount > 0 ? 100 : 0}%"></span></div></div>
         <div class="mission"><p>Racha activa</p>
-          <div class="bar"><span style="width:${Math.min(100, S.streak * 20)}%"></span></div></div>
+          <div class="bar"><span style="width:${Math.min(100, dailyStreak * 20)}%"></span></div></div>
       </div>
       <div class="card center"><h2>💚 Liga Esmeralda</h2><p>Puesto #4 de 30</p></div>
     </aside>`;
@@ -382,7 +397,7 @@ export async function initEngine({
         <main class="main-content">
           <div class="stats-bar">
             <div class="stat-chip">❤️ <strong>${raw.lives ?? 5}</strong></div>
-            <div class="stat-chip">🔥 <strong>${S.streak}</strong></div>
+            <div class="stat-chip">🔥 <strong>${dailyStreak}</strong></div>
             <div class="stat-chip">💎 <strong>${raw.gems ?? 0}</strong></div>
             <div class="stat-chip xp">⚡ <strong>${S.xp} XP</strong></div>
           </div>
