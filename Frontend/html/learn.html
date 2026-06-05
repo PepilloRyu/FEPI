@@ -269,7 +269,7 @@
       const userData = (userResult.status === "fulfilled" && userResult.value.exists())
         ? userResult.value.data() : {};
       const isAdmin = userData.role === "admin";
-      const displayName = userData.name || user.displayName || user.email || "Usuario";
+      const displayName = userData.name || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuario');
       const initials = displayName.slice(0, 2).toUpperCase();
       document.querySelector('.profile-card .avatar').textContent = initials;
       document.querySelector('.profile-card h3').textContent = displayName;

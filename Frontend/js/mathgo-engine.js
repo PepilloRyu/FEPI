@@ -156,13 +156,15 @@ export async function initEngine({
   }
 
   function rightPanel(completedCount = 0) {
-    const name = firestoreName || user.displayName || user.email || "Usuario";
+    const name = firestoreName || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuario');
     const initials = name.slice(0, 2).toUpperCase();
     const xpPct = Math.min(100, Math.round((S.xp % 100) / 100 * 100));
+    let globalCompleted = 0;
+    Object.values(raw.worlds ?? {}).forEach(w => { globalCompleted += (w.levelsCompleted ?? []).length; });
     return `<aside class="right-panel">
       <div class="profile-card">
         <div class="avatar">${initials}</div>
-        <div><h3>${name}</h3><span>Nivel ${1 + completedCount}</span></div>
+        <div><h3>${name}</h3><span>Nivel ${globalCompleted + 1}</span></div>
       </div>
       <div class="card">
         <h2>Misiones diarias</h2>
