@@ -90,9 +90,7 @@ export async function initEngine({
       <div class="brand"><div class="brand-mark">M</div><div class="brand-name">Math<span>Go</span></div></div>
       <nav class="mockup-nav">
         <a href="learn.html" class="active"><span>🏠</span>Aprender</a>
-        <a href="leaderboard.html"><span>🏆</span>Ligas</a>
         <a href="profile-page.html"><span>👤</span>Perfil</a>
-        <a href="shoppingpage.html"><span>💎</span>Tienda</a>
         <a href="faq.html"><span>❔</span>Soporte</a>
       </nav>
       <div class="sidebar-footer">
