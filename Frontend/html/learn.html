@@ -35,10 +35,6 @@
           Soporte
         </a>
 
-        <a href="world-1.html">
-          <span>🎮</span>
-          Ejercicios
-        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -51,10 +47,10 @@
     <main class="main-content">
 
       <div class="stats-bar">
-        <div class="stat-chip">❤️ <strong>5</strong></div>
+        <div class="stat-chip">❤️ <strong id="stat-lives">–</strong></div>
         <div class="stat-chip">🔥 <strong id="stat-streak">–</strong></div>
-        <div class="stat-chip">💎 <strong>340</strong></div>
-        <div class="stat-chip xp">⚡ <strong>1840 XP</strong></div>
+        <div class="stat-chip">💎 <strong id="stat-gems">–</strong></div>
+        <div class="stat-chip xp">⚡ <strong id="stat-xp">– XP</strong></div>
       </div>
 
       <section class="hero-banner">
@@ -142,27 +138,18 @@
         <div class="avatar">CR</div>
         <div>
           <h3>Chrystian R.</h3>
-          <span>Nivel 8</span>
+          <span id="stat-nivel">Nivel –</span>
         </div>
       </div>
 
       <div class="card">
         <h2>Misiones diarias</h2>
-
-        <div class="mission">
-          <p>Gana 30 XP</p>
-          <div class="bar"><span style="width:60%"></span></div>
-        </div>
-
-        <div class="mission">
-          <p>Completa 3 lecciones perfectas</p>
-          <div class="bar"><span style="width:33%"></span></div>
-        </div>
-
-        <div class="mission">
-          <p>Resuelve 10 ecuaciones</p>
-          <div class="bar"><span style="width:80%"></span></div>
-        </div>
+        <div class="mission"><p>Gana 100 XP</p>
+          <div class="bar"><span id="mission-xp-bar" style="width:0%"></span></div></div>
+        <div class="mission"><p>Completa 1 lección perfecta</p>
+          <div class="bar"><span id="mission-lesson-bar" style="width:0%"></span></div></div>
+        <div class="mission"><p>Racha activa</p>
+          <div class="bar"><span id="mission-streak-bar" style="width:0%"></span></div></div>
       </div>
 
       <div class="card center">
@@ -302,6 +289,24 @@
         } catch (e) { console.warn("Error guardando racha diaria:", e); }
       }
       document.getElementById('stat-streak').textContent = dailyStreak;
+
+      // ---- Stats bar ----
+      const xp = data.totalXp ?? 0;
+      document.getElementById('stat-lives').textContent = data.lives ?? 5;
+      document.getElementById('stat-gems').textContent = data.gems ?? 0;
+      document.getElementById('stat-xp').textContent = xp + ' XP';
+
+      // ---- Nivel global (total niveles completados + 1) ----
+      let totalCompleted = 0;
+      Object.values(data.worlds ?? {}).forEach(w => {
+        totalCompleted += (w.levelsCompleted ?? []).length;
+      });
+      document.getElementById('stat-nivel').textContent = 'Nivel ' + (totalCompleted + 1);
+
+      // ---- Misiones ----
+      document.getElementById('mission-xp-bar').style.width = (xp % 100) + '%';
+      document.getElementById('mission-lesson-bar').style.width = (totalCompleted > 0 ? 100 : 0) + '%';
+      document.getElementById('mission-streak-bar').style.width = Math.min(100, dailyStreak * 20) + '%';
 
       const w1 = data?.worlds?.["1"] ?? {};
       const w2 = data?.worlds?.["2"] ?? {};
