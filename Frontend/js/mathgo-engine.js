@@ -102,6 +102,44 @@ export async function initEngine({
     return "locked";
   }
 
+  // ---- Conector SVG en zigzag ----
+  function injectPathSVG() {
+    const container = document.querySelector('.lesson-path');
+    if (!container) return;
+    const circles = Array.from(container.querySelectorAll('.lesson .circle'));
+    if (circles.length < 2) return;
+
+    const cRect = container.getBoundingClientRect();
+    const pts = circles.map(el => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - cRect.left, y: r.top + r.height / 2 - cRect.top };
+    });
+
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i];
+      const t = (b.y - a.y) * 0.55;
+      d += ` C ${a.x},${a.y + t} ${b.x},${b.y - t} ${b.x},${b.y}`;
+    }
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'path-connector');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.height = cRect.height + 'px';
+
+    const line = document.createElementNS(ns, 'path');
+    line.setAttribute('d', d);
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke', '#e5e5e5');
+    line.setAttribute('stroke-width', '5');
+    line.setAttribute('stroke-dasharray', '12 10');
+    line.setAttribute('stroke-linecap', 'round');
+
+    svg.appendChild(line);
+    container.insertBefore(svg, container.firstChild);
+  }
+
   // ---- Fragmentos HTML reutilizables ----
   function sidebar() {
     return `<aside class="mockup-sidebar">
@@ -406,6 +444,7 @@ export async function initEngine({
         </main>
         ${rightPanel(completedCount)}
       </div>`;
+    requestAnimationFrame(injectPathSVG);
   }
 
   function renderPlayer() {

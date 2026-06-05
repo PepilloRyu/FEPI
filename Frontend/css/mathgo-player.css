@@ -48,8 +48,7 @@ body{ margin:0; min-height:100vh; font-family:"din-round","Nunito",-apple-system
 
 /* ============ ÁRBOL EN ZIGZAG ============ */
 .lesson-path{ position:relative; display:flex; flex-direction:column; align-items:center; gap:30px; padding:46px 0 20px; }
-.lesson-path::before{ content:""; position:absolute; top:60px; bottom:50px; left:50%; width:5px; transform:translateX(-50%);
-  background:repeating-linear-gradient(to bottom, rgb(var(--swan)) 0 10px, transparent 10px 20px); z-index:0; }
+.path-connector{ position:absolute; top:0; left:0; width:100%; overflow:visible; pointer-events:none; z-index:0; }
 .lesson{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transition:transform .12s; }
 .lesson.off1{ transform:translateX(-90px); } .lesson.off2{ transform:translateX(90px); }
 .lesson:hover:not(.locked){ transform:translateY(-2px); }
