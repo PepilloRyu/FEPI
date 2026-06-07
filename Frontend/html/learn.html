@@ -32,7 +32,7 @@
 
         <a href="../html/faq.html">
           <span>❔</span>
-          Soporte
+          Preguntas Frecuentes
         </a>
 
       </nav>
@@ -47,7 +47,6 @@
     <main class="main-content">
 
       <div class="stats-bar">
-        <div class="stat-chip">❤️ <strong id="stat-lives">–</strong></div>
         <div class="stat-chip">🔥 <strong id="stat-streak">–</strong></div>
         <div class="stat-chip">💎 <strong id="stat-gems">–</strong></div>
         <div class="stat-chip xp">⚡ <strong id="stat-xp">– XP</strong></div>
@@ -152,10 +151,6 @@
           <div class="bar"><span id="mission-streak-bar" style="width:0%"></span></div></div>
       </div>
 
-      <div class="card center">
-        <h2>💚 Liga Esmeralda</h2>
-        <p>Puesto #4 de 30</p>
-      </div>
 
     </aside>
 
@@ -292,7 +287,6 @@
 
       // ---- Stats bar ----
       const xp = data.totalXp ?? 0;
-      document.getElementById('stat-lives').textContent = data.lives ?? 5;
       document.getElementById('stat-gems').textContent = data.gems ?? 0;
       document.getElementById('stat-xp').textContent = xp + ' XP';
 

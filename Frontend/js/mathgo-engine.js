@@ -147,7 +147,7 @@ export async function initEngine({
       <nav class="mockup-nav">
         <a href="learn.html" class="active"><span>🏠</span>Aprender</a>
         <a href="profile-page.html"><span>👤</span>Perfil</a>
-        <a href="faq.html"><span>❔</span>Soporte</a>
+        <a href="faq.html"><span>❔</span>Preguntas Frecuentes</a>
       </nav>
       <div class="sidebar-footer">
         <a onclick="MG.signOut()" style="cursor:pointer;">⛔ Cerrar sesión</a>
@@ -175,7 +175,6 @@ export async function initEngine({
         <div class="mission"><p>Racha activa</p>
           <div class="bar"><span style="width:${Math.min(100, dailyStreak * 20)}%"></span></div></div>
       </div>
-      <div class="card center"><h2>💚 Liga Esmeralda</h2><p>Puesto #4 de 30</p></div>
     </aside>`;
   }
 
@@ -430,7 +429,6 @@ export async function initEngine({
         ${sidebar()}
         <main class="main-content">
           <div class="stats-bar">
-            <div class="stat-chip">❤️ <strong>${raw.lives ?? 5}</strong></div>
             <div class="stat-chip">🔥 <strong>${dailyStreak}</strong></div>
             <div class="stat-chip">💎 <strong>${raw.gems ?? 0}</strong></div>
             <div class="stat-chip xp">⚡ <strong>${S.xp} XP</strong></div>
