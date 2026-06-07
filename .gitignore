@@ -1,1 +1,13 @@
 config.js
+firebase-credentials.json
+appsettings.Development.json
+
+# Visual Studio / .NET ignores
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.log

@@ -1,14 +1,24 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using MathGo.Application.Interfaces.Repositories;
+using MathGo.Application.Interfaces.Services;
+using MathGo.Application.Services;
+using MathGo.Application.Validators;
 using MathGo.Infrastructure.Extensions;
 using MathGo.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -41,10 +51,26 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
+
+    var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly);
+    foreach (var xmlFile in xmlFiles)
+    {
+        c.IncludeXmlComments(xmlFile);
+    }
 });
 
 // Firebase Init and Repositories DI
 builder.Services.AddFirebaseServices(builder.Configuration);
+
+// Application Services DI
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<IMissionService, MissionService>();
+builder.Services.AddScoped<IAchievementService, AchievementService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
 
 // Authentication
 var projectId = builder.Configuration["Firebase:ProjectId"];

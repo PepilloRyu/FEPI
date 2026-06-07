@@ -1,6 +1,5 @@
 using MathGo.Application.DTOs.Requests;
-using MathGo.Application.Interfaces.Repositories;
-using MathGo.Domain.Entities;
+using MathGo.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -9,67 +8,69 @@ namespace MathGo.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // All user endpoints require authentication
 public class UsersController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserService _userService;
 
-    public UsersController(IUserRepository userRepository)
+    public UsersController(IUserService userService)
     {
-        _userRepository = userRepository;
-    }
-
-    [HttpPost("register")]
-    [Authorize] // Requiere que el usuario ya se haya registrado en Firebase Auth y envíe el Token
-    public async Task<IActionResult> RegisterUser([FromBody] CreateUserRequest request)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        // Extraer la información validada y segura del Token JWT de Firebase
-        var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        // Firebase Auth usualmente incluye el email en una claim llamada "email" o ClaimTypes.Email
-        var email = User.FindFirst(ClaimTypes.Email)?.Value ?? 
-                    User.FindFirst("email")?.Value ?? string.Empty;
-
-        if (string.IsNullOrEmpty(uid))
-            return Unauthorized("No se pudo obtener la identidad del usuario.");
-
-        // Verificar si el usuario ya existe para no sobreescribirlo accidentalmente
-        var existingUser = await _userRepository.GetByIdAsync(uid);
-        if (existingUser != null)
-            return Conflict("El usuario ya se encuentra registrado en el sistema.");
-
-        var newUser = new User
-        {
-            Uid = uid,
-            Email = email,
-            Name = request.Name,
-            Role = "student",
-            Gamification = new UserGamification(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        // Guardamos explícitamente con su UID en Firestore para que la auth y la bd estén sincronizadas
-        await _userRepository.AddAsync(newUser, uid);
-
-        return Created($"/api/Users/{uid}", newUser);
+        _userService = userService;
     }
 
     [HttpGet("me")]
-    [Authorize] // Requiere Token de Firebase
     public async Task<IActionResult> GetCurrentUser()
     {
         var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        if (string.IsNullOrEmpty(uid))
-            return Unauthorized("No se pudo obtener la identidad del usuario.");
+        if (string.IsNullOrEmpty(uid)) return Unauthorized();
 
-        var existingUser = await _userRepository.GetByIdAsync(uid);
-        if (existingUser == null)
-            return NotFound("Perfil de usuario no encontrado en la base de datos.");
+        var profile = await _userService.GetProfileAsync(uid);
+        if (profile == null) return NotFound(new { Message = "User profile not found." });
 
-        return Ok(existingUser);
+        return Ok(profile);
+    }
+
+    [HttpPut("me")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(uid)) return Unauthorized();
+
+        try
+        {
+            var updatedProfile = await _userService.UpdateProfileAsync(uid, request);
+            return Ok(updatedProfile);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard()
+    {
+        var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(uid)) return Unauthorized();
+
+        try
+        {
+            var dashboard = await _userService.GetDashboardAsync(uid);
+            return Ok(dashboard);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    [HttpGet("leaderboard")]
+    [AllowAnonymous] // Leaderboard can be public or authenticated
+    public async Task<IActionResult> GetLeaderboard([FromQuery] int top = 20)
+    {
+        var leaderboard = await _userService.GetLeaderboardAsync(top);
+        return Ok(leaderboard);
     }
 }

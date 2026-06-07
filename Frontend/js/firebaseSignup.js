@@ -154,27 +154,19 @@ mainForm.addEventListener('submit', RegisterUser);
 
 // js/firebaseSignup.js
 import { auth, db } from './firebaseConfig.js';
-import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 // Función para registrar usuario
 async function signUpUser(email, password, name) {
     try {
-        // Crear usuario en Firebase Auth
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        // Obtener el token JWT seguro de Firebase
-        const token = await user.getIdToken();
-
-        // Llamar a nuestro Backend para registrar al usuario en Firestore (Arquitectura Limpia)
-        const response = await fetch("http://localhost:5000/api/Users/register", {
+        // Llamar a nuestro Backend para registrar al usuario (AuthService creará en Firebase y Firestore)
+        const response = await fetch("http://localhost:5000/api/Auth/register", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ name: name })
+            body: JSON.stringify({ name: name, email: email, password: password })
         });
 
         if (!response.ok) {
@@ -182,6 +174,10 @@ async function signUpUser(email, password, name) {
             throw new Error(`Error del servidor al registrar: ${errorText}`);
         }
         
+        // Iniciar sesión en Firebase Auth para mantener la sesión activa en el frontend
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
         return { success: true, user };
     } catch (error) {
         console.error("Error en registro:", error);

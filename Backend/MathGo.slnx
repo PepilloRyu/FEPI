@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="MathGo.Api/MathGo.Api.csproj" />
+  <Project Path="MathGo.Application/MathGo.Application.csproj" />
+  <Project Path="MathGo.Domain/MathGo.Domain.csproj" />
+  <Project Path="MathGo.Infrastructure/MathGo.Infrastructure.csproj" />
+  <Project Path="MathGo.Tests/MathGo.Tests.csproj" />
+</Solution>

@@ -27,6 +27,17 @@ public static class FirebaseServiceCollectionExtensions
                 }
                 options.Credential = GoogleCredential.FromFile(credentialsPath);
             }
+            else
+            {
+                try
+                {
+                    options.Credential = GoogleCredential.GetApplicationDefault();
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("No se encontraron credenciales de Firebase. Configura 'Firebase:CredentialsPath' en appsettings.Development.json o la variable de entorno GOOGLE_APPLICATION_CREDENTIALS.", ex);
+                }
+            }
 
             FirebaseApp.Create(options);
         }
@@ -54,6 +65,12 @@ public static class FirebaseServiceCollectionExtensions
         services.AddScoped<IPracticeRepository, PracticeRepository>();
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
+        
+        // Gamification and progress repositories
+        services.AddScoped<IProgressRepository, ProgressRepository>();
+        services.AddScoped<IAttemptRepository, AttemptRepository>();
+        services.AddScoped<IMissionRepository, MissionRepository>();
+        services.AddScoped<IAchievementRepository, AchievementRepository>();
 
         return services;
     }
