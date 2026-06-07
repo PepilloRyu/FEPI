@@ -44,7 +44,7 @@ export const WORLD = {
           options: [{ label: "a, b", correct: false }, { label: "a + 1, a + 2", correct: true }, { label: "1a, 2a", correct: false }],
           hint: "Para pasar al siguiente entero, sumas 1. El que sigue después de a es a + 1, y el siguiente a + 2." },
         { type: "build", tag: "Reto 6 · Problema aplicado 🏆",
-          prompt: "Compraste 3 libros a $a c/u, 6 cuadernos a $b c/u y m mochilas a $x c/u. ¿Cuánto gastaste en total?",
+          prompt: "El precio de un libro es a pesos, el de un cuaderno es b pesos y el de una mochila es x pesos. Si compraste 3 libros, 6 cuadernos y m mochilas, ¿cuál expresión representa el total gastado?",
           bank: ["3a", "6b", "mx", "3", "a", "+", "+"], operands: ["3a", "6b", "mx"],
           hint: "Multiplica la cantidad por su precio: 3 libros a $a son 3a. Luego suma los tres resultados." },
       ],

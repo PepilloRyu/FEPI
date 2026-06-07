@@ -221,3 +221,20 @@ body{ margin:0; min-height:100vh; font-family:"din-round","Nunito",-apple-system
   .exam-modal-content{ max-height:100vh; border-radius:0; }
   #exam-modal{ padding:0; }
 }
+
+/* ============ SIDEBAR COMPACTO (world-N) ============ */
+/* Mayor especificidad para anular los !important de frontend-polish.css */
+.mockup-sidebar .mockup-nav a{
+  font-size:13px !important;
+  padding:10px 12px !important;
+  min-height:44px !important;
+  gap:10px !important;
+}
+.mockup-sidebar .mockup-nav a span{
+  width:30px !important; height:30px !important; min-width:30px !important;
+  font-size:16px !important; border-radius:10px !important;
+}
+/* Footer del sidebar sin margin-top:auto (clase propia para no chocar con frontend-polish) */
+.mg-sidebar-footer{ padding-top:14px; margin-top:14px; border-top:1px solid rgb(var(--swan)); }
+.mg-sidebar-footer a{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:rgb(var(--wolf)); font-family:"din-round-bold"; font-weight:800; font-size:13px; text-transform:uppercase; text-decoration:none; cursor:pointer; }
+.mg-sidebar-footer a:hover{ color:var(--cardinal); }

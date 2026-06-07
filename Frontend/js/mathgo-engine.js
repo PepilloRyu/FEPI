@@ -149,7 +149,7 @@ export async function initEngine({
         <a href="profile-page.html"><span>👤</span>Perfil</a>
         <a href="faq.html"><span>❔</span>Preguntas Frecuentes</a>
       </nav>
-      <div class="sidebar-footer">
+      <div class="mg-sidebar-footer">
         <a onclick="MG.signOut()" style="cursor:pointer;">⛔ Cerrar sesión</a>
       </div>
     </aside>`;
