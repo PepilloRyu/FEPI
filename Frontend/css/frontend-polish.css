@@ -47,6 +47,8 @@ a { color: inherit; }
 .mockup-layout {
   display: grid !important;
   grid-template-columns: var(--mg-sidebar) minmax(0, 1fr) var(--mg-right) !important;
+  margin: 0 !important;
+  max-width: none !important;
 }
 
 .main-container {

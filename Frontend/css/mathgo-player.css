@@ -20,7 +20,7 @@ body{ margin:0; min-height:100vh; font-family:"din-round","Nunito",-apple-system
 .hidden{ display:none !important; }
 
 /* ============ LAYOUT TRES COLUMNAS ============ */
-.mockup-layout{ display:grid; grid-template-columns:240px 1fr 320px; gap:0; max-width:1240px; margin:0 auto; min-height:100vh; }
+.mockup-layout{ display:grid; grid-template-columns:240px 1fr 320px; gap:0; margin:0; min-height:100vh; }
 
 .mockup-sidebar{ border-right:2px solid rgb(var(--swan)); padding:20px 14px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto; }
 .brand{ display:flex; align-items:center; gap:10px; padding:8px 10px 18px; }
