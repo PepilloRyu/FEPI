@@ -8,6 +8,13 @@
   <link rel="icon" href="../assets/images/favicon.ico" />
   <link rel="stylesheet" href="../css/design-system.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    .objetivo-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--mg-border-soft); }
+    .objetivo-item:last-child { border-bottom:none; }
+    .objetivo-text { flex:1; font-size:13px; font-weight:600; color:var(--mg-text-2); word-break:break-word; }
+    .objetivo-del { background:none; border:none; cursor:pointer; color:var(--mg-muted-2); font-size:20px; line-height:1; padding:0 4px; border-radius:6px; transition:color var(--mg-transition); }
+    .objetivo-del:hover { color:var(--mg-danger); }
+  </style>
 </head>
 <body>
 
@@ -60,15 +67,22 @@
         </div>
       </div>
 
-      <!-- Misiones -->
+      <!-- Objetivos personales -->
       <div class="mg-card mg-card-sm">
         <h2 class="mg-card-title">
-          <i class="fa-solid fa-bullseye" style="color:var(--mg-primary);"></i> Misiones diarias
+          <i class="fa-solid fa-bullseye" style="color:var(--mg-primary);"></i> Mis objetivos
         </h2>
-        <div id="missions-list">
+        <div id="obj-list">
           <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="width:80%; height:14px;"></div>
           <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="width:65%; height:14px;"></div>
           <div class="mg-skeleton mg-skeleton-text" style="width:72%; height:14px;"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <input type="text" id="obj-input" class="mg-input"
+            placeholder="Nuevo objetivo..."
+            style="padding:10px 12px;font-size:13px;border-radius:12px;" />
+          <button id="obj-add-btn" class="mg-btn mg-btn-primary mg-btn-sm"
+            aria-label="Agregar objetivo">+</button>
         </div>
       </div>
 
@@ -82,9 +96,8 @@
   <div class="mg-toast-container" id="mg-toast-container"></div>
 
   <script type="module">
-    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { requireAuth, getInitials } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
-    import { getMissions } from '../js/services/api.js';
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
@@ -119,29 +132,6 @@
           </a>
         `;
       }).join('');
-    }
-
-    function renderMissions(missions) {
-      const container = document.getElementById('missions-list');
-      if (!missions || missions.length === 0) {
-        container.innerHTML = `
-          <div class="mg-empty" style="padding:16px 0;">
-            <i class="fa-solid fa-bullseye" style="font-size:32px; color:var(--mg-muted-2); margin-bottom:8px;"></i>
-            <div class="mg-empty-text">No hay misiones activas hoy</div>
-          </div>`;
-        return;
-      }
-      container.innerHTML = missions.slice(0, 3).map(m => `
-        <div class="mg-mission-item">
-          <div class="mg-mission-header">
-            <span class="mg-mission-title">${m.description || m.title || 'Misión'}</span>
-            <span class="mg-mission-xp"><i class="fa-solid fa-bolt"></i> +${m.xpReward || 0} XP</span>
-          </div>
-          <div class="mg-progress">
-            <div class="mg-progress-bar xp" style="width: ${Math.min(100, (m.currentProgress / (m.targetProgress || 1)) * 100)}%"></div>
-          </div>
-        </div>
-      `).join('');
     }
 
     async function loadLearnPage(user) {
@@ -193,17 +183,48 @@
       if (isAdmin || worlds['5']?.allComplete) unlocked.push('6');
       renderWorlds(unlocked, isAdmin);
 
-      // Misiones
-      const { data: missions } = await getMissions();
-      if (missions) {
-        renderMissions(missions);
-      } else {
-        renderMissions([
-          { description: 'Gana 100 XP hoy',         xpReward: 20, currentProgress: xp % 100,           targetProgress: 100 },
-          { description: 'Mantén tu racha activa',   xpReward: 10, currentProgress: Math.min(streak, 5), targetProgress: 5 },
-          { description: 'Completa 1 lección',       xpReward: 30, currentProgress: totalCompleted > 0 ? 1 : 0, targetProgress: 1 },
-        ]);
+      // Objetivos personales
+      let currentObjetivos = userData.objetivos ?? [];
+
+      function renderObjList(objetivos) {
+        const container = document.getElementById('obj-list');
+        if (!container) return;
+        if (!objetivos?.length) {
+          container.innerHTML = `<p style="font-size:13px;color:var(--mg-muted);margin:8px 0 0;">No tienes objetivos aún.</p>`;
+          return;
+        }
+        container.innerHTML = objetivos.map((obj, i) => {
+          const safe = obj.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          return `<div class="objetivo-item">
+            <i class="fa-solid fa-bullseye" style="color:var(--mg-primary);font-size:12px;flex-shrink:0;"></i>
+            <span class="objetivo-text">${safe}</span>
+            <button class="objetivo-del" data-idx="${i}" title="Eliminar">×</button>
+          </div>`;
+        }).join('');
+        container.querySelectorAll('.objetivo-del').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const idx = parseInt(btn.dataset.idx);
+            currentObjetivos = currentObjetivos.filter((_, i) => i !== idx);
+            setDoc(doc(db, 'users', user.uid), { objetivos: currentObjetivos }, { merge: true }).catch(() => {});
+            renderObjList(currentObjetivos);
+          });
+        });
       }
+
+      renderObjList(currentObjetivos);
+
+      const objInput = document.getElementById('obj-input');
+      const objAddBtn = document.getElementById('obj-add-btn');
+      const doAdd = async () => {
+        const text = objInput?.value?.trim();
+        if (!text) return;
+        objInput.value = '';
+        currentObjetivos = [...currentObjetivos, text];
+        setDoc(doc(db, 'users', user.uid), { objetivos: currentObjetivos }, { merge: true }).catch(() => {});
+        renderObjList(currentObjetivos);
+      };
+      objAddBtn?.addEventListener('click', doAdd);
+      objInput?.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
     }
 
     requireAuth(false).then(user => loadLearnPage(user));

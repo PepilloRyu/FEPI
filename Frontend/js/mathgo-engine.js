@@ -20,6 +20,7 @@ export async function initEngine({
   let raw = {};
   let isAdmin = false;
   let firestoreName = null;
+  let firestoreObjetivos = [];
   const [progressResult, userResult] = await Promise.allSettled([
     getDoc(doc(db, "mathgo_progress", uid)),
     getDoc(doc(db, "users", uid)),
@@ -33,6 +34,7 @@ export async function initEngine({
     const ud = userResult.value.data();
     isAdmin = ud.role === "admin";
     firestoreName = ud.name ?? null;
+    firestoreObjetivos = ud.objetivos ?? [];
   } else if (userResult.status === "rejected") {
     console.warn("Error cargando rol (revisa reglas de Firestore para users/{uid}):", userResult.reason);
   }
@@ -162,10 +164,22 @@ export async function initEngine({
     </aside>`;
   }
 
+  function buildObjHtml() {
+    if (!firestoreObjetivos.length)
+      return `<p style="font-size:13px;color:#9aa3b2;margin:6px 0 2px;">No tienes objetivos aún.</p>`;
+    return firestoreObjetivos.map((obj, i) => {
+      const safe = obj.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f2f7;">
+        <i class="fa-solid fa-bullseye" style="color:#4f46e5;font-size:12px;flex-shrink:0;"></i>
+        <span style="flex:1;font-size:13px;font-weight:600;color:#344563;word-break:break-word;">${safe}</span>
+        <button onclick="MG.delObjetivo(${i})" style="background:none;border:none;cursor:pointer;color:#c5cdd8;font-size:20px;line-height:1;padding:0 4px;" onmouseover="this.style.color='#ef4770'" onmouseout="this.style.color='#c5cdd8'" title="Eliminar">×</button>
+      </div>`;
+    }).join('');
+  }
+
   function rightPanel(completedCount = 0) {
     const name = firestoreName || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuario');
     const initials = name.slice(0, 2).toUpperCase();
-    const xpPct = Math.min(100, Math.round((S.xp % 100) / 100 * 100));
     let globalCompleted = 0;
     Object.values(raw.worlds ?? {}).forEach(w => { globalCompleted += (w.levelsCompleted ?? []).length; });
     return `<aside class="right-panel">
@@ -174,13 +188,14 @@ export async function initEngine({
         <div><h3>${name}</h3><span>Nivel ${globalCompleted + 1}</span></div>
       </div>
       <div class="card">
-        <h2><i class="fa-solid fa-bullseye" style="color:#4f46e5;margin-right:6px;"></i>Misiones diarias</h2>
-        <div class="mission"><p>Gana 100 XP</p>
-          <div class="bar"><span style="width:${xpPct}%"></span></div></div>
-        <div class="mission"><p>Completa 1 lección perfecta</p>
-          <div class="bar"><span style="width:${completedCount > 0 ? 100 : 0}%"></span></div></div>
-        <div class="mission"><p>Racha activa</p>
-          <div class="bar"><span style="width:${Math.min(100, dailyStreak * 20)}%"></span></div></div>
+        <h2><i class="fa-solid fa-bullseye" style="color:#4f46e5;margin-right:6px;"></i>Mis objetivos</h2>
+        <div id="rp-obj-list">${buildObjHtml()}</div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <input id="rp-obj-input" type="text" placeholder="Nuevo objetivo..."
+            onkeydown="if(event.key==='Enter')MG.addObjetivo()"
+            style="flex:1;padding:9px 12px;border:1.5px solid #e5e9f2;border-radius:12px;font-size:13px;font-family:inherit;color:#344563;outline:none;" />
+          <button onclick="MG.addObjetivo()" style="padding:9px 15px;background:#4f46e5;color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:900;font-size:16px;">+</button>
+        </div>
       </div>
       <a href="dashboard.html" style="display:block;text-align:center;padding:12px 16px;border-radius:14px;border:1px solid #e5e9f2;color:#4f46e5;font-weight:900;font-size:14px;text-decoration:none;background:#fff;transition:background .15s;">
         <i class="fa-solid fa-chart-line"></i> Ver mi progreso completo
@@ -486,7 +501,6 @@ export async function initEngine({
               <small>Mundo ${worldData.id} · ${completedCount}/${totalLevels} niveles</small>
               <h1>${worldData.title}</h1>
             </div>
-            <button onclick="MG.toast('Guía disponible próximamente')">📖 Guía</button>
           </section>
           <section class="lesson-path">${nodes}</section>
         </main>
@@ -822,6 +836,24 @@ export async function initEngine({
       renderPreview();
     },
     exitPreview() { MG.home(); },
+
+    // -- Objetivos personales --
+    async addObjetivo() {
+      const input = document.getElementById('rp-obj-input');
+      const text = input?.value?.trim();
+      if (!text) return;
+      input.value = '';
+      firestoreObjetivos = [...firestoreObjetivos, text];
+      setDoc(doc(db, 'users', uid), { objetivos: firestoreObjetivos }, { merge: true }).catch(e => console.warn('Error guardando objetivo:', e));
+      const el = document.getElementById('rp-obj-list');
+      if (el) el.innerHTML = buildObjHtml();
+    },
+    async delObjetivo(idx) {
+      firestoreObjetivos = firestoreObjetivos.filter((_, i) => i !== idx);
+      setDoc(doc(db, 'users', uid), { objetivos: firestoreObjetivos }, { merge: true }).catch(e => console.warn('Error eliminando objetivo:', e));
+      const el = document.getElementById('rp-obj-list');
+      if (el) el.innerHTML = buildObjHtml();
+    },
 
     // -- Utilidades --
     press(btn, fn) {
