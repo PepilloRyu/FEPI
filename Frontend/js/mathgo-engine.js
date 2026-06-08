@@ -90,6 +90,9 @@ export async function initEngine({
   };
   let pendingExamSave = null;
 
+  // ---- Estado de Vista Previa (solo admin) ----
+  const P = { levelIdx: 0, stepIdx: 0 };
+
   // ---- Accesos rápidos ----
   const curLevel    = () => worldData.levels[S.level];
   const curTheory   = () => curLevel().theory;
@@ -334,6 +337,44 @@ export async function initEngine({
     return "";
   }
 
+  // ---- Render de un reto en modo preview (respuestas correctas siempre visibles) ----
+  function previewChallengeHTML(c) {
+    if (c.type === "mc" || c.type === "vf") {
+      const cls = c.type === "vf" ? "mg-vf" : "mg-options";
+      return `<div class="${cls}">${c.options.map(o =>
+        `<button class="mg-opt${o.correct ? " right" : ""}" disabled>${o.label}${o.correct ? " ✓" : ""}</button>`
+      ).join("")}</div>`;
+    }
+    if (c.type === "build" || c.type === "buildSeq") {
+      const tokens = c.type === "build" ? c.operands : c.answers[0];
+      const chips = tokens.map(t =>
+        `<span class="mg-chip" style="border-color:var(--owl-green-shadow);background:var(--correct-bg);color:var(--correct-text)">${t}</span>`
+      ).join("");
+      return `<div class="mg-answer" style="border-color:var(--owl-green-shadow);background:var(--correct-bg)">${chips}</div>
+        <div class="mg-bank">${c.bank.map(b => `<span class="mg-chip">${b}</span>`).join("")}</div>`;
+    }
+    if (c.type === "match") {
+      const rows = c.pairs.map(p => `<div class="mg-match-row">
+        <span class="mg-match-desc">${p.desc}</span>
+        <div class="dropzone filled" style="border-color:var(--owl-green-shadow)">
+          <span class="mg-placed" style="background:var(--correct-bg);border-color:var(--owl-green-shadow);color:var(--correct-text)">${p.sym}</span>
+        </div></div>`).join("");
+      return `<div class="mg-match">${rows}</div><div class="mg-tilebank" style="display:none"></div>`;
+    }
+    if (c.type === "slots") {
+      const parts = [];
+      if (c.prefix) parts.push(`<span>${c.prefix}</span>`);
+      c.answer.forEach((val, i) => {
+        parts.push(`<div class="dropzone filled" style="border-color:var(--owl-green-shadow)">
+          <span class="mg-placed" style="background:var(--correct-bg);border-color:var(--owl-green-shadow);color:var(--correct-text)">${val}</span>
+        </div>`);
+        if (i < c.slots - 1) parts.push(`<span>+</span>`);
+      });
+      return `<div class="mg-slots">${parts.join("")}</div><div class="mg-tilebank" style="display:none"></div>`;
+    }
+    return "";
+  }
+
   // ---- Firestore: guardar progreso ----
   async function saveProgress() {
     const completedArr = Object.keys(S.completed).map(Number).filter(li => S.completed[li]);
@@ -445,6 +486,71 @@ export async function initEngine({
         ${rightPanel(completedCount)}
       </div>`;
     requestAnimationFrame(injectPathSVG);
+  }
+
+  function renderNodeOptions(li) {
+    const lv = worldData.levels[li];
+    app.innerHTML = `
+      <div class="mockup-layout mg-fade">
+        ${sidebar()}
+        <main class="main-content">
+          <div class="mg-node-choice">
+            <div style="font-size:52px">${lv.icon ?? "⭐"}</div>
+            <h2>${lv.title}</h2>
+            <p>Nivel ${lv.id} · ${(lv.theory?.length ?? 0) + (lv.challenges?.length ?? 0)} pasos</p>
+            <div class="mg-node-choice__btns">
+              <div class="mg-btn-wrap green">
+                <button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${li}))">▶ Iniciar nivel</button>
+              </div>
+              <div class="mg-btn-wrap" style="box-shadow:0 4px 0 #4338ca">
+                <button class="mg-btn" style="background:#6366f1" onclick="MG.press(this,()=>MG.openPreview(${li}))">👁 Vista Previa</button>
+              </div>
+              <div class="mg-btn-wrap">
+                <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.home()">← Volver al mapa</button>
+              </div>
+            </div>
+          </div>
+        </main>
+        ${rightPanel()}
+      </div>`;
+  }
+
+  function renderPreview() {
+    const lv = worldData.levels[P.levelIdx];
+    const challenges = lv.challenges;
+    const total = challenges.length;
+    const c = challenges[P.stepIdx];
+    const mid = previewChallengeHTML(c);
+    const prevDisabled = P.stepIdx === 0;
+    const nextDisabled = P.stepIdx === total - 1;
+
+    app.innerHTML = `<div class="mg-player">
+      <div class="mg-top" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)">
+        <button class="mg-close" onclick="MG.exitPreview()" title="Salir" style="color:#fff">✕</button>
+        <div class="mg-progress"><div class="mg-progress-fill" style="width:${Math.round(((P.stepIdx + 1) / total) * 100)}%"></div></div>
+        <span class="mg-xp" style="color:#fff;white-space:nowrap">Ej. ${P.stepIdx + 1}/${total}</span>
+      </div>
+      <div class="mg-content mg-fade">
+        <span class="mg-preview-badge">🔑 Admin · Vista Previa</span>
+        <span class="mg-tag">${c.tag ?? ""}</span>
+        <p class="mg-prompt">${c.prompt}</p>
+        ${mid}
+        ${c.hint ? `<div class="mg-note hint"><div class="lbl">💡 Pista</div><div class="txt">${c.hint}</div></div>` : ""}
+      </div>
+      <div class="mg-footer" style="display:flex;gap:12px;justify-content:center;align-items:stretch">
+        <div class="mg-btn-wrap" style="flex:1;max-width:180px;${prevDisabled ? "opacity:.4;pointer-events:none" : ""}">
+          <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))"
+            onclick="MG.previewNav(-1)" ${prevDisabled ? "disabled" : ""}>← Anterior</button>
+        </div>
+        <div class="mg-btn-wrap red" style="flex:1;max-width:220px">
+          <button class="mg-btn" onclick="MG.exitPreview()">Salir de Vista Previa</button>
+        </div>
+        <div class="mg-btn-wrap" style="flex:1;max-width:180px;${nextDisabled ? "opacity:.4;pointer-events:none" : ""}">
+          <button class="mg-btn" style="background:${nextDisabled ? "rgb(var(--swan));color:rgb(var(--eel))" : "#6366f1;color:#fff"}"
+            onclick="MG.previewNav(1)" ${nextDisabled ? "disabled" : ""}>Siguiente →</button>
+        </div>
+      </div>
+    </div>`;
   }
 
   function renderPlayer() {
@@ -613,7 +719,11 @@ export async function initEngine({
       Object.assign(S, { phase: "home", step: 0, selected: [], chosen: null, placed: {}, result: null, showHint: false });
       render();
     },
-    node(li) { if (levelState(li) !== "locked") MG.startLevel(li); },
+    node(li) {
+      if (levelState(li) === "locked") return;
+      if (isAdmin) { renderNodeOptions(li); return; }
+      MG.startLevel(li);
+    },
     startLevel(l) {
       S.level = l;
       Object.assign(S, { phase: "play", step: 0, selected: [], chosen: null, placed: {}, result: null, showHint: false, streak: 0 });
@@ -692,6 +802,19 @@ export async function initEngine({
       if (pendingExamSave) await pendingExamSave.catch(console.warn);
       window.location.reload();
     },
+
+    // -- Vista Previa (solo admin) --
+    openPreview(li) {
+      P.levelIdx = li;
+      P.stepIdx = 0;
+      renderPreview();
+    },
+    previewNav(delta) {
+      const total = worldData.levels[P.levelIdx].challenges.length;
+      P.stepIdx = Math.max(0, Math.min(total - 1, P.stepIdx + delta));
+      renderPreview();
+    },
+    exitPreview() { MG.home(); },
 
     // -- Utilidades --
     press(btn, fn) {

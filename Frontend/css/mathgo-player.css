@@ -222,6 +222,13 @@ body{ margin:0; min-height:100vh; font-family:"din-round","Nunito",-apple-system
   #exam-modal{ padding:0; }
 }
 
+/* ============ ADMIN VISTA PREVIA ============ */
+.mg-preview-badge{ display:block; font-family:"din-round-bold"; font-weight:800; font-size:11px; letter-spacing:.4px; text-transform:uppercase; color:#fff; background:linear-gradient(135deg,#6366f1,#8b5cf6); padding:3px 12px; border-radius:20px; margin-bottom:6px; width:fit-content; }
+.mg-node-choice{ display:flex; flex-direction:column; align-items:center; gap:20px; max-width:420px; margin:48px auto; padding:36px 28px; background:#fff; border-radius:24px; border:2px solid rgb(var(--swan)); box-shadow:0 10px 32px rgba(0,0,0,.08); text-align:center; }
+.mg-node-choice h2{ font-family:"din-round-bold"; font-weight:800; font-size:26px; margin:0; }
+.mg-node-choice p{ color:rgb(var(--wolf)); font-size:15px; margin:0; }
+.mg-node-choice__btns{ display:flex; flex-direction:column; gap:12px; width:100%; }
+
 /* Footer del sidebar sin margin-top:auto (clase propia para no chocar con frontend-polish) */
 .mg-sidebar-footer{ padding-top:14px; margin-top:14px; border-top:1px solid rgb(var(--swan)); }
 .mg-sidebar-footer a{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:rgb(var(--wolf)); font-family:"din-round-bold"; font-weight:800; font-size:16px; text-transform:uppercase; text-decoration:none; cursor:pointer; }
