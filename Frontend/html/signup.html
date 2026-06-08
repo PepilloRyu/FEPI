@@ -1,99 +1,355 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../css/signup.css" />
-    <link rel="stylesheet" href="../css/main.css" />
-    <title>Duolingo - Login</title>
-    <link rel="icon" href="../assets/images/favicon.ico" />
-    <script src="../js/signup.js"></script>
-    <script type="module" src="../js/firebaseSignup.js"></script>
-  </head>
-  <body>
-    <div class="main-container">
-      <div class="signup-page-container">
-        <div class="close-button-div">
-            <a href="../index.html">
-              <img src="../assets/svg/close-button.svg" alt="close button"
-            /></a>
-          </div>
-          <div class="login-button-container">
-            <button
-              class="login-button button-div"
-              id="login-button"
-              onclick="loginButtonAnimation()"
-            >
-              INGRESAR
-            </button>
-          </div>
-          <form class="signup-section-main" id="main-form">
-            <div class="signup-information-div">
-              <h1 class="create-profile-heading">Crea tu perfil</h1>
-              <div class="input-fields-div">
-                <div class="field-one">
-                  <input
-                    class="input-field"
-                    id="age-input"
-                    type="text"
-                    placeholder="Edad"
-                  />
-                  <div class="error-message" id="age-error-message"></div>
-                </div>
-                <div class="field-one">
-                  <input
-                    class="input-field"
-                    id="name-input"
-                    type="text"
-                    placeholder="Nombre"
-                  />
-                  <div class="error-message" id="name-error-message"></div>
-                </div>
-                <div class="field-one">
-                  <input
-                    class="input-field"
-                    id="email-input"
-                    type="text"
-                    placeholder="Email"
-                  />
-                  <div class="error-message" id="email-error-message"></div>
-                </div>
-                <div class="field-one">
-                  <input
-                    class="input-field"
-                    id="password-input"
-                    type="password"
-                    placeholder="Contraseña"
-                  />
-                  <div class="error-message" id="password-error-message"></div>
-                </div>
-              </div>
-  
-              <div class="create-account-button-container">
-                <button
-                  type="submit"
-                  class="create-account-button button-div"
-                  id="create-account-button"
-                  onclick="createAccountButtonAnimation()"
-                >
-                  <span id="create-account-span">CREATE ACCOUNT</span>
-                  <div
-                    class="loading-balls-container hidden"
-                    style="transition-duration: 250ms"
-                    id="loading-balls-container"
-                  >
-                    <div class="animation loading-ball"></div>
-                    <div class="animation second-animation loading-ball"></div>
-                    <div class="animation third-animation loading-ball"></div>
-                  </div>
-                </button>
-              </div>
-            </div>
-  
-            <div class="split-line"></div>
-  
-          </form>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Crear cuenta</title>
+  <meta name="description" content="Crea tu cuenta en MathGo y comienza a aprender algebra." />
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0f1a 0%, #1e1e35 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .auth-page {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 600px;
+      max-width: 960px;
+      width: 100%;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    }
+
+    /* Panel izquierdo */
+    .auth-left {
+      background: linear-gradient(135deg, var(--mg-primary), var(--mg-secondary));
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+    }
+    .auth-logo { font-size: 30px; font-weight: 900; letter-spacing: -0.04em; }
+    .auth-logo span { opacity: 0.8; }
+    .auth-tagline { font-size: 34px; font-weight: 900; letter-spacing: -0.04em; line-height: 1.15; }
+    .auth-features { display: flex; flex-direction: column; gap: 14px; }
+    .auth-feature { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; opacity: 0.92; }
+    .auth-feature-icon { font-size: 24px; }
+
+    /* Panel derecho */
+    .auth-right {
+      background: #fff;
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .auth-right h1 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--mg-text);
+      margin-bottom: 6px;
+    }
+    .auth-right .auth-sub {
+      color: var(--mg-muted);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+
+    /* Paso a paso */
+    .step-indicator {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mg-border);
+      transition: all 300ms ease;
+    }
+    .step-dot.active { background: var(--mg-primary); width: 24px; border-radius: 9999px; }
+
+    .auth-form { display: flex; flex-direction: column; gap: 0; }
+
+    .form-step { display: none; flex-direction: column; gap: 12px; animation: mgFadeUp 250ms ease both; }
+    .form-step.active { display: flex; }
+
+    .auth-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--mg-muted);
+    }
+    .auth-link a { color: var(--mg-primary); font-weight: 800; text-decoration: none; }
+    .auth-link a:hover { text-decoration: underline; }
+
+    /* Indicador de fortaleza de contraseña */
+    .pw-strength {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .pw-bar {
+      flex: 1;
+      height: 4px;
+      border-radius: 9999px;
+      background: var(--mg-border);
+      transition: background 300ms ease;
+    }
+    .pw-bar.weak   { background: var(--mg-danger); }
+    .pw-bar.medium { background: var(--mg-xp); }
+    .pw-bar.strong { background: var(--mg-success); }
+
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 700ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 720px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-left  { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-page">
+    <!-- Panel izquierdo — branding -->
+    <div class="auth-left">
+      <div class="auth-logo">Math<span>Go</span></div>
+      <div>
+        <div class="auth-tagline">Aprende álgebra<br>como si fuera un juego</div>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-gamepad"></i></span> Ejercicios interactivos</div>
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-fire"></i></span> Sistema de rachas diarias</div>
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-trophy"></i></span> Compite en ligas</div>
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-chart-line"></i></span> Progreso detallado</div>
       </div>
     </div>
-  </body>
+
+    <!-- Panel derecho — formulario multi-paso -->
+    <div class="auth-right">
+      <h1>Crear cuenta</h1>
+      <p class="auth-sub">Es gratis. Siempre lo será.</p>
+
+      <!-- Indicador de paso -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+        <div class="step-dot" id="dot-3"></div>
+      </div>
+
+      <form class="auth-form" id="signup-form" novalidate>
+
+        <!-- PASO 1: Nombre y edad -->
+        <div class="form-step active" id="step-1">
+          <div class="mg-input-group">
+            <label class="mg-label" for="name-input">Tu nombre</label>
+            <input class="mg-input" type="text" id="name-input"
+              placeholder="¿Cómo te llamamos?" autocomplete="given-name" required />
+            <span class="mg-error-msg" id="name-error"></span>
+          </div>
+          <div class="mg-input-group">
+            <label class="mg-label" for="age-input">Tu edad</label>
+            <input class="mg-input" type="number" id="age-input"
+              placeholder="Ej: 17" min="8" max="99" required />
+            <span class="mg-error-msg" id="age-error"></span>
+          </div>
+          <button type="button" class="mg-btn mg-btn-primary mg-btn-full" id="step1-next">
+            Continuar →
+          </button>
+        </div>
+
+        <!-- PASO 2: Email -->
+        <div class="form-step" id="step-2">
+          <div class="mg-input-group">
+            <label class="mg-label" for="email-input">Correo electrónico</label>
+            <input class="mg-input" type="email" id="email-input"
+              placeholder="tu@correo.com" autocomplete="email" required />
+            <span class="mg-error-msg" id="email-error"></span>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="mg-btn mg-btn-secondary" id="step2-back" style="flex:1;">← Atrás</button>
+            <button type="button" class="mg-btn mg-btn-primary" id="step2-next" style="flex:2;">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- PASO 3: Contraseña -->
+        <div class="form-step" id="step-3">
+          <div class="mg-input-group">
+            <label class="mg-label" for="password-input">Contraseña</label>
+            <input class="mg-input" type="password" id="password-input"
+              placeholder="Mínimo 8 caracteres" autocomplete="new-password" required />
+            <div class="pw-strength" id="pw-strength">
+              <div class="pw-bar" id="pw-bar-1"></div>
+              <div class="pw-bar" id="pw-bar-2"></div>
+              <div class="pw-bar" id="pw-bar-3"></div>
+            </div>
+            <span class="mg-error-msg" id="password-error"></span>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="mg-btn mg-btn-secondary" id="step3-back" style="flex:1;">← Atrás</button>
+            <button type="submit" class="mg-btn mg-btn-success" id="submit-btn" style="flex:2;">
+            <span id="submit-text"><i class="fa-solid fa-check"></i> ¡Crear cuenta!</span>
+            <div class="spinner" id="submit-spinner" style="display:none;"></div>
+          </button>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Mensaje de error global -->
+      <div id="global-error" class="mg-error-msg" style="margin-top:12px; display:none;"></div>
+
+      <p class="auth-link">¿Ya tienes cuenta? <a href="loginpage.html">Ingresar</a></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from '../js/firebaseConfig.js';
+    import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+    import { registerUser } from '../js/services/api.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+
+    // Redirigir si ya hay sesion
+    onAuthStateChanged(auth, user => {
+      if (user && user.emailVerified) window.location.replace('./learn.html');
+    });
+
+    // ─── Logica de pasos ───
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    function goTo(step) {
+      document.getElementById(`step-${currentStep}`)?.classList.remove('active');
+      document.getElementById(`dot-${currentStep}`)?.classList.remove('active');
+      currentStep = step;
+      document.getElementById(`step-${currentStep}`)?.classList.add('active');
+      document.getElementById(`dot-${currentStep}`)?.classList.add('active');
+    }
+
+    // Botones de navegacion
+    document.getElementById('step1-next').addEventListener('click', () => {
+      const name = document.getElementById('name-input').value.trim();
+      const age  = parseInt(document.getElementById('age-input').value);
+      let valid = true;
+
+      document.getElementById('name-error').textContent = '';
+      document.getElementById('age-error').textContent  = '';
+
+      if (!name || name.length < 2) {
+        document.getElementById('name-error').textContent = 'Ingresa tu nombre (mínimo 2 caracteres)';
+        document.getElementById('name-input').classList.add('error');
+        valid = false;
+      } else {
+        document.getElementById('name-input').classList.remove('error');
+      }
+      if (!age || age < 8 || age > 99) {
+        document.getElementById('age-error').textContent = 'Ingresa una edad válida (8-99)';
+        document.getElementById('age-input').classList.add('error');
+        valid = false;
+      } else {
+        document.getElementById('age-input').classList.remove('error');
+      }
+      if (valid) goTo(2);
+    });
+
+    document.getElementById('step2-back').addEventListener('click', () => goTo(1));
+    document.getElementById('step2-next').addEventListener('click', () => {
+      const email = document.getElementById('email-input').value.trim();
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      document.getElementById('email-error').textContent = '';
+      if (!emailRe.test(email)) {
+        document.getElementById('email-error').textContent = 'Ingresa un correo válido';
+        document.getElementById('email-input').classList.add('error');
+      } else {
+        document.getElementById('email-input').classList.remove('error');
+        goTo(3);
+      }
+    });
+
+    document.getElementById('step3-back').addEventListener('click', () => goTo(2));
+
+    // ─── Indicador de fortaleza ───
+    document.getElementById('password-input').addEventListener('input', (e) => {
+      const pw = e.target.value;
+      const bars = [
+        document.getElementById('pw-bar-1'),
+        document.getElementById('pw-bar-2'),
+        document.getElementById('pw-bar-3'),
+      ];
+      bars.forEach(b => { b.className = 'pw-bar'; });
+
+      if (pw.length >= 6) { bars[0].classList.add('weak'); }
+      if (pw.length >= 8 && /[0-9]/.test(pw)) { bars[0].classList.replace('weak','medium'); bars[1].classList.add('medium'); }
+      if (pw.length >= 10 && /[^a-zA-Z0-9]/.test(pw)) {
+        bars.forEach(b => { b.className = 'pw-bar strong'; });
+      }
+    });
+
+    // ─── Submit ───
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name     = document.getElementById('name-input').value.trim();
+      const email    = document.getElementById('email-input').value.trim();
+      const password = document.getElementById('password-input').value;
+
+      document.getElementById('password-error').textContent = '';
+      document.getElementById('global-error').style.display = 'none';
+
+      if (password.length < 8) {
+        document.getElementById('password-error').textContent = 'La contraseña debe tener al menos 8 caracteres';
+        document.getElementById('password-input').classList.add('error');
+        return;
+      }
+
+      // Estado de carga
+      const submitBtn = document.getElementById('submit-btn');
+      document.getElementById('submit-text').style.display = 'none';
+      document.getElementById('submit-spinner').style.display = 'block';
+      submitBtn.disabled = true;
+
+      // Llamar al backend
+      const { data, error } = await registerUser(name, email, password);
+
+      if (error) {
+        document.getElementById('submit-text').style.display = 'block';
+        document.getElementById('submit-spinner').style.display = 'none';
+        submitBtn.disabled = false;
+
+        const errEl = document.getElementById('global-error');
+        errEl.style.display = 'flex';
+        errEl.textContent = error;
+        return;
+      }
+
+      // Registro exitoso → iniciar sesion en Firebase
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch {}
+
+      // Redirigir a verificacion de email
+      window.location.replace('./verify-email.html');
+    });
+  </script>
+</body>
 </html>

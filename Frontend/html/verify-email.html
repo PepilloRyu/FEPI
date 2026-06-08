@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Verificar correo</title>
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0f1a 0%, #1e1e35 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .verify-card {
+      background: #fff;
+      border-radius: 28px;
+      padding: 52px 44px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+      animation: mgBounceIn 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    .verify-icon { font-size: 64px; color: var(--mg-primary); margin-bottom: 20px; animation: mgPulse 2s ease infinite; }
+    .verify-card h1 { font-size: 28px; font-weight: 900; color: var(--mg-text); margin-bottom: 12px; }
+    .verify-card p { color: var(--mg-muted); line-height: 1.6; margin-bottom: 8px; }
+    .verify-email-box {
+      display: inline-block;
+      background: rgba(79,70,229,0.08);
+      color: var(--mg-primary);
+      font-weight: 800;
+      padding: 8px 20px;
+      border-radius: 9999px;
+      font-size: 15px;
+      margin: 12px 0 24px;
+    }
+    .verify-actions { display: flex; flex-direction: column; gap: 12px; }
+    .verify-divider { color: var(--mg-muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="verify-card">
+    <div class="verify-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+    <h1>Revisa tu correo</h1>
+    <p>Enviamos un enlace de verificación a:</p>
+    <div class="verify-email-box" id="verify-email">tu@correo.com</div>
+    <p>Haz clic en el enlace del correo para activar tu cuenta. Si no lo encuentras, revisa la carpeta de <strong>spam</strong>.</p>
+
+    <div class="verify-actions">
+      <button class="mg-btn mg-btn-primary mg-btn-full" id="resend-btn">
+        <i class="fa-solid fa-paper-plane"></i> Reenviar correo de verificación
+      </button>
+      <div class="verify-divider">— o —</div>
+      <button class="mg-btn mg-btn-secondary mg-btn-full" id="check-btn">
+        <i class="fa-solid fa-circle-check"></i> Ya verifiqué mi correo
+      </button>
+      <button class="mg-btn" id="logout-btn"
+        style="background:none; color:var(--mg-muted); border:none; font-size:14px; margin-top:4px;">
+        <i class="fa-solid fa-arrow-left"></i> Usar otra cuenta
+      </button>
+    </div>
+  </div>
+
+  <div class="mg-toast-container" id="mg-toast-container"></div>
+
+  <script type="module">
+    import { auth } from '../js/firebaseConfig.js';
+    import { onAuthStateChanged, signOut, sendEmailVerification, reload }
+      from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+    import { showToast } from '../js/services/auth.js';
+
+    let currentUser = null;
+    let cooldown = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('../index.html');
+        return;
+      }
+
+      currentUser = user;
+      document.getElementById('verify-email').textContent = user.email;
+
+      // Si ya esta verificado, ir directo
+      if (user.emailVerified) {
+        window.location.replace('./learn.html');
+      }
+    });
+
+    // Reenviar correo
+    document.getElementById('resend-btn').addEventListener('click', async () => {
+      if (!currentUser || cooldown) return;
+      cooldown = true;
+
+      const btn = document.getElementById('resend-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+      try {
+        await sendEmailVerification(currentUser);
+        showToast('¡Correo reenviado! Revisa tu bandeja.', 'success');
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Correo enviado';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Reenviar correo de verificación';
+          cooldown = false;
+        }, 30000);
+      } catch (err) {
+        showToast('Error al reenviar. Intenta más tarde.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Reenviar correo de verificación';
+        cooldown = false;
+      }
+    });
+
+    // Verificar si ya hizo clic en el enlace
+    document.getElementById('check-btn').addEventListener('click', async () => {
+      if (!currentUser) return;
+      try {
+        await reload(currentUser);
+        if (currentUser.emailVerified) {
+          showToast('¡Correo verificado! Redirigiendo...', 'success');
+          setTimeout(() => { window.location.replace('./learn.html'); }, 1000);
+        } else {
+          showToast('Aún no hemos detectado la verificación. Revisa tu correo.', 'error');
+        }
+      } catch {
+        showToast('Error al verificar. Intenta de nuevo.', 'error');
+      }
+    });
+
+    // Cerrar sesion
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.replace('../index.html');
+    });
+  </script>
+</body>
+</html>

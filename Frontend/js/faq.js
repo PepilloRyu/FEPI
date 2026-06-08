@@ -1,83 +1,100 @@
 // ==================== MATHGO FAQ - ÁLGEBRA ====================
-// NO hay rastro de Duolingo
+// Sistema de FAQs homologado y sin emojis
 
-window.expandToAnswers = function(event) {
-    const target = event.currentTarget;
-    const answer = target.querySelector('.answer');
-    const img = target.querySelector('img');
-    
-    if (answer) answer.classList.toggle('hidden');
-    if (img) img.classList.toggle('rotate');
-    target.classList.toggle('bold');
-};
+const faqData = [
+    {
+        category: "Aprendizaje de Álgebra",
+        icon: "fa-solid fa-graduation-cap",
+        questions: [
+            { question: "¿Qué temas de álgebra ofrece MathGo?", answer: "Fundamentos de Álgebra, Ecuaciones Lineales, Sistemas de Ecuaciones, Polinomios, Factorización, Ecuaciones Cuadráticas y Funciones." },
+            { question: "¿Cómo empiezo a aprender álgebra?", answer: "Regístrate y comienza con los fundamentos. Las lecciones están pensadas para principiantes y avanzan de manera progresiva." },
+            { question: "¿Necesito conocimientos previos?", answer: "No, MathGo está diseñado para todos los niveles. Comenzamos desde la aritmética básica hasta llegar a conceptos algebraicos complejos." }
+        ]
+    },
+    {
+        category: "Sistema de Puntos y Progreso",
+        icon: "fa-solid fa-star",
+        questions: [
+            { question: "¿Cómo gano XP?", answer: "Completando lecciones en los distintos mundos, respondiendo correctamente los ejercicios de los cuestionarios y manteniendo tu racha de días activos." },
+            { question: "¿Para qué sirven las gemas?", answer: "Las gemas representan tu dedicación y te permiten medir tu avance en la resolución de problemas en la plataforma." },
+            { question: "¿Qué es la racha (streak)?", answer: "La racha cuenta los días consecutivos que has practicado en MathGo. Debes completar al menos una lección al día para mantenerla activa." }
+        ]
+    },
+    {
+        category: "Ligas y Competencias",
+        icon: "fa-solid fa-trophy",
+        questions: [
+            { question: "¿Qué son las ligas?", answer: "Es una tabla de clasificación donde compites con otros estudiantes. Subes o bajas de liga al final de cada semana según los puntos de XP que consigas." },
+            { question: "¿Cuáles son las ligas disponibles?", answer: "Actualmente compites en ligas basadas en tu nivel de experiencia: Bronce, Plata, Oro, Diamante y Maestro." },
+            { question: "¿Cómo se calcula mi posición en la liga?", answer: "Se obtiene directamente del XP total acumulado durante la semana. Los mejores posicionados ascienden al siguiente nivel de liga." }
+        ]
+    },
+    {
+        category: "Cuenta y Configuración",
+        icon: "fa-solid fa-user-gear",
+        questions: [
+            { question: "¿Puedo usar MathGo en mi teléfono?", answer: "¡Sí! MathGo es totalmente adaptativo (responsivo) y funciona de manera óptima en computadoras, tabletas y teléfonos inteligentes." },
+            { question: "¿Cómo cambio mi contraseña?", answer: "En la pantalla de inicio de sesión, puedes solicitar un enlace de restablecimiento de contraseña seleccionando '¿Olvidaste tu contraseña?'." }
+        ]
+    }
+];
 
-const faqData = {
-    "📚 Aprendizaje de Álgebra": [
-        { question: "¿Qué temas de álgebra ofrece MathGo?", answer: "Fundamentos de Álgebra, Ecuaciones Lineales, Sistemas de Ecuaciones, Polinomios, Factorización, Ecuaciones Cuadráticas y Funciones." },
-        { question: "¿Cómo empiezo a aprender álgebra?", answer: "Regístrate y comienza con los fundamentos. Las lecciones son para principiantes y avanzan gradualmente." },
-        { question: "¿Necesito conocimientos previos?", answer: "No, MathGo está diseñado para todos los niveles. Comenzamos desde lo más básico hasta temas avanzados." }
-    ],
-    "⭐ Sistema de Puntos y Progreso": [
-        { question: "¿Cómo gano XP?", answer: "Completando lecciones, manteniendo tu racha diaria, respondiendo correctamente los ejercicios y participando en desafíos." },
-        { question: "¿Para qué sirven las gemas?", answer: "Para comprar boosts de XP (doble experiencia), lecciones especiales, protectores de racha y temas personalizados." },
-        { question: "¿Qué es la racha (streak)?", answer: "La racha cuenta los días consecutivos que practicas. Debes completar al menos una lección por día para mantenerla. Cada día suma y desbloqueas recompensas." }
-    ],
-    "🏆 Ligas y Competencias": [
-        { question: "¿Qué son las ligas?", answer: "Sistema de clasificación para competir con otros estudiantes. Subes de liga ganando XP semanalmente." },
-        { question: "¿Cuáles son las ligas disponibles?", answer: "Bronce, Plata, Oro, Zafiro, Rubí, Esmeralda y Diamante. Cada semana los mejores ascienden." },
-        { question: "¿Qué beneficios tienen las ligas altas?", answer: "Más recompensas de XP, gemas adicionales, insignias exclusivas y reconocimiento en la tabla de líderes." }
-    ],
-    "📱 Cuenta y Configuración": [
-        { question: "¿Puedo usar MathGo en mi teléfono?", answer: "¡Sí! MathGo es completamente responsivo y funciona perfectamente en computadoras, tablets y teléfonos móviles." },
-        { question: "¿Cómo cambio mi contraseña?", answer: "Ve a tu perfil > Configuración > Cambiar contraseña. Recibirás un correo para restablecerla de forma segura." },
-        { question: "¿Puedo eliminar mi cuenta?", answer: "Sí, desde Configuración > Eliminar cuenta. Ten en cuenta que esta acción es irreversible y perderás todo tu progreso." }
-    ]
-};
+function expandToAnswers(event) {
+    const item = event.currentTarget.closest('.faq-item');
+    if (!item) return;
 
-function loadFAQ() {
-    const container = document.querySelector('.faq-container');
-    if (!container) return;
-    
-    // Limpiar completamente cualquier contenido previo (importante)
-    container.innerHTML = '';
-    
-    // Títulos
-    const title = document.createElement('div');
-    title.className = 'faq-heading';
-    title.innerHTML = '❓ Preguntas Frecuentes';
-    container.appendChild(title);
-    
-    const subtitle = document.createElement('div');
-    subtitle.className = 'faq-subheading';
-    subtitle.innerHTML = 'Todo lo que necesitas saber sobre MathGo y álgebra';
-    container.appendChild(subtitle);
-    
-    // Generar categorías y preguntas
-    for (const [category, questions] of Object.entries(faqData)) {
-        const group = document.createElement('div');
-        group.className = 'faq-group';
-        
-        const categoryHeader = document.createElement('div');
-        categoryHeader.className = 'item heading';
-        categoryHeader.innerHTML = `<div class="flex">${category}</div>`;
-        group.appendChild(categoryHeader);
-        
-        for (const q of questions) {
-            const item = document.createElement('div');
-            item.className = 'item';
-            item.setAttribute('onclick', 'expandToAnswers(event)');
-            item.innerHTML = `
-                <div class="flex">
-                    ${q.question}
-                    <img src="../assets/svg/down-arrow-faq.svg" alt="arrow" />
-                </div>
-                <div class="answer hidden">${q.answer}</div>
-            `;
-            group.appendChild(item);
-        }
-        container.appendChild(group);
+    const answer = item.querySelector('.faq-answer');
+    const isActive = item.classList.contains('active');
+
+    // Cerrar todas las preguntas abiertas de este grupo para un acordeón limpio
+    const parentGroup = item.closest('.faq-category-card');
+    parentGroup.querySelectorAll('.faq-item').forEach(el => {
+        el.classList.remove('active');
+        const ans = el.querySelector('.faq-answer');
+        if (ans) ans.style.maxHeight = null;
+    });
+
+    if (!isActive) {
+        item.classList.add('active');
+        answer.style.maxHeight = answer.scrollHeight + "px";
     }
 }
 
-// Ejecutar cuando el DOM esté listo
+function loadFAQ() {
+    const container = document.getElementById('faq-content-list');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    faqData.forEach(cat => {
+        const categoryCard = document.createElement('div');
+        categoryCard.className = 'mg-card faq-category-card';
+
+        const title = document.createElement('h2');
+        title.className = 'faq-category-title';
+        title.innerHTML = `<i class="${cat.icon}"></i> ${cat.category}`;
+        categoryCard.appendChild(title);
+
+        cat.questions.forEach(q => {
+            const item = document.createElement('div');
+            item.className = 'faq-item';
+            
+            const btn = document.createElement('button');
+            btn.className = 'faq-question-btn';
+            btn.innerHTML = `<span>${q.question}</span><i class="fa-solid fa-chevron-down"></i>`;
+            btn.addEventListener('click', expandToAnswers);
+            item.appendChild(btn);
+
+            const ans = document.createElement('div');
+            ans.className = 'faq-answer';
+            ans.innerHTML = `<div class="faq-answer-inner">${q.answer}</div>`;
+            item.appendChild(ans);
+
+            categoryCard.appendChild(item);
+        });
+
+        container.appendChild(categoryCard);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', loadFAQ);

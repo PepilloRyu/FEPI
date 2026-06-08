@@ -1,161 +1,437 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./scss/landingpage.css" />
-    <link rel="stylesheet" href="./css/main.css" />
-    <title>MathGo - Aprende Álgebra</title>
-    <link rel="icon" href="./assets/images/favicon.ico" />
-  </head>
-  <body>
-    <header class="landing-header">
-      <div class="header-navbar">
-        <nav class="landing-navbar">
-          <a href="/" class="mathgo-logo-link">
-            <span class="mathgo-logo-text">MathGo</span>
-          </a>
-        </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Aprende Álgebra de forma divertida</title>
+  <meta name="description" content="MathGo es la plataforma de aprendizaje de álgebra gamificada. Gana XP, mantén tu racha y domina las matemáticas." />
+  <link rel="icon" href="./assets/images/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --secondary: #7c3aed;
+      --success: #22c55e;
+      --bg: #0f0f1a;
+      --surface: #16162a;
+      --surface-2: #1e1e35;
+      --border: rgba(255,255,255,0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --font: 'Nunito', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 64px;
+      background: rgba(15,15,26,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo i { color: var(--primary); font-size: 22px; }
+    .nav-logo span { color: var(--primary); }
+    .nav-actions { display: flex; gap: 12px; align-items: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 14px;
+      font-family: var(--font);
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 180ms ease;
+      text-decoration: none;
+      border: none;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 0 var(--primary-dark);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 0 var(--primary-dark); }
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+      box-shadow: 0 4px 0 #15803d;
+      font-size: 17px;
+      padding: 16px 40px;
+      border-radius: 18px;
+    }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #15803d; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 32px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(79,70,229,0.25) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(124,58,237,0.2) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(34,197,94,0.1) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 780px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: rgba(79,70,229,0.15);
+      border: 1px solid rgba(79,70,229,0.4);
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #a5b4fc;
+      margin-bottom: 28px;
+      animation: fadeUp 600ms ease both;
+    }
+    .hero h1 {
+      font-size: clamp(44px, 7vw, 80px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 24px;
+      animation: fadeUp 600ms 100ms ease both;
+    }
+    .hero h1 .accent {
+      background: linear-gradient(135deg, #818cf8, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 20px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 540px;
+      margin: 0 auto 40px;
+      animation: fadeUp 600ms 200ms ease both;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 600ms 300ms ease both;
+    }
+
+    /* Stats */
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 64px;
+      flex-wrap: wrap;
+      animation: fadeUp 600ms 400ms ease both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-value {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #818cf8, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-stat-label { font-size: 14px; color: var(--muted); font-weight: 700; margin-top: 4px; }
+
+    /* Chips flotantes */
+    .floating-chip {
+      position: absolute;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 20px;
+      font-weight: 800;
+      font-size: 14px;
+      white-space: nowrap;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+      animation: floatAnim 4s ease-in-out infinite;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chip-streak { top: 25%; left: 5%; animation-delay: 0s; color: #f97316; }
+    .chip-xp     { top: 60%; right: 4%; animation-delay: 1.5s; color: #f59e0b; }
+    .chip-level  { top: 35%; right: 6%; animation-delay: 0.8s; color: #22c55e; }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 100px 64px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .features-heading {
+      text-align: center;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 64px;
+    }
+    .features-heading span { color: #818cf8; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 36px 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      transition: all 250ms ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(79,70,229,0.4);
+      box-shadow: 0 24px 64px rgba(79,70,229,0.15);
+    }
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+    .feature-icon.purple { background: rgba(79,70,229,0.15); color: #818cf8; }
+    .feature-icon.orange { background: rgba(249,115,22,0.15); color: #f97316; }
+    .feature-icon.green  { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .feature-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .feature-desc { font-size: 15px; color: var(--muted); line-height: 1.65; }
+
+    /* ── CTA ── */
+    .cta {
+      text-align: center;
+      padding: 100px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(79,70,229,0.2) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .cta h2 {
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+    }
+    .cta p { font-size: 18px; color: var(--muted); margin-bottom: 40px; }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50%       { transform: translateY(-12px) rotate(1deg); }
+    }
+
+    @media (max-width: 900px) {
+      .nav { padding: 16px 24px; }
+      .features { padding: 60px 24px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .floating-chip { display: none; }
+    }
+    @media (max-width: 640px) {
+      .nav-actions .btn-ghost { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-logo">
+      <i class="fa-solid fa-square-root-variable"></i>
+      Math<span>Go</span>
+    </div>
+    <nav class="nav-actions">
+      <a href="./html/loginpage.html" class="btn btn-ghost" id="nav-login">
+        <i class="fa-solid fa-right-to-bracket"></i> Ingresar
+      </a>
+      <a href="./html/signup.html" class="btn btn-primary" id="nav-signup">
+        Comenzar gratis <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+
+    <!-- Chips decorativos -->
+    <div class="floating-chip chip-streak">
+      <i class="fa-solid fa-fire"></i> 7 días de racha
+    </div>
+    <div class="floating-chip chip-xp">
+      <i class="fa-solid fa-bolt"></i> +50 XP ganados
+    </div>
+    <div class="floating-chip chip-level">
+      <i class="fa-solid fa-unlock"></i> Mundo desbloqueado
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fa-solid fa-star"></i> Plataforma educativa para álgebra
+      </div>
+      <h1>
+        Domina el álgebra<br>
+        <span class="accent">jugando cada día</span>
+      </h1>
+      <p class="hero-sub">
+        Aprende con lecciones cortas, gana XP, desbloquea mundos
+        y compite en ligas semanales. El método más efectivo para
+        aprender álgebra en serio.
+      </p>
+      <div class="hero-actions">
+        <a href="./html/signup.html" class="btn btn-success" id="hero-cta">
+          <i class="fa-solid fa-rocket"></i> ¡Empezar ahora — es gratis!
+        </a>
+        <a href="./html/loginpage.html" class="btn btn-ghost">Ya tengo cuenta</a>
       </div>
 
-      <!-- Hero Section -->
-      <div class="header-logging">
-        <div class="left-logging-header" id="left-logging-header">
-          <img src="./assets/images/duo-logo.png" alt="Math learning" style="max-width: 100%; height: auto;" />
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">6</div>
+          <div class="hero-stat-label">Mundos de álgebra</div>
         </div>
-        <div class="right-logging-header">
-          <h1 id="header-text"></h1>
-          <p class="hero-subtitle" id="hero-subtitle"></p>
-          <div class="right-logging-button-section">
-            <div class="get-started-btn-div">
-              <button class="logging-get-started-button button-div" onclick="signupButtonAnimation();" id="get-started-button">
-                <span id="get-started-text"></span>
-              </button>
-            </div>
-            <div class="already-have-account-btn-div">
-              <button class="logging-already-have-account-button button-div" onclick="alreadyAccountButtonAnimation();" id="already-have-account-button">
-                <span id="already-have-account-text"></span>
-              </button>
-            </div>
-          </div>
-          <p class="hero-stat" id="hero-stat"></p>
+        <div class="hero-stat">
+          <div class="hero-stat-value">24+</div>
+          <div class="hero-stat-label">Niveles únicos</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">∞</div>
+          <div class="hero-stat-label">Práctica adaptativa</div>
         </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <!-- Secciones de características con imágenes estáticas -->
-    <section class="duolingo-features">
-      <!-- Feature 1: Aprende haciendo -->
-      <section class="feature-class features-column">
-        <div class="duolingo-features-text">
-          <h2 class="duolingo-features-text-head" id="feature-head-1"></h2>
-          <p class="duolingo-features-text-body">
-            <span id="feature-body-1"></span>
-          </p>
+  <section class="features">
+    <h2 class="features-heading">Por qué funciona <span>MathGo</span></h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon purple">
+          <i class="fa-solid fa-gamepad"></i>
         </div>
-        <div class="duolingo-feature-animation">
-          <img src="./assets/images/math-learning.png" alt="Aprende haciendo" style="width: 100%; height: auto; border-radius: 20px;" />
+        <h3 class="feature-title">Aprende haciendo</h3>
+        <p class="feature-desc">
+          Cada concepto se practica con ejercicios interactivos.
+          No memorices fórmulas — resuelve problemas reales con
+          retroalimentación instantánea.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange">
+          <i class="fa-solid fa-fire"></i>
         </div>
-      </section>
-      
-      <!-- Feature 3: Aprendizaje personalizado -->
-      <section class="feature-class features-column-reverse">
-        <div class="duolingo-feature-animation">
-          <img src="./assets/images/math-personalized.png" alt="Aprendizaje personalizado" style="width: 100%; height: auto; border-radius: 20px;" />
+        <h3 class="feature-title">Rachas motivadoras</h3>
+        <p class="feature-desc">
+          El sistema de racha diaria te mantiene constante.
+          Gana XP, desbloquea mundos y sube de liga.
+          La consistencia es la clave del aprendizaje.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">
+          <i class="fa-solid fa-chart-line"></i>
         </div>
-        <div class="duolingo-features-text">
-          <h2 class="duolingo-features-text-head" id="feature-head-3"></h2>
-          <p class="duolingo-features-text-body">
-            <span id="feature-body-3"></span>
-          </p>
-        </div>
-      </section>
-      <!-- Feature 2: Mantén la motivación -->
-      <section class="feature-class features-column">
-        <div class="duolingo-features-text">
-          <h2 class="duolingo-features-text-head" id="feature-head-2"></h2>
-          <p class="duolingo-features-text-body">
-            <span id="feature-body-2"></span>
-          </p>
-        </div>
-        <div class="duolingo-feature-animation">
-          <img src="./assets/images/math-motivation.png" alt="Mantén la motivación" style="width: 100%; height: auto; border-radius: 20px;" />
-        </div>
-      </section>
+        <h3 class="feature-title">Progreso real</h3>
+        <p class="feature-desc">
+          Dashboard académico con estadísticas detalladas.
+          Ve exactamente dónde mejorar, qué temas dominas
+          y cómo evolucionas semana a semana.
+        </p>
+      </div>
+    </div>
+  </section>
 
-    </section>
+  <section class="cta">
+    <h2>¿Listo para comenzar?</h2>
+    <p>Únete y empieza tu primer mundo hoy mismo.</p>
+    <a href="./html/signup.html" class="btn btn-success">
+      <i class="fa-solid fa-user-plus"></i> Crear mi cuenta gratuita
+    </a>
+  </section>
 
-  </body>
-  <script src="./js/pointerpage.js"></script>
-  <script src="./js/landingpage.js"></script>
-  
-  <!-- Script principal con funciones de navegación y Firebase -->
+  <footer>
+    <p><i class="fa-solid fa-square-root-variable"></i> © 2024 MathGo · Plataforma educativa de álgebra</p>
+  </footer>
+
   <script type="module">
-    // Importar Firebase
     import { auth } from './js/firebaseConfig.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    
-    // Definir funciones globales para los botones
-    window.signupButtonAnimation = function() {
-      window.location.href = './html/signup.html';
-    };
-    
-    window.alreadyAccountButtonAnimation = function() {
-      window.location.href = './html/loginpage.html';
-    };
-    
-    // Función para cargar el contenido del JSON
-    window.setIndexSiteLanguage = function(jsonPath, language) {
-      fetch(jsonPath)
-        .then(response => response.json())
-        .then(data => {
-          if (document.getElementById('header-text')) 
-            document.getElementById('header-text').innerText = data['header-text'];
-          if (document.getElementById('hero-subtitle')) 
-            document.getElementById('hero-subtitle').innerText = data['hero-subtitle'];
-          if (document.getElementById('get-started-text')) 
-            document.getElementById('get-started-text').innerText = data['get-started-text'];
-          if (document.getElementById('bottom-get-started-text')) 
-            document.getElementById('bottom-get-started-text').innerText = data['bottom-get-started-text'];
-          if (document.getElementById('already-have-account-text')) 
-            document.getElementById('already-have-account-text').innerText = data['already-have-account-text'];
-          if (document.getElementById('feature-head-1')) 
-            document.getElementById('feature-head-1').innerText = data['feature-head-1'];
-          if (document.getElementById('feature-body-1')) 
-            document.getElementById('feature-body-1').innerText = data['feature-body-1'];
-          if (document.getElementById('feature-head-2')) 
-            document.getElementById('feature-head-2').innerText = data['feature-head-2'];
-          if (document.getElementById('feature-body-2')) 
-            document.getElementById('feature-body-2').innerText = data['feature-body-2'];
-          if (document.getElementById('feature-head-3')) 
-            document.getElementById('feature-head-3').innerText = data['feature-head-3'];
-          if (document.getElementById('feature-body-3')) 
-            document.getElementById('feature-body-3').innerText = data['feature-body-3'];
-          if (document.getElementById('float-heading')) 
-            document.getElementById('float-heading').innerText = data['float-heading'];
-          if (document.getElementById('hero-stat')) 
-            document.getElementById('hero-stat').innerText = data['hero-stat'];
-          if (document.getElementById('site-language')) 
-            document.getElementById('site-language').innerText = data['site-language'];
-        })
-        .catch(error => console.error('Error cargando JSON:', error));
-    };
-    
-    // Verificar si el usuario ya está logueado
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Usuario ya tiene sesión, redirigir a la página de aprendizaje
-        window.location.href = './html/learn.html';
-      }
+      if (user && user.emailVerified) window.location.replace('./html/learn.html');
     });
-    
-    // Cargar contenido por defecto (español)
-    window.setIndexSiteLanguage('./assets/JSON/landing-spanish.json', 'spanish');
   </script>
-
-
-<!-- End of scripts -->
-  
-  <!-- Lottie para animaciones (opcional) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
+</body>
 </html>

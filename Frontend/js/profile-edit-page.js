@@ -1,107 +1,123 @@
-import { db, app } from './firebaseConfig.js';
-import { doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { app } from './firebaseConfig.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
+import { getProfile, updateProfile } from './services/api.js';
+import { requireAuth, getInitials, showToast } from './services/auth.js';
+import { initSidebar } from './components/sidebar.js';
 
 const storage = getStorage(app);
+let currentUser = null;
+let currentAvatarUrl = "";
 
-let userInfo = JSON.parse(localStorage.getItem('mathgo_user')) || JSON.parse(sessionStorage.getItem('user-info')) || { uid: "temp" };
-const userId = userInfo.uid || userInfo.userId;
-console.log(userId);
-const userDocRef = doc(db, 'users', userId);
+async function load(user) {
+  currentUser = user;
+  
+  // Iniciar sidebar dinámico
+  await initSidebar('profile');
 
-const imageInput = document.getElementById("choose-file-input");
+  // Obtener datos del perfil actual desde el backend
+  const { data: profile, error } = await getProfile();
+  if (error) {
+    showToast(error, 'error');
+    return;
+  }
 
-const updateProfile = async () => {
-    console.log("Reached Update Profile");
+  if (profile) {
+    document.getElementById('name').value = profile.name || '';
+    document.getElementById('email').value = profile.email || '';
+    currentAvatarUrl = profile.avatarUrl || '';
 
-    const file = imageInput.files[0];
-    const changedName = document.getElementById('name').value;
-
-    try {
-        if (file) {
-            // If a file is uploaded, update profile picture in Firebase Storage
-            const storageRef = ref(storage, `profile_images/${userId}/${file.name}`);
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
-
-            // Update user data in sessionStorage with profile picture URL
-            sessionStorage.setItem('user-info', JSON.stringify({
-                    ...userInfo,
-                    name: changedName,
-                    profileImage: downloadURL,
-            }));
-
-            // Update the user's document with the new profile picture URL
-            await updateDoc(userDocRef, {
-                profileImage: downloadURL,
-                name: changedName,
-            });
-        } else {
-            // If no file is uploaded, update user document with only text information
-            sessionStorage.setItem('user-info', JSON.stringify({
-                    ...userInfo,
-                    name: changedName
-            }));
-
-            await updateDoc(userDocRef, {
-                name: changedName,
-            });
-        }
-
-        // Redirect to the profile page
-        redirectToProfilePage();
-    } catch (error) {
-
-        document.getElementById('save-changes-span').classList.toggle('hidden');
-        document.getElementById('loading-balls-container').classList.toggle('hidden');
-
-        console.error("Error during profile update:", error);
+    const initials = getInitials(profile.name || profile.email);
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarPreview) {
+      if (profile.avatarUrl) {
+        avatarPreview.innerHTML = `<img src="${profile.avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`;
+      } else {
+        avatarPreview.textContent = initials;
+      }
     }
-};
+  }
+}
 
-const redirectToProfilePage = () => {
-    window.location.href = "../html/profile-page.html";
-};
+// Escuchar cambios en el input de imagen
+document.getElementById('choose-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const fileNameSpan = document.getElementById('selected-file-name');
+  const avatarPreview = document.getElementById('avatar-preview');
 
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    document.getElementById('name').value = userInfo.name;
-    document.getElementById('email').value = userInfo.email;
-
-    // document.getElementById("save-changes").onclick = updateProfile;
-    document.getElementById("choose-file-input").onchange = updateFileName;
-    document.getElementById("go-back").onclick = goBackButtonAnimation;
-    document.getElementById("save-changes").onclick = saveChangesButtonAnimation;
-
-    updateLeftProfileImage();
+  if (file) {
+    fileNameSpan.textContent = file.name;
+    
+    // Crear preview local
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      avatarPreview.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    fileNameSpan.textContent = 'Ningún archivo seleccionado';
+  }
 });
 
-const updateFileName = () => {
+// Guardar cambios
+document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-    let fileInput = document.getElementById("choose-file-input");
-    let fileNameDiv = document.getElementById("selected-file-name");
+  const fileInput = document.getElementById('choose-file-input');
+  const file = fileInput.files[0];
+  const nameVal = document.getElementById('name').value.trim();
 
-    fileNameDiv.textContent = fileInput.files[0].name;
-}
+  if (!nameVal) {
+    showToast('El nombre es obligatorio', 'error');
+    return;
+  }
 
-const updateLeftProfileImage = () => {
-    const leftProfileImage = document.getElementById('left-profile-image');
+  // Activar spinner y desactivar botones
+  document.getElementById('save-changes-span').style.display = 'none';
+  document.getElementById('save-spinner').style.display = 'block';
+  document.getElementById('save-changes').disabled = true;
+  document.getElementById('go-back').disabled = true;
 
-    leftProfileImage.src = userInfo.profileImage;
-}
+  try {
+    let finalAvatarUrl = currentAvatarUrl;
 
-const saveChangesButtonAnimation = () => {
-    document.getElementById("save-changes").classList.toggle('clicked');
-    setTimeout(() => document.getElementById("save-changes").classList.toggle('clicked'), 300);
-    
-    document.getElementById('save-changes-span').classList.toggle('hidden');
-    document.getElementById('loading-balls-container').classList.toggle('hidden');
-    updateProfile();
-}
+    if (file) {
+      // Subir archivo a Firebase Storage
+      const storageRef = ref(storage, `profile_images/${currentUser.uid}/${file.name}`);
+      await uploadBytes(storageRef, file);
+      finalAvatarUrl = await getDownloadURL(storageRef);
+    }
 
-const goBackButtonAnimation = () => {
-    document.getElementById("go-back").classList.toggle('clicked');
-    setTimeout(() => document.getElementById("go-back").classList.toggle('clicked'), 300)
-    window.location.href = "../html/profile-page.html";
-}
+    // Actualizar perfil a través del backend C#
+    const { data: updated, error } = await updateProfile({
+      name: nameVal,
+      avatarUrl: finalAvatarUrl
+    });
+
+    if (error) {
+      showToast(error, 'error');
+    } else {
+      showToast('Perfil actualizado correctamente', 'success');
+      setTimeout(() => {
+        window.location.href = './profile-page.html';
+      }, 1000);
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error al actualizar el perfil.', 'error');
+  }
+
+  // Restaurar estado de los botones si falló
+  document.getElementById('save-changes-span').style.display = 'inline';
+  document.getElementById('save-spinner').style.display = 'none';
+  document.getElementById('save-changes').disabled = false;
+  document.getElementById('go-back').disabled = false;
+});
+
+// Botón Volver
+document.getElementById('go-back').addEventListener('click', () => {
+  window.location.href = './profile-page.html';
+});
+
+// Arrancar validando sesión
+requireAuth(false).then(user => load(user));

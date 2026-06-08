@@ -1,249 +1,217 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MathGo - Liga de Álgebra</title>
-    <link rel="icon" href="../assets/images/favicon.ico" />
-    <link rel="stylesheet" href="../css/learn.css" />
-    <link rel="stylesheet" href="../css/mathgo-mockup-theme.css" />
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/leaderboard.css" />
-    <link rel="stylesheet" href="../css/mathgo-redesign.css" />
-    <link rel="stylesheet" href="../css/frontend-polish.css?v=sidebar-deep-fix" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Liga de Álgebra</title>
+  <meta name="description" content="Leaderboard de MathGo. Compite en la Liga de Algebra y sube de posicion." />
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* Podio top 3 */
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 16px;
+      padding: 32px 0 0;
+      margin-bottom: var(--mg-space-6);
+    }
+    .podium-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .podium-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 900;
+      font-size: 20px;
+      color: #fff;
+    }
+    .podium-slot:nth-child(1) .podium-avatar { /* 2do puesto */
+      width: 60px; height: 60px; font-size: 18px;
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+    }
+    .podium-slot:nth-child(2) .podium-avatar { /* 1er puesto */
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 8px 32px rgba(245,158,11,0.35);
+    }
+    .podium-slot:nth-child(3) .podium-avatar { /* 3er puesto */
+      width: 56px; height: 56px; font-size: 16px;
+      background: linear-gradient(135deg, #f97316, #c2410c);
+    }
+    .podium-block {
+      border-radius: 12px 12px 0 0;
+      width: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 12px;
+      font-size: 24px;
+    }
+    .podium-slot:nth-child(1) .podium-block { height: 70px;  background: linear-gradient(180deg,#c0c9d9,#94a3b8); }
+    .podium-slot:nth-child(2) .podium-block { height: 100px; background: linear-gradient(180deg,#fcd34d,#f59e0b); }
+    .podium-slot:nth-child(3) .podium-block { height: 55px;  background: linear-gradient(180deg,#fdba74,#f97316); }
+    .podium-name { font-size: 13px; font-weight: 900; color: var(--mg-text); text-align: center; max-width: 90px; }
+    .podium-xp { font-size: 12px; font-weight: 700; color: var(--mg-muted); }
+
+    /* Header de liga */
+    .league-header {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      border-radius: var(--mg-radius-xl);
+      padding: 28px 32px;
+      color: #fff;
+      margin-bottom: var(--mg-space-6);
+      box-shadow: 0 16px 48px rgba(124,58,237,0.25);
+      text-align: center;
+    }
+    .league-header h1 { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
+    .league-header p { opacity: 0.85; font-size: 15px; margin-top: 6px; }
+    .lb-section-title {
+      font-size: 14px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--mg-muted); margin: 20px 0 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+  </style>
 </head>
-  <body>
-    <div class="main-container">
-      <!------------------------------------- Left Sidebar ------------------------------------------------>
-            <aside class="mockup-sidebar">
-        <div class="brand">
-          <div class="brand-mark">M</div>
-          <div class="brand-name">Math<span>Go</span></div>
-        </div>
+<body>
 
-        <nav class="mockup-nav" aria-label="Navegación principal">
-        <a href="../html/learn.html">
-          <span>🏠</span>
-          Aprender
-        </a>
+  <div class="mg-layout-2col" id="mg-layout">
+    <!-- Sidebar inyectado -->
 
-        <a href="../html/leaderboard.html" class="active" aria-current="page">
-          <span>🏆</span>
-          Ligas
-        </a>
+    <main class="mg-main" id="mg-main">
 
-        <a href="../html/profile-page.html">
-          <span>👤</span>
-          Perfil
-        </a>
+      <!-- Header -->
+      <div class="league-header">
+        <div style="font-size:48px; margin-bottom:8px;"><i class="fa-solid fa-trophy" style="color:#fcd34d;"></i></div>
+        <h1>Liga de Álgebra</h1>
+        <p>Compite con otros estudiantes y sube de posición</p>
+      </div>
 
-        <a href="../html/shoppingpage.html">
-          <span>💎</span>
-          Tienda
-        </a>
-
-        <a href="../html/faq.html">
-          <span>❔</span>
-          Preguntas Frecuentes
-        </a>
-        </nav>
-
-        <div class="sidebar-footer">
-          <a onclick="window.cerrarSesion && window.cerrarSesion()" id="logout-button" style="cursor:pointer;">
-            ⛔ Cerrar sesión
-          </a>
-        </div>
-      </aside>
-      
-      <!------------------------------------- Content-Container ------------------------------------------------>
-      <div class="content-container">
-        <!----------------------------------- Right sidebar ------------------------------------------------>
-        <div class="right-sidebar">
-          <div class="right-sidebar-header">
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/lesson-xp.svg"
-                    alt="xp-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button fire-text" id="user-xp">0</span>
-              </span>
-            </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/gems-icon.svg"
-                    alt="gems-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button gem-text" id="user-gems">0</span>
-              </span>
-            </a>
-          </div>
-          
-          <div class="try-super-box">
-            <img
-              src="../assets/images/emocionado.png"
-              alt="math-learning"
-              id="try-super-image-two"
-            />
-            <div class="content-text">
-              <h2>🔥 Mantén tu racha</h2>
-              <div class="description">
-                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
-              </div>
-              <button id="streak-button" onclick="verRacha();">
-                Ver mi racha actual →
-              </button>
-            </div>
-          </div>
-          
-          <div class="try-super-box">
-            <div class="league-header-with-link">
-              <h2>🎯 Próximos objetivos</h2>
-              <h2><a href="./learn.html">Ver Todos →</a></h2>
-            </div>
-            <div class="league-header-with-link">
-              <div class="league-text-container">
-                <div class="description">
-                  🎯 Completar "Ecuaciones lineales" (3 lecciones restantes)<br>
-                  🎯 Ganar 200 XP hoy (llevas 120)<br>
-                  🎯 Mantener racha de 7 días (estás en 5)
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!----------------------------------- Scrollable area showing leaderboard ------------------------------------------------>
-        <div class="scrollable-lesson-div">
-          <div class="center-container">
-            <div class="center-container-firstdiv">
-              <div class="diffmedals">
-                <div class="medalsdiv" style="--offset: 0;">
-                  <div class="medaldiv">
-                    <img class="p9XXu" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/838ba65643baef4c8442317df514cab5.svg" alt="league-icon">
-                  </div>
-                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
-                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
-                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
-                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
-                  <img class="_14I3k" src="https://d35aaqx5ub95lt.cloudfront.net/images/leagues/1b4fb092de75e4ecefd8e92f10b4ddd2.svg" alt="medal">
-                </div>
-              </div>
-              <div class="_250dJ">Liga de Álgebra</div>
-              <div class="_2Xv_D"></div>
-              <hr class="_3cgRx">
-            </div>
-            <div class="centre-container-secdiv" id="centre-container-secdiv">
-              <!-- Aquí se cargarán los datos del leaderboard dinámicamente -->
-            </div>
+      <!-- Podio -->
+      <div class="mg-card" style="padding: 0 24px 24px; overflow: hidden;">
+        <div class="podium" id="podium">
+          <!-- Top 3 se inyecta via JS -->
+          <div style="display:flex;align-items:flex-end;justify-content:center;gap:16px;width:100%;padding:24px 0;">
+            <div class="mg-skeleton" style="width:80px;height:130px;border-radius:12px;"></div>
+            <div class="mg-skeleton" style="width:80px;height:160px;border-radius:12px;"></div>
+            <div class="mg-skeleton" style="width:80px;height:110px;border-radius:12px;"></div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Bottom navigation para móvil -->
-    <div class="sidebar-buttons bottom-nav">
-      <a href="learn.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
-          </div>
-        </span>
-      </a>
-      <a href="leaderboard.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap selected">
-          <div class="icon-in-button">
-            <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
-          </div>
-        </span>
-      </a>
-      <a href="profile-page.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img
-              id="profile-image-bottom"
-              src="../assets/svg/profile-image-temp.svg"
-              alt="profile-icon"
-              class="profile"
-            />
-          </div>
-        </span>
-      </a>
-      <a href="./shoppingpage.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
-          </div>
-        </span>
-      </a>
-      <a href="./faq.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
-          </div>
-        </span>
-      </a>
-    </div>
-    
-    <div class="loading-screen hidden">
-      <div class="text-animation-container">
-        <div class="lesson-loading-svg" id="owl-walk-animation"></div>
-        <span>Did You Know: El álgebra viene de la palabra árabe "al-jabr" que significa "reintegración" o "completamiento".</span>
-      </div>
-    </div>
 
-    <script type="module" src="../js/leaderboard.js"></script>
-    <script type="module">
-      import { auth, db } from '../js/firebaseConfig.js';
-      import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-      import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-      
-      // Función para cerrar sesión
-      window.cerrarSesion = async function() {
-        try {
-          await signOut(auth);
-          localStorage.removeItem('mathgo_user');
-          window.location.href = '../index.html';
-        } catch (error) {
-          console.error('Error al cerrar sesión:', error);
-          alert('Error al cerrar sesión: ' + error.message);
-        }
-      };
-      
-      // Función para ver racha
-      window.verRacha = function() {
-        alert("🔥 Tu racha actual: 5 días!\n\nSigue así para desbloquear logros especiales.");
-      };
-      
-      // Cargar datos del usuario (XP y Gemas)
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          window.location.href = '../index.html';
-        } else {
-          console.log('Usuario logueado:', user.email);
-          
-          // Cargar XP y Gemas desde Firestore
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              document.getElementById('user-xp').textContent = userData.totalXp || 0;
-              document.getElementById('user-gems').textContent = userData.gems || 0;
-            }
-          } catch (error) {
-            console.error('Error cargando datos:', error);
-          }
-        }
-      });
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.7/lottie.min.js"></script>
-      <script src="../js/frontend-ui-fixes.js"></script>
-  </body>
+      <!-- Clasificacion -->
+      <div class="lb-section-title">
+        <i class="fa-solid fa-list-ol"></i> Clasificación completa
+      </div>
+      <div id="leaderboard-list">
+        <div class="mg-skeleton" style="height:64px; border-radius:14px; margin-bottom:8px;"></div>
+        <div class="mg-skeleton" style="height:64px; border-radius:14px; margin-bottom:8px;"></div>
+        <div class="mg-skeleton" style="height:64px; border-radius:14px; margin-bottom:8px;"></div>
+        <div class="mg-skeleton" style="height:64px; border-radius:14px; margin-bottom:8px;"></div>
+        <div class="mg-skeleton" style="height:64px; border-radius:14px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { getLeaderboard } from '../js/services/api.js';
+
+    const MEDALS = ['🥇', '🥈', '🥉'];
+    const LEAGUES = ['Bronce', 'Plata', 'Oro', 'Diamante', 'Maestro'];
+
+    function getLeague(xp) {
+      if (xp < 500) return LEAGUES[0];
+      if (xp < 1500) return LEAGUES[1];
+      if (xp < 4000) return LEAGUES[2];
+      if (xp < 10000) return LEAGUES[3];
+      return LEAGUES[4];
+    }
+
+    function renderPodium(top3, currentUid) {
+      const podium = document.getElementById('podium');
+      if (!top3 || top3.length < 2) { podium.style.display = 'none'; return; }
+
+      // Orden visual: 2do, 1ro, 3ro
+      const ordered = [top3[1], top3[0], top3[2]].filter(Boolean);
+
+      podium.innerHTML = ordered.map((u, vi) => {
+        const rank = vi === 1 ? 1 : vi === 0 ? 2 : 3;
+        const heights = [70, 100, 55];
+        const isMe = u.uid === currentUid;
+        return `
+          <div class="podium-slot">
+            <div class="podium-avatar" style="${isMe ? 'border: 3px solid #fff;' : ''}">
+              ${getInitials(u.name || u.displayName || u.email || '?')}
+            </div>
+            <div class="podium-name">${u.name || u.displayName || 'Usuario'} ${isMe ? '(Tú)' : ''}</div>
+            <div class="podium-xp">⚡ ${u.xpTotal ?? u.totalXp ?? 0} XP</div>
+            <div class="podium-block" style="height:${heights[vi]}px;">${MEDALS[rank-1]}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderList(users, currentUid) {
+      const list = document.getElementById('leaderboard-list');
+      if (!users?.length) {
+        list.innerHTML = `<div class="mg-empty">
+          <div class="mg-empty-icon">🏆</div>
+          <div class="mg-empty-title">Sin datos de clasificación</div>
+          <div class="mg-empty-text">El leaderboard se irá poblando a medida que los usuarios practiquen.</div>
+        </div>`;
+        return;
+      }
+
+      list.innerHTML = users.slice(3).map((u, i) => {
+        const rank = i + 4;
+        const xp = u.xpTotal ?? u.totalXp ?? 0;
+        const isMe = u.uid === currentUid;
+        return `
+          <div class="mg-lb-row ${isMe ? 'me' : ''}" tabindex="0">
+            <span class="mg-lb-rank">${rank}</span>
+            <div class="mg-avatar" style="width:40px;height:40px;font-size:14px;">
+              ${getInitials(u.name || u.email || '?')}
+            </div>
+            <div>
+              <div class="mg-lb-name">${u.name || 'Usuario'} ${isMe ? '<span class="mg-badge mg-badge-primary" style="margin-left:6px;">Tú</span>' : ''}</div>
+              <div class="mg-lb-league">${getLeague(xp)}</div>
+            </div>
+            <div class="mg-lb-xp">⚡ ${xp}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function load(user) {
+      await initSidebar('leaderboard');
+
+      const { data: leaders, error } = await getLeaderboard(20);
+
+      if (error || !leaders) {
+        showToast('No se pudo cargar el ranking. Intenta más tarde.', 'error');
+        document.getElementById('podium').innerHTML = `<div class="mg-empty" style="padding:24px;">
+          <div class="mg-empty-icon">📡</div>
+          <div class="mg-empty-text">Sin conexión con el servidor</div>
+        </div>`;
+        document.getElementById('leaderboard-list').innerHTML = '';
+        return;
+      }
+
+      renderPodium(leaders.slice(0, 3), user.uid);
+      renderList(leaders, user.uid);
+    }
+
+    requireAuth(false).then(user => load(user));
+  </script>
+</body>
 </html>

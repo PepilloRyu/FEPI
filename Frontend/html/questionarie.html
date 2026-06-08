@@ -46,7 +46,7 @@
                   id="skip-button"
                   onclick="skipButton(this.id)"
                 >
-                  <span id="skip-span">Skip</span>
+                  <span id="skip-span">Saltar</span>
                 </button>
               </div>
               <div class="correct-left" id="correct-left" style="display: none">
@@ -58,7 +58,7 @@
                     />
                   </div>
                   <div class="correct-text">
-                    <h2>Good job!</h2>
+                    <h2>¡Buen trabajo!</h2>
                   </div>
                 </div>
               </div>
@@ -71,7 +71,7 @@
                     />
                   </div>
                   <div class="wrong-text">
-                    <h2>Correct Solution:</h2>
+                    <h2>Solución correcta:</h2>
                     <div class="solution-text">Correct Answer</div>
                   </div>
                 </div>
@@ -82,7 +82,7 @@
                   id="check-button"
                   onclick="checkButton(this.id)"
                 >
-                  <span id="continue-button">Check</span>
+                  <span id="continue-button">Comprobar</span>
                 </button>
               </div>
             </div>
@@ -97,10 +97,9 @@
             <div class="exit-image">
               <img src="../assets/svg/exit-image.svg" />
             </div>
-            <span class="exit-text-head">Wait, don’t go!</span>
+            <span class="exit-text-head">¡Espera, no te vayas!</span>
             <span class="exit-text-description"
-              >You’re right on track! If you quit now, you’ll lose your
-              progress.</span
+              >¡Vas por buen camino! Si sales ahora perderás tu progreso en esta sesión.</span
             >
             <div
               class="keep-learning-button-outer-active"
@@ -111,11 +110,11 @@
                 id="keep-learning-button"
                 onclick="revertQuestionScreen()"
               >
-                <span id="keep-learning">KEEP LEARNING</span>
+                <span id="keep-learning">SEGUIR APRENDIENDO</span>
               </button>
             </div>
             <button class="end-question-session" onclick="exitToLearn()">
-              <span>END SESSION</span>
+              <span>FINALIZAR SESIÓN</span>
             </button>
           </div>
         </div>
@@ -124,15 +123,15 @@
     <div class="shop-overlay" style="display: none">
       <div class="exit-box">
         <div class="exit-box-contents">
-          <div class="gem-head-popup">
+          <div class="gem-head-popup" style="display: none;">
             <div class="gem-count-div">
               <img class="gem-img" src="../assets/svg/gems-icon.svg" />
               <span id="gem-count-text"></span>
             </div>
           </div>
-          <span class="exit-text-head">You ran out of hearts!!</span>
+          <span class="exit-text-head">¡Te has quedado sin vidas!</span>
           <span class="exit-text-description"
-            >Get Super for Unlimited Hearts, or use gems to buy hearts.</span
+            >Puedes recargar tus vidas gratis para continuar tu práctica de pruebas.</span
           >
           <div class="keep-learning-button-outer-active" id="check-button-div">
             <button
@@ -140,11 +139,11 @@
               id="keep-learning-button"
               onclick="goToShop()"
             >
-              <span id="keep-learning">GO TO SHOP</span>
+              <span id="keep-learning">RECARGAR VIDAS</span>
             </button>
           </div>
           <button class="end-question-session" onclick="exitToLearn()">
-            <span>END SESSION</span>
+            <span>FINALIZAR SESIÓN</span>
           </button>
         </div>
       </div>

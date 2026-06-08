@@ -16,4 +16,7 @@ public interface IAuthService
 
     /// <summary>Revoca los refresh tokens del usuario (logout server-side).</summary>
     Task RevokeRefreshTokensAsync(string uid);
+
+    /// <summary>Genera un enlace de recuperación de contraseña y lo envía.</summary>
+    Task ForgotPasswordAsync(string email);
 }

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Mi Progreso</title>
+  <meta name="description" content="Dashboard academico de MathGo. Ve tu nivel, XP, estadisticas y misiones." />
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    .dash-welcome {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 32px;
+      background: linear-gradient(135deg, var(--mg-primary) 0%, var(--mg-secondary) 100%);
+      border-radius: var(--mg-radius-xl);
+      color: #fff;
+      margin-bottom: var(--mg-space-6);
+      box-shadow: 0 16px 48px var(--mg-primary-glow);
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-welcome::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -5%;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+    }
+    .dash-welcome-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 3px solid rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .dash-welcome h2 { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+    .dash-welcome p { opacity: 0.85; font-size: 15px; }
+
+    /* XP Progress ring */
+    .xp-ring-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .xp-ring {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(var(--mg-primary) 0%, var(--mg-border) 0%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: var(--mg-shadow-md);
+      transition: background 800ms ease;
+    }
+    .xp-ring-inner {
+      width: 108px;
+      height: 108px;
+      border-radius: 50%;
+      background: var(--mg-surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .xp-ring-value { font-size: 28px; font-weight: 900; color: var(--mg-primary); letter-spacing: -0.04em; }
+    .xp-ring-label { font-size: 11px; font-weight: 800; color: var(--mg-muted); text-transform: uppercase; }
+
+    /* Actividad semanal */
+    .activity-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 80px;
+      padding-top: 8px;
+    }
+    .activity-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .activity-bar {
+      width: 100%;
+      border-radius: 8px 8px 0 0;
+      background: var(--mg-primary);
+      opacity: 0.7;
+      transition: height 600ms cubic-bezier(0.4,0,0.2,1), opacity 200ms;
+      min-height: 4px;
+    }
+    .activity-bar.today { opacity: 1; background: linear-gradient(180deg, var(--mg-primary), var(--mg-secondary)); }
+    .activity-bar-label { font-size: 11px; font-weight: 800; color: var(--mg-muted); }
+
+    .dash-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--mg-space-4);
+      margin-bottom: var(--mg-space-6);
+    }
+
+    .dash-streak-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+    .dash-streak-fire { font-size: 56px; animation: mgPulse 2s ease infinite; }
+    .dash-streak-num { font-size: 42px; font-weight: 900; color: var(--mg-streak); letter-spacing: -0.04em; }
+    .dash-streak-text { font-size: 13px; font-weight: 700; color: var(--mg-muted); }
+
+    .topic-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--mg-border-soft);
+    }
+    .topic-bar:last-child { border-bottom: none; }
+    .topic-name { font-size: 14px; font-weight: 700; color: var(--mg-text-2); min-width: 130px; }
+    .topic-progress { flex: 1; }
+    .topic-pct { font-size: 13px; font-weight: 800; color: var(--mg-muted); min-width: 36px; text-align: right; }
+  </style>
+</head>
+<body>
+
+  <div class="mg-layout" id="mg-layout">
+    <!-- Sidebar inyectado por JS -->
+
+    <main class="mg-main" id="mg-main">
+
+      <!-- Bienvenida personalizada -->
+      <div class="dash-welcome" id="dash-welcome">
+        <div class="dash-welcome-avatar" id="dash-avatar">?</div>
+        <div>
+          <h2 id="dash-greeting">¡Hola!</h2>
+          <p id="dash-subtitle">Cargando tu progreso...</p>
+        </div>
+      </div>
+
+      <!-- Metricas principales -->
+      <div class="mg-stats-grid mg-mb-6" id="main-stats">
+        <div class="mg-stat-box">
+          <div style="font-size:24px; color:var(--mg-xp); margin-bottom:6px;"><i class="fa-solid fa-bolt"></i></div>
+          <div class="mg-stat-value mg-text-xp" id="d-xp">–</div>
+          <div class="mg-stat-label">XP Total</div>
+        </div>
+        <div class="mg-stat-box">
+          <div style="font-size:24px; color:var(--mg-primary); margin-bottom:6px;"><i class="fa-solid fa-star"></i></div>
+          <div class="mg-stat-value mg-text-primary" id="d-level">–</div>
+          <div class="mg-stat-label">Nivel</div>
+        </div>
+        <div class="mg-stat-box">
+          <div style="font-size:24px; color:var(--mg-gems); margin-bottom:6px;"><i class="fa-solid fa-gem"></i></div>
+          <div class="mg-stat-value mg-text-gem" id="d-gems">–</div>
+          <div class="mg-stat-label">Gemas</div>
+        </div>
+        <div class="mg-stat-box">
+          <div style="font-size:24px; color:var(--mg-success); margin-bottom:6px;"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="mg-stat-value" id="d-accuracy" style="color: var(--mg-success);">–</div>
+          <div class="mg-stat-label">Precisión</div>
+        </div>
+      </div>
+
+      <div class="dash-grid-2">
+        <!-- XP Ring -->
+        <div class="mg-card" style="display:flex; align-items:center; justify-content:center; padding: 28px;">
+          <div class="xp-ring-container">
+            <div class="xp-ring" id="xp-ring">
+              <div class="xp-ring-inner">
+                <div class="xp-ring-value" id="xp-ring-val">0</div>
+                <div class="xp-ring-label">/ 1000 XP</div>
+              </div>
+            </div>
+            <div style="font-size:14px; font-weight:800; color: var(--mg-muted);">Progreso al siguiente nivel</div>
+          </div>
+        </div>
+
+        <!-- Racha -->
+        <div class="mg-card dash-streak-badge">
+          <div class="dash-streak-fire"><i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i></div>
+          <div class="dash-streak-num" id="d-streak">0</div>
+          <div class="dash-streak-text">días de racha</div>
+          <span class="mg-badge mg-badge-streak" id="d-streak-msg">¡Sigue así!</span>
+        </div>
+      </div>
+
+      <!-- Actividad semanal -->
+      <div class="mg-card mg-mb-6">
+        <h2 class="mg-card-title"><i class="fa-solid fa-calendar-days" style="color:var(--mg-primary);"></i> Actividad esta semana</h2>
+        <div class="activity-chart" id="activity-chart">
+          <!-- Se genera por JS -->
+        </div>
+      </div>
+
+      <!-- Progreso por tema -->
+      <div class="mg-card mg-mb-6">
+        <h2 class="mg-card-title"><i class="fa-solid fa-book-open" style="color:var(--mg-primary);"></i> Dominio por mundo</h2>
+        <div id="topics-list">
+          <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="width:90%;height:36px;"></div>
+          <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="width:90%;height:36px;"></div>
+          <div class="mg-skeleton mg-skeleton-text" style="width:90%;height:36px;"></div>
+        </div>
+      </div>
+
+      <!-- Misiones activas -->
+      <div class="mg-card">
+        <h2 class="mg-card-title"><i class="fa-solid fa-bullseye" style="color:var(--mg-primary);"></i> Misiones de hoy</h2>
+        <div id="dash-missions">
+          <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="height:60px;"></div>
+          <div class="mg-skeleton mg-skeleton-text" style="height:60px;"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Panel derecho -->
+    <aside class="mg-right">
+      <div class="mg-card mg-card-sm">
+        <h2 class="mg-card-title" style="margin-bottom:12px;">
+          <i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i> Tu racha
+        </h2>
+        <div style="text-align:center; padding: 16px 0;">
+          <div style="font-size:52px; color:var(--mg-streak); font-weight:900;" id="right-streak-num">–</div>
+          <div style="font-size:13px; color:var(--mg-muted); font-weight:700;">días consecutivos</div>
+        </div>
+        <div class="mg-progress" style="margin-top:8px;">
+          <div class="mg-progress-bar" id="right-streak-bar" style="width:0%; background: linear-gradient(90deg, var(--mg-streak), var(--mg-xp));"></div>
+        </div>
+        <div style="font-size:12px; color:var(--mg-muted); text-align:center; margin-top:6px;" id="right-streak-msg">¡Sigue así!</div>
+      </div>
+
+      <a href="learn.html" class="mg-btn mg-btn-success mg-btn-full" style="text-align:center; display:block;">
+        <i class="fa-solid fa-rocket"></i> Ir a aprender
+      </a>
+    </aside>
+  </div>
+
+  <script type="module">
+    import { requireAuth, getInitials, showToast, animateProgress } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { getDashboard, getMissions, getAnalytics } from '../js/services/api.js';
+    import { db } from '../js/firebaseConfig.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    const WORLD_NAMES = {
+      '1': 'Las Bases del Álgebra',
+      '2': 'Números Reales',
+      '3': 'Funciones Lineales',
+      '4': 'Funciones Cuadráticas',
+      '5': 'Matrices y Sistemas',
+      '6': 'Números Complejos',
+    };
+
+    const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+    function renderActivityChart(weeklyXp = []) {
+      const chart = document.getElementById('activity-chart');
+      const today = new Date().getDay();
+      const maxXp = Math.max(...weeklyXp, 50);
+
+      chart.innerHTML = weeklyXp.map((xp, i) => {
+        const h = Math.max(4, Math.round((xp / maxXp) * 72));
+        const isToday = i === today;
+        return `
+          <div class="activity-bar-wrap">
+            <div class="activity-bar ${isToday ? 'today' : ''}" style="height:${h}px;" title="${xp} XP"></div>
+            <span class="activity-bar-label">${DAYS[i]}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTopics(worldsData) {
+      const list = document.getElementById('topics-list');
+      const items = Object.entries(WORLD_NAMES).map(([id, name]) => {
+        const w = worldsData?.[id] ?? {};
+        const completed = (w.levelsCompleted ?? []).length;
+        const total = [3,5,4,4,4,4][parseInt(id)-1];
+        const pct = Math.round((completed / total) * 100);
+        return { name, pct, completed, total };
+      });
+
+      list.innerHTML = items.map(t => `
+        <div class="topic-bar">
+          <span class="topic-name">${t.name}</span>
+          <div class="topic-progress mg-progress">
+            <div class="mg-progress-bar success" style="width:${t.pct}%"></div>
+          </div>
+          <span class="topic-pct">${t.pct}%</span>
+        </div>
+      `).join('');
+    }
+
+    function renderMissions(missions) {
+      const container = document.getElementById('dash-missions');
+      if (!missions?.length) {
+        container.innerHTML = `<div class="mg-empty" style="padding:16px 0;">
+          <div class="mg-empty-icon" style="color:var(--mg-muted-2); font-size:32px;"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="mg-empty-text">No hay misiones activas hoy</div>
+        </div>`;
+        return;
+      }
+      container.innerHTML = missions.slice(0,3).map(m => `
+        <div class="mg-mission-item">
+          <div class="mg-mission-header">
+            <span class="mg-mission-title">${m.description || m.title}</span>
+            <span class="mg-mission-xp">+${m.xpReward ?? 0} XP</span>
+          </div>
+          <div class="mg-progress">
+            <div class="mg-progress-bar xp" style="width:${Math.min(100,(m.currentProgress/(m.targetProgress||1))*100)}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+function updateXpRing(xp, xpNeeded = 1000) {
+      const pct = Math.min(100, (xp % xpNeeded) / xpNeeded * 100);
+      const ring = document.getElementById('xp-ring');
+      if (ring) {
+        ring.style.background = `conic-gradient(var(--mg-primary) ${pct}%, var(--mg-border) 0%)`;
+      }
+      const val = document.getElementById('xp-ring-val');
+      if (val) val.textContent = xp % xpNeeded;
+    }
+
+    async function load(user) {
+      await initSidebar('dashboard');
+
+      const displayName = user.displayName || user.email?.split('@')[0] || 'Usuario';
+      document.getElementById('dash-avatar').textContent = getInitials(displayName);
+      
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? '¡Buenos días' : hour < 18 ? '¡Buenas tardes' : '¡Buenas noches';
+      document.getElementById('dash-greeting').textContent = `${greeting}, ${displayName.split(' ')[0]}!`;
+
+      // Cargar datos de Firestore (fallback local)
+      const [progressSnap, userSnap] = await Promise.allSettled([
+        getDoc(doc(db, 'mathgo_progress', user.uid)),
+        getDoc(doc(db, 'users', user.uid)),
+      ]);
+      const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
+      const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
+
+      const xp = progress.totalXp ?? userData.totalXp ?? 0;
+      const streak = progress.dailyStreak ?? userData.streak ?? 0;
+      const gems = progress.gems ?? userData.gems ?? 0;
+      
+      let totalCompleted = 0;
+      Object.values(progress.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
+      const level = totalCompleted + 1;
+
+      document.getElementById('d-xp').textContent = xp;
+      document.getElementById('d-level').textContent = level;
+      document.getElementById('d-gems').textContent = gems;
+      document.getElementById('d-streak').textContent = streak;
+
+      const streakMsg = streak >= 7 ? '¡En racha!' : streak >= 3 ? '¡Vas bien!' : '¡Comienza hoy!';
+      document.getElementById('d-streak-msg').textContent = streakMsg;
+      document.getElementById('dash-subtitle').textContent = `Nivel ${level} · ${xp} XP total · ${streak} días de racha`;
+
+      // Actualizar panel derecho con racha
+      const rightStreak = document.getElementById('right-streak-num');
+      if (rightStreak) rightStreak.textContent = streak;
+      const rightBar = document.getElementById('right-streak-bar');
+      if (rightBar) rightBar.style.width = `${Math.min(100, (streak / 30) * 100)}%`;
+      const rightMsg = document.getElementById('right-streak-msg');
+      if (rightMsg) rightMsg.textContent = streak >= 7 ? '¡En racha!' : streak >= 3 ? '¡Vas bien!' : '¡Comienza hoy!';
+
+      updateXpRing(xp);
+      renderTopics(progress.worlds);
+
+      // Intentar cargar analytics del backend
+      const { data: analytics } = await getAnalytics();
+      if (analytics) {
+        const acc = analytics.accuracyRate ?? analytics.accuracy;
+        if (acc !== undefined) document.getElementById('d-accuracy').textContent = `${Math.round(acc * 100)}%`;
+        if (analytics.weeklyXp) renderActivityChart(analytics.weeklyXp);
+        else renderActivityChart([0, 20, 45, 30, 0, 80, xp % 100]);
+      } else {
+        document.getElementById('d-accuracy').textContent = '–';
+        renderActivityChart([0, 20, 45, 30, 0, 80, xp % 100]);
+      }
+
+      // Misiones
+      const { data: missions } = await getMissions();
+      renderMissions(missions);
+    }
+
+    requireAuth(false).then(user => load(user));
+  </script>
+</body>
+</html>

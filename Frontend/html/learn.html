@@ -3,336 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MathGo</title>
+  <title>MathGo — Aprender</title>
+  <meta name="description" content="Elige tu mundo y comienza a aprender álgebra con MathGo." />
   <link rel="icon" href="../assets/images/favicon.ico" />
-  <link rel="stylesheet" href="../css/learn.css" />
-  <link rel="stylesheet" href="../css/mathgo-mockup-theme.css" />
-  <link rel="stylesheet" href="../css/frontend-polish.css?v=sidebar-deep-fix" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
 </head>
-
 <body>
-  <div class="mockup-layout">
 
-    <aside class="mockup-sidebar">
-      <div class="brand">
-        <div class="brand-mark">M</div>
-        <div class="brand-name">Math<span>Go</span></div>
+  <div class="mg-layout" id="mg-layout">
+    <!-- Sidebar inyectado por JS -->
+
+    <main class="mg-main" id="mg-main">
+      <!-- Stats bar -->
+      <div class="mg-stats-bar" id="stats-bar">
+        <div class="mg-stat-chip str">
+          <i class="fa-solid fa-fire"></i>
+          <strong id="stat-streak">–</strong> días
+        </div>
+        <div class="mg-stat-chip gem">
+          <i class="fa-solid fa-gem"></i>
+          <strong id="stat-gems">–</strong>
+        </div>
+        <div class="mg-stat-chip xp">
+          <i class="fa-solid fa-bolt"></i>
+          <strong id="stat-xp">–</strong> XP
+        </div>
       </div>
 
-      <nav class="mockup-nav" aria-label="Navegación principal">
-        <a href="../html/learn.html" class="active" aria-current="page">
-          <span>🏠</span>
-          Aprender
-        </a>
-
-        <a href="../html/profile-page.html">
-          <span>👤</span>
-          Perfil
-        </a>
-
-        <a href="../html/faq.html">
-          <span>❔</span>
-          Preguntas Frecuentes
-        </a>
-
-      </nav>
-
-      <div class="sidebar-footer">
-        <a onclick="cerrarSesion()" style="cursor:pointer;">
-          ⛔ Cerrar sesión
-        </a>
-      </div>
-    </aside>
-
-    <main class="main-content">
-
-      <div class="stats-bar">
-        <div class="stat-chip">🔥 <strong id="stat-streak">–</strong></div>
-        <div class="stat-chip">💎 <strong id="stat-gems">–</strong></div>
-        <div class="stat-chip xp">⚡ <strong id="stat-xp">– XP</strong></div>
+      <!-- Hero banner -->
+      <div class="mg-hero-banner mg-mb-6">
+        <small><i class="fa-solid fa-book-open"></i> Curso de Álgebra</small>
+        <h1>Elige tu mundo</h1>
       </div>
 
-      <section class="hero-banner">
-        <div>
-          <small>Curso de Álgebra</small>
-          <h1>Elige tu mundo</h1>
+      <!-- Mundos -->
+      <section>
+        <h2 class="mg-section-heading">
+          <i class="fa-solid fa-map" style="color:var(--mg-primary);"></i> Mapa de mundos
+        </h2>
+        <div class="mg-worlds-grid" id="worlds-grid">
+          <div class="mg-skeleton" style="height: 96px; border-radius: 18px;"></div>
+          <div class="mg-skeleton" style="height: 96px; border-radius: 18px;"></div>
+          <div class="mg-skeleton" style="height: 96px; border-radius: 18px;"></div>
         </div>
       </section>
-
-      <section class="worlds-grid">
-
-        <a href="world-1.html" class="world-card world-card--unlocked">
-          <div class="world-card__icon">📐</div>
-          <div class="world-card__body">
-            <div class="world-card__num">Mundo 1</div>
-            <h2 class="world-card__title">Las Bases del Álgebra</h2>
-            <p class="world-card__sub">Del pensamiento aritmético al algebraico</p>
-            <div class="world-card__levels">3 niveles</div>
-          </div>
-          <div class="world-card__arrow">→</div>
-        </a>
-
-        <a href="world-2.html" class="world-card world-card--locked">
-          <div class="world-card__icon">🔢</div>
-          <div class="world-card__body">
-            <div class="world-card__num">Mundo 2</div>
-            <h2 class="world-card__title">Números Reales</h2>
-            <p class="world-card__sub">Clasificación, propiedades y jerarquía</p>
-            <div class="world-card__levels">5 niveles</div>
-          </div>
-          <div class="world-card__arrow">🔒</div>
-        </a>
-
-        <a href="world-3.html" class="world-card world-card--locked" id="card-world-3">
-          <div class="world-card__icon">📈</div>
-          <div class="world-card__body">
-            <div class="world-card__num">Mundo 3</div>
-            <h2 class="world-card__title">Funciones y Ecuaciones Lineales</h2>
-            <p class="world-card__sub">Descifra el lenguaje de las relaciones entre variables</p>
-            <div class="world-card__levels">4 niveles</div>
-          </div>
-          <div class="world-card__arrow">🔒</div>
-        </a>
-
-        <a href="world-4.html" class="world-card world-card--locked" id="card-world-4">
-          <div class="world-card__icon">🪂</div>
-          <div class="world-card__body">
-            <div class="world-card__num">Mundo 4</div>
-            <h2 class="world-card__title">Funciones y Ecuaciones Cuadráticas</h2>
-            <p class="world-card__sub">Domina la curva que rige el universo</p>
-            <div class="world-card__levels">4 niveles</div>
-          </div>
-          <div class="world-card__arrow">🔒</div>
-        </a>
-
-        <a href="world-5.html" class="world-card world-card--locked" id="card-world-5">
-          <div class="world-card__icon">🔢</div>
-          <div class="world-card__body">
-            <div class="world-card__num">Mundo 5</div>
-            <h2 class="world-card__title">Matrices y Sistemas Avanzados</h2>
-            <p class="world-card__sub">Organiza el caos en filas y columnas</p>
-            <div class="world-card__levels">4 niveles</div>
-          </div>
-          <div class="world-card__arrow">🔒</div>
-        </a>
-
-        <a href="world-6.html" class="world-card world-card--locked" id="card-world-6">
-          <div class="world-card__icon">🌀</div>
-          <div class="world-card__body">
-            <div class="world-card__num">Mundo 6</div>
-            <h2 class="world-card__title">Números Complejos y Vectores</h2>
-            <p class="world-card__sub">Donde lo imaginario se vuelve real</p>
-            <div class="world-card__levels">4 niveles</div>
-          </div>
-          <div class="world-card__arrow">🔒</div>
-        </a>
-
-      </section>
-
     </main>
 
-    <aside class="right-panel">
-
-      <div class="profile-card">
-        <div class="avatar">CR</div>
-        <div>
-          <h3>Chrystian R.</h3>
-          <span id="stat-nivel">Nivel –</span>
+    <!-- Panel derecho -->
+    <aside class="mg-right" id="mg-right">
+      <div class="mg-profile-card" id="profile-card">
+        <div class="mg-avatar" id="right-avatar">?</div>
+        <div class="mg-profile-card-info">
+          <h3 id="right-name">Cargando...</h3>
+          <span id="right-level">Nivel –</span>
         </div>
       </div>
 
-      <div class="card">
-        <h2>Misiones diarias</h2>
-        <div class="mission"><p>Gana 100 XP</p>
-          <div class="bar"><span id="mission-xp-bar" style="width:0%"></span></div></div>
-        <div class="mission"><p>Completa 1 lección perfecta</p>
-          <div class="bar"><span id="mission-lesson-bar" style="width:0%"></span></div></div>
-        <div class="mission"><p>Racha activa</p>
-          <div class="bar"><span id="mission-streak-bar" style="width:0%"></span></div></div>
+      <!-- Misiones -->
+      <div class="mg-card mg-card-sm">
+        <h2 class="mg-card-title">
+          <i class="fa-solid fa-bullseye" style="color:var(--mg-primary);"></i> Misiones diarias
+        </h2>
+        <div id="missions-list">
+          <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="width:80%; height:14px;"></div>
+          <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="width:65%; height:14px;"></div>
+          <div class="mg-skeleton mg-skeleton-text" style="width:72%; height:14px;"></div>
+        </div>
       </div>
 
-
+      <a href="dashboard.html" class="mg-btn mg-btn-secondary mg-btn-full mg-btn-sm"
+         style="text-align:center; display:block;">
+        <i class="fa-solid fa-chart-line"></i> Ver mi progreso completo
+      </a>
     </aside>
-
   </div>
 
-  <style>
-    .worlds-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 8px;
-    }
-    .world-card {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      border: 2px solid #e5e7eb;
-      border-radius: 18px;
-      padding: 20px 22px;
-      text-decoration: none;
-      color: inherit;
-      background: #fff;
-      transition: box-shadow .15s, border-color .15s, transform .1s;
-    }
-    .world-card--unlocked {
-      border-color: #84d8ff;
-      background: linear-gradient(135deg, #f0faff 0%, #fff 100%);
-      box-shadow: 0 4px 0 #cdeeff;
-    }
-    .world-card--unlocked:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 0 #cdeeff;
-    }
-    .world-card--locked {
-      opacity: .7;
-      cursor: default;
-    }
-    .world-card__icon {
-      font-size: 38px;
-      flex-shrink: 0;
-    }
-    .world-card__body {
-      flex: 1;
-    }
-    .world-card__num {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .6px;
-      text-transform: uppercase;
-      color: #1cb0f6;
-      margin-bottom: 2px;
-    }
-    .world-card--locked .world-card__num {
-      color: #afafaf;
-    }
-    .world-card__title {
-      font-size: 18px;
-      font-weight: 800;
-      margin: 0 0 4px;
-      color: #4b4b4b;
-    }
-    .world-card__sub {
-      font-size: 13px;
-      color: #777;
-      margin: 0 0 8px;
-    }
-    .world-card__levels {
-      display: inline-block;
-      background: #ddf4ff;
-      color: #1483c2;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 20px;
-    }
-    .world-card--locked .world-card__levels {
-      background: #f0f0f0;
-      color: #afafaf;
-    }
-    .world-card__arrow {
-      font-size: 22px;
-      color: #1cb0f6;
-      flex-shrink: 0;
-    }
-    .world-card--locked .world-card__arrow {
-      color: #afafaf;
-    }
-  </style>
+  <div class="mg-toast-container" id="mg-toast-container"></div>
 
   <script type="module">
-    import { auth, db } from '../js/firebaseConfig.js';
-    import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { getMissions } from '../js/services/api.js';
+    import { db } from '../js/firebaseConfig.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
-    window.cerrarSesion = async function() {
-      await signOut(auth);
-      localStorage.removeItem('mathgo_user');
-      window.location.href = '../index.html';
-    };
+    const WORLD_DATA = [
+      { id: '1', icon: 'fa-solid fa-drafting-compass', title: 'Las Bases del Álgebra',           sub: 'Del pensamiento aritmético al algebraico',   href: 'world-1.html' },
+      { id: '2', icon: 'fa-solid fa-infinity',          title: 'Números Reales',                  sub: 'Clasificación, propiedades y jerarquía',     href: 'world-2.html' },
+      { id: '3', icon: 'fa-solid fa-chart-simple',      title: 'Funciones y Ecuaciones Lineales', sub: 'Descifra el lenguaje de las relaciones',     href: 'world-3.html' },
+      { id: '4', icon: 'fa-solid fa-wave-square',       title: 'Funciones Cuadráticas',           sub: 'Domina la curva que rige el universo',       href: 'world-4.html' },
+      { id: '5', icon: 'fa-solid fa-table-cells',       title: 'Matrices y Sistemas Avanzados',   sub: 'Organiza el caos en filas y columnas',       href: 'world-5.html' },
+      { id: '6', icon: 'fa-solid fa-atom',              title: 'Números Complejos y Vectores',    sub: 'Donde lo imaginario se vuelve real',         href: 'world-6.html' },
+    ];
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = '../index.html'; return; }
+    function renderWorlds(unlockedIds, isAdmin) {
+      const grid = document.getElementById('worlds-grid');
+      grid.innerHTML = WORLD_DATA.map(w => {
+        const unlocked = isAdmin || unlockedIds.includes(w.id);
+        return `
+          <a href="${unlocked ? w.href : '#'}"
+             class="mg-world-card ${unlocked ? 'unlocked' : 'locked'}"
+             ${unlocked ? '' : 'aria-disabled="true" tabindex="-1"'}>
+            <span class="mg-world-icon" style="font-size:28px; width:52px; height:52px; background:${unlocked ? 'rgba(79,70,229,0.1)' : 'var(--mg-border)'}; border-radius:14px; display:flex; align-items:center; justify-content:center; color:${unlocked ? 'var(--mg-primary)' : 'var(--mg-muted-2)'}; flex-shrink:0;">
+              <i class="${w.icon}"></i>
+            </span>
+            <div class="mg-world-body">
+              <div class="mg-world-num">Mundo ${w.id}</div>
+              <div class="mg-world-title">${w.title}</div>
+              <p class="mg-world-sub">${w.sub}</p>
+            </div>
+            <span class="mg-world-arrow">
+              <i class="fa-solid ${unlocked ? 'fa-chevron-right' : 'fa-lock'}" style="color: ${unlocked ? 'var(--mg-primary)' : 'var(--mg-muted-2)'};"></i>
+            </span>
+          </a>
+        `;
+      }).join('');
+    }
 
-      const [progressResult, userResult] = await Promise.allSettled([
-        getDoc(doc(db, "mathgo_progress", user.uid)),
-        getDoc(doc(db, "users", user.uid)),
+    function renderMissions(missions) {
+      const container = document.getElementById('missions-list');
+      if (!missions || missions.length === 0) {
+        container.innerHTML = `
+          <div class="mg-empty" style="padding:16px 0;">
+            <i class="fa-solid fa-bullseye" style="font-size:32px; color:var(--mg-muted-2); margin-bottom:8px;"></i>
+            <div class="mg-empty-text">No hay misiones activas hoy</div>
+          </div>`;
+        return;
+      }
+      container.innerHTML = missions.slice(0, 3).map(m => `
+        <div class="mg-mission-item">
+          <div class="mg-mission-header">
+            <span class="mg-mission-title">${m.description || m.title || 'Misión'}</span>
+            <span class="mg-mission-xp"><i class="fa-solid fa-bolt"></i> +${m.xpReward || 0} XP</span>
+          </div>
+          <div class="mg-progress">
+            <div class="mg-progress-bar xp" style="width: ${Math.min(100, (m.currentProgress / (m.targetProgress || 1)) * 100)}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadLearnPage(user) {
+      await initSidebar('learn');
+
+      const todayStr = new Date().toLocaleDateString('en-CA');
+
+      const [progressSnap, userSnap] = await Promise.allSettled([
+        getDoc(doc(db, 'mathgo_progress', user.uid)),
+        getDoc(doc(db, 'users', user.uid)),
       ]);
 
-      const data = (progressResult.status === "fulfilled" && progressResult.value.exists())
-        ? progressResult.value.data() : {};
-      const userData = (userResult.status === "fulfilled" && userResult.value.exists())
-        ? userResult.value.data() : {};
-      const isAdmin = userData.role === "admin";
-      const displayName = userData.name || user.displayName || (user.email ? user.email.split('@')[0] : 'Usuario');
-      const initials = displayName.slice(0, 2).toUpperCase();
-      document.querySelector('.profile-card .avatar').textContent = initials;
-      document.querySelector('.profile-card h3').textContent = displayName;
+      const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
+      const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
 
-      // ---- Racha diaria ----
-      const todayStr = new Date().toLocaleDateString('en-CA');
-      const lastDate  = data.lastActiveDate ?? null;
-      let dailyStreak = data.dailyStreak ?? 0;
+      const isAdmin = userData.role === 'admin';
+      const displayName = userData.name || user.email?.split('@')[0] || 'Usuario';
+
+      // Racha diaria
+      const lastDate = progress.lastActiveDate ?? null;
+      let streak = progress.dailyStreak ?? 0;
       if (lastDate !== todayStr) {
-        const dayGap = lastDate
+        const gap = lastDate
           ? Math.round((new Date(todayStr + 'T12:00:00') - new Date(lastDate + 'T12:00:00')) / 86400000)
           : null;
-        dailyStreak = dayGap === 1 ? dailyStreak + 1 : 1;
-        try {
-          await setDoc(doc(db, "mathgo_progress", user.uid),
-            { dailyStreak, lastActiveDate: todayStr }, { merge: true });
-        } catch (e) { console.warn("Error guardando racha diaria:", e); }
+        streak = gap === 1 ? streak + 1 : 1;
+        setDoc(doc(db, 'mathgo_progress', user.uid), { dailyStreak: streak, lastActiveDate: todayStr }, { merge: true }).catch(() => {});
       }
-      document.getElementById('stat-streak').textContent = dailyStreak;
 
-      // ---- Stats bar ----
-      const xp = data.totalXp ?? 0;
-      document.getElementById('stat-gems').textContent = data.gems ?? 0;
-      document.getElementById('stat-xp').textContent = xp + ' XP';
+      const xp = progress.totalXp ?? userData.totalXp ?? 0;
+      document.getElementById('stat-streak').textContent = streak;
+      document.getElementById('stat-gems').textContent   = progress.gems ?? userData.gems ?? 0;
+      document.getElementById('stat-xp').textContent     = xp;
 
-      // ---- Nivel global (total niveles completados + 1) ----
+      // Perfil derecho
+      document.getElementById('right-avatar').textContent = getInitials(displayName);
+      document.getElementById('right-name').textContent   = displayName;
       let totalCompleted = 0;
-      Object.values(data.worlds ?? {}).forEach(w => {
-        totalCompleted += (w.levelsCompleted ?? []).length;
-      });
-      document.getElementById('stat-nivel').textContent = 'Nivel ' + (totalCompleted + 1);
+      Object.values(progress.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
+      document.getElementById('right-level').textContent  = `Nivel ${totalCompleted + 1}`;
 
-      // ---- Misiones ----
-      document.getElementById('mission-xp-bar').style.width = (xp % 100) + '%';
-      document.getElementById('mission-lesson-bar').style.width = (totalCompleted > 0 ? 100 : 0) + '%';
-      document.getElementById('mission-streak-bar').style.width = Math.min(100, dailyStreak * 20) + '%';
+      // Mundos desbloqueados
+      const worlds = progress.worlds ?? {};
+      const unlocked = ['1'];
+      if (isAdmin || worlds['1']?.allComplete) unlocked.push('2');
+      if (isAdmin || worlds['2']?.allComplete) unlocked.push('3');
+      if (isAdmin || worlds['3']?.allComplete) unlocked.push('4');
+      if (isAdmin || worlds['4']?.allComplete) unlocked.push('5');
+      if (isAdmin || worlds['5']?.allComplete) unlocked.push('6');
+      renderWorlds(unlocked, isAdmin);
 
-      const w1 = data?.worlds?.["1"] ?? {};
-      const w2 = data?.worlds?.["2"] ?? {};
-      const w3 = data?.worlds?.["3"] ?? {};
-      const w4 = data?.worlds?.["4"] ?? {};
-      const w5 = data?.worlds?.["5"] ?? {};
-      const w6 = data?.worlds?.["6"] ?? {};
-      const world2Unlocked = isAdmin || w1.allComplete === true || w2.jumpExam?.passed === true;
-      const world3Unlocked = isAdmin || w2.allComplete === true || w3.jumpExam?.passed === true;
-      const world4Unlocked = isAdmin || w3.allComplete === true || w4.jumpExam?.passed === true;
-      const world5Unlocked = isAdmin || w4.allComplete === true || w5.jumpExam?.passed === true;
-      const world6Unlocked = isAdmin || w5.allComplete === true || w6.jumpExam?.passed === true;
-
-      function unlockCard(selector) {
-        const card = document.querySelector(selector);
-        if (!card) return;
-        card.classList.remove("world-card--locked");
-        card.classList.add("world-card--unlocked");
-        card.querySelector(".world-card__num").style.color = "#1cb0f6";
-        card.querySelector(".world-card__arrow").textContent = "→";
-        card.querySelector(".world-card__arrow").style.color = "#1cb0f6";
-        card.querySelector(".world-card__levels").style.cssText = "background:#ddf4ff;color:#1483c2";
-        card.style.cursor = "pointer";
+      // Misiones
+      const { data: missions } = await getMissions();
+      if (missions) {
+        renderMissions(missions);
+      } else {
+        renderMissions([
+          { description: 'Gana 100 XP hoy',         xpReward: 20, currentProgress: xp % 100,           targetProgress: 100 },
+          { description: 'Mantén tu racha activa',   xpReward: 10, currentProgress: Math.min(streak, 5), targetProgress: 5 },
+          { description: 'Completa 1 lección',       xpReward: 30, currentProgress: totalCompleted > 0 ? 1 : 0, targetProgress: 1 },
+        ]);
       }
+    }
 
-      if (world2Unlocked) unlockCard('a[href="world-2.html"]');
-      if (world3Unlocked) unlockCard('#card-world-3');
-      if (world4Unlocked) unlockCard('#card-world-4');
-      if (world5Unlocked) unlockCard('#card-world-5');
-      if (world6Unlocked) unlockCard('#card-world-6');
-    });
+    requireAuth(false).then(user => loadLearnPage(user));
   </script>
-    <script src="../js/frontend-ui-fixes.js"></script>
-  </body>
+</body>
 </html>

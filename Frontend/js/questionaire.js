@@ -102,7 +102,7 @@ let disablePointer = () => {
 
 //reset bottom row ui
 const resetBottomRow = () => {
-    document.getElementById('skip-span').textContent = "SKIP";
+    document.getElementById('skip-span').textContent = "Saltar";
 
     const skipButton = document.querySelector('.skip-button');
     skipButton.style.display = 'block';
@@ -114,7 +114,7 @@ const resetBottomRow = () => {
     bottomLeftRow.style.display = 'none';
     const wrongNottomLeftRow = document.querySelector('#wrong-left');
     wrongNottomLeftRow.style.display = 'none';
-    document.getElementById('continue-button').textContent = 'CHECK'
+    document.getElementById('continue-button').textContent = 'Comprobar'
     document.querySelector('#check-button-div').classList.remove('check-button-continue');
 
     document.getElementById('check-button').classList.add('check-button-inner-inactive')
@@ -170,7 +170,7 @@ let checkButton = (id) => {
     document.querySelector('#check-button-div').classList.add('check-button-continue');
     document.getElementById(id).classList.toggle('clicked');
     setTimeout(() => document.getElementById(id).classList.toggle('clicked'), 300);
-    document.getElementById('continue-button').textContent = 'Continue'
+    document.getElementById('continue-button').textContent = 'Continuar'
     clickCount++;
 
     //continue to next question functionality
@@ -293,7 +293,7 @@ let lessonComplete = () => {
     document.getElementById('check-button-div').classList.add('check-button-outer-active');
     document.getElementById('check-button').classList.remove('check-button-inner-inactive')
     document.getElementById('check-button').classList.add('check-button-inner-active');
-    document.getElementById('continue-button').textContent = 'Continue'
+    document.getElementById('continue-button').textContent = 'Continuar'
 
 
     document.querySelector('.mid-row').innerHTML = '';
@@ -309,11 +309,11 @@ let lessonComplete = () => {
 
     let appreciationHead = document.createElement('div');
     appreciationHead.className = 'appreciation-head';
-    appreciationHead.textContent = 'Lesson Complete';
+    appreciationHead.textContent = 'Lección completada';
 
     let appreciationBody = document.createElement('div');
     appreciationBody.className = 'appreciation-body';
-    appreciationBody.textContent = 'You have completed this lesson';
+    appreciationBody.textContent = '¡Has completado esta lección con éxito!';
 
     let lessonStatsContainer = document.createElement('div');
     lessonStatsContainer.className = 'lesson-stats';
@@ -328,7 +328,7 @@ let lessonComplete = () => {
     let xpHead = document.createElement('div');
     xpHead.className = 'lesson-head';
     xpHead.id = 'xp-head';
-    xpHead.textContent = 'TOTAL XP';
+    xpHead.textContent = 'XP TOTAL';
 
     let innerXpContainer = document.createElement('div');
     innerXpContainer.className = 'inner-xp-container inner-xp-container-xp';
@@ -360,7 +360,7 @@ let lessonComplete = () => {
     let percentHead = document.createElement('div');
     percentHead.className = 'lesson-head';
     percentHead.id = 'percent-head';
-    percentHead.textContent = 'TRY HARDER';
+    percentHead.textContent = 'PUNTUACIÓN';
 
     let innerPercentContainer = document.createElement('div');
     innerPercentContainer.className = 'inner-xp-container inner-xp-container-percent';
@@ -450,9 +450,12 @@ let showAlertPopup = () => {
     document.querySelector('.exit-overlay').style.display = 'flex'
 }
 
-//navigate to shop page
+//navigate to shop page (mocked: replenish hearts)
 let goToShop = () => {
-    window.location.href = './shoppingpage.html';
+    heartCount = 5;
+    document.getElementById("heart-count").textContent = heartCount;
+    document.querySelector('.shop-overlay').style.display = 'none';
+    questionLoad();
 }
 
 //navigate to learn page

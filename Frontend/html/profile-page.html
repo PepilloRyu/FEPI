@@ -1,356 +1,318 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MathGo - Mi Perfil</title>
-    <link rel="icon" href="../assets/images/favicon.ico" />
-    <link rel="stylesheet" href="../css/profile-page.css" />
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/learn.css" />
-    <link rel="stylesheet" href="../css/mathgo-mockup-theme.css" />
-    <link rel="stylesheet" href="../css/mathgo-redesign.css" />
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script type="module" src="../js/profile-page.js"></script>
-    <script src="../js/profile-page-values.js"></script>
-    <link rel="stylesheet" href="../css/frontend-polish.css?v=sidebar-deep-fix" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Mi Perfil</title>
+  <meta name="description" content="Perfil de usuario en MathGo. Ve tus estadisticas, racha y logros." />
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* Cabecera de perfil */
+    .profile-hero {
+      background: linear-gradient(135deg, var(--mg-primary), var(--mg-secondary));
+      border-radius: var(--mg-radius-xl);
+      padding: 36px;
+      color: #fff;
+      margin-bottom: var(--mg-space-6);
+      box-shadow: var(--mg-shadow-primary);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -5%;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      pointer-events: none;
+    }
+    .profile-hero-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 3px solid rgba(255,255,255,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .profile-hero-info { flex: 1; }
+    .profile-hero-name { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; }
+    .profile-hero-email { opacity: 0.8; font-size: 15px; margin-top: 2px; }
+    .profile-hero-join { opacity: 0.7; font-size: 13px; margin-top: 6px; }
+    .profile-hero-edit {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all var(--mg-transition);
+      text-decoration: none;
+    }
+    .profile-hero-edit:hover { background: rgba(255,255,255,0.25); }
+
+    /* Stats grid grande */
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: var(--mg-space-6);
+    }
+    .profile-stat-box {
+      background: var(--mg-surface);
+      border: 1px solid var(--mg-border);
+      border-radius: var(--mg-radius-lg);
+      padding: 22px;
+      text-align: center;
+      box-shadow: var(--mg-shadow-sm);
+      transition: all var(--mg-transition);
+    }
+    .profile-stat-box:hover { transform: translateY(-2px); box-shadow: var(--mg-shadow-md); }
+    .profile-stat-icon { font-size: 32px; margin-bottom: 8px; }
+    .profile-stat-value { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .profile-stat-label { font-size: 12px; font-weight: 700; color: var(--mg-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* Objetivos */
+    .objetivo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--mg-border-soft);
+    }
+    .objetivo-item:last-child { border-bottom: none; }
+    .objetivo-text { flex: 1; font-size: 14px; font-weight: 600; color: var(--mg-text-2); }
+    .objetivo-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--mg-muted-2);
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 8px;
+      transition: color var(--mg-transition);
+    }
+    .objetivo-del:hover { color: var(--mg-danger); }
+  </style>
 </head>
-  <body>
-    <div class="main-container">
-      <!-- Left Sidebar -->
-            <aside class="mockup-sidebar">
-        <div class="brand">
-          <div class="brand-mark">M</div>
-          <div class="brand-name">Math<span>Go</span></div>
-        </div>
+<body>
 
-        <nav class="mockup-nav" aria-label="Navegación principal">
-        <a href="../html/learn.html">
-          <span>🏠</span>
-          Aprender
-        </a>
+  <div class="mg-layout-2col" id="mg-layout">
+    <!-- Sidebar inyectado -->
 
-        <a href="../html/profile-page.html" class="active" aria-current="page">
-          <span>👤</span>
-          Perfil
-        </a>
+    <main class="mg-main" id="mg-main">
 
-        <a href="../html/faq.html">
-          <span>❔</span>
-          Preguntas Frecuentes
-        </a>
-        </nav>
-
-        <div class="sidebar-footer">
-          <a onclick="window.cerrarSesion && window.cerrarSesion()" id="logout-button" style="cursor:pointer;">
-            ⛔ Cerrar sesión
-          </a>
-        </div>
-      </aside>
-
-      <div class="content-container">
-        <!----------------------------------- Right sidebar ------------------------------------------------>
-        <div class="right-sidebar">
-          <div class="right-sidebar-header">
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/lesson-xp.svg"
-                    alt="xp-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button fire-text" id="xp-value-sidebar">0</span>
-              </span>
-            </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img
-                    src="../assets/svg/gems-icon.svg"
-                    alt="gems-icon"
-                    class="profile"
-                  />
-                </div>
-                <span class="text-in-button gem-text" id="gems-value-sidebar">0</span>
-              </span>
-            </a>
-          </div>
-          
-          <div class="try-super-box">
-            <img
-              src="../assets/images/emocionado.png"
-              alt="math-learning"
-              id="try-super-image-two"
-            />
-            <div class="content-text">
-              <h2>🔥 Mantén tu racha</h2>
-              <div class="description">
-                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
-              </div>
-              <button id="streak-button" onclick="verRacha();">
-                Ver mi racha actual →
-              </button>
-            </div>
-          </div>
-          
-          <div class="try-super-box">
-            <h2 style="margin:0 0 12px">🎯 Mis objetivos</h2>
-            <div id="objetivos-lista"></div>
-            <div style="display:flex;gap:8px;margin-top:12px">
-              <input type="text" id="objetivos-input" placeholder="Agregar objetivo..."
-                style="flex:1;padding:10px 14px;border:1px solid var(--mg-border,#e5e9f2);border-radius:12px;font-size:14px;outline:none;font-family:inherit" />
-              <button id="objetivos-btn"
-                style="padding:10px 18px;background:var(--mg-primary,#4f46e5);color:#fff;border:none;border-radius:12px;font-weight:900;cursor:pointer;font-size:20px;line-height:1;">+</button>
-            </div>
+      <!-- Hero de perfil -->
+      <div class="profile-hero">
+        <div class="profile-hero-avatar" id="profile-avatar">?</div>
+        <div class="profile-hero-info">
+          <div class="profile-hero-name" id="profile-name">Cargando...</div>
+          <div class="profile-hero-email" id="profile-email"></div>
+          <div class="profile-hero-join" id="profile-join">
+            <i class="fa-solid fa-calendar-days"></i> Cargando fecha...
           </div>
         </div>
+        <a href="profile-edit-page.html" class="profile-hero-edit">
+          <i class="fa-solid fa-pen"></i> Editar perfil
+        </a>
+      </div>
 
-        <!-- Middle Section - Perfil -->
-        <div class="profile-middle-container">
-          <div class="profile-middle-flex">
-            <div class="user-info-div">
-              <div class="user-info-text">
-                <h1 class="profile-username">
-                  <span class="first-and-last-name" id="first-and-last-name">Nombre</span>
-                  <div class="email" id="email">Email</div>
-                </h1>
-                <div class="join-date-container">
-                  <img src="../assets/svg/join-date.svg" class="date-image" alt="" />
-                  <div class="join-date" id="join-date">Joined</div>
-                </div>
-              </div>
-              <div class="profile-image-div">
-                <span class=""></span>
-                <img src="" alt="" id="profile-image" />
-                <div class="edit-account-div">
-                  <a href="../html/profile-edit-page.html">
-                    <img src="../assets/svg/edit-button-logo.svg" alt="Editar perfil" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div class="statistics-section">
-              <div class="statistics-heading-div">
-                <h2 class="statistics-heading">Estadísticas</h2>
-              </div>
-
-              <div class="statistics-content-div">
-                <div>
-                  <div class="statistics-section-one">
-                    <img src="../assets/svg/gems-icon.svg" class="statistics-streak-icon" alt="" />
-                    <div class="statistics-section-one-content">
-                      <h4 class="statistics-value gem-text" id="gems-value">0</h4>
-                      <div class="statistics-text">Gemas</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="statistics-section-one">
-                    <img src="../assets/svg/lesson-xp.svg" class="statistics-streak-icon" alt="" />
-                    <div class="statistics-section-one-content">
-                      <h4 class="statistics-value" id="xp-value">0</h4>
-                      <div class="statistics-text">Total XP</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div class="statistics-section-one">
-                    <img src="../assets/svg/streak-fire-active.svg" class="statistics-streak-icon" alt="" />
-                    <div class="statistics-section-one-content">
-                      <h4 class="statistics-value" id="streak-value">0</h4>
-                      <div class="statistics-text">Racha actual</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div class="statistics-section-one">
-                    <img src="../assets/svg/badge-in-sidebar.svg" class="statistics-streak-icon" alt="" />
-                    <div class="statistics-section-one-content">
-                      <h4 class="statistics-value" id="league-value">Principiante</h4>
-                      <div class="statistics-text">Liga actual</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <a class="logout-button" id="logout-button-mobile" onclick="cerrarSesion()">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img src="../assets/svg/Logout.svg" alt="logout-icon" />
-                </div>
-                <span class="text-in-button text-logout">CERRAR SESIÓN</span>
-              </span>
-            </a>
-          </div>         
+      <!-- Estadísticas -->
+      <div class="profile-stats-grid">
+        <div class="profile-stat-box">
+          <div class="profile-stat-icon"><i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i></div>
+          <div class="profile-stat-value mg-text-xp" id="stat-xp">–</div>
+          <div class="profile-stat-label">XP Total</div>
+        </div>
+        <div class="profile-stat-box">
+          <div class="profile-stat-icon"><i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i></div>
+          <div class="profile-stat-value mg-text-streak" id="stat-streak">–</div>
+          <div class="profile-stat-label">Racha actual</div>
+        </div>
+        <div class="profile-stat-box">
+          <div class="profile-stat-icon"><i class="fa-solid fa-gem" style="color:var(--mg-gems);"></i></div>
+          <div class="profile-stat-value mg-text-gem" id="stat-gems">–</div>
+          <div class="profile-stat-label">Gemas</div>
+        </div>
+        <div class="profile-stat-box">
+          <div class="profile-stat-icon"><i class="fa-solid fa-medal" style="color:var(--mg-league);"></i></div>
+          <div class="profile-stat-value" id="stat-league" style="font-size:18px;">–</div>
+          <div class="profile-stat-label">Liga actual</div>
         </div>
       </div>
-    </div>
-    
-    <!-- Bottom navigation para móvil -->
-    <div class="sidebar-buttons bottom-nav">
-      <a href="learn.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" />
-          </div>
-        </span>
-      </a>
-      <a href="leaderboard.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" />
-          </div>
-        </span>
-      </a>
-      <a href="profile-page.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap selected">
-          <div class="icon-in-button">
-            <img
-              id="profile-bottom"
-              src="../assets/svg/profile-image-temp.svg"
-              alt="profile-icon"
-              class="profile"
-            />
-          </div>
-        </span>
-      </a>
-      <a href="./shoppingpage.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" />
-          </div>
-        </span>
-      </a>
-      <a href="./faq.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button">
-            <img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" />
-          </div>
-        </span>
-      </a>
-    </div>
 
-    <script type="module">
-      import { auth, db } from '../js/firebaseConfig.js';
-      import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-      import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-      
-      function escapeHtml(str) {
-        const d = document.createElement('div');
-        d.textContent = str;
-        return d.innerHTML;
+      <!-- Precision y progreso -->
+      <div class="mg-card mg-mb-6">
+        <h2 class="mg-card-title">
+          <i class="fa-solid fa-chart-line" style="color:var(--mg-primary);"></i> Estadísticas de aprendizaje
+        </h2>
+        <div class="mg-stats-grid">
+          <div class="mg-stat-box">
+            <div class="mg-stat-value" id="stat-accuracy" style="color:var(--mg-success)">–</div>
+            <div class="mg-stat-label">Precisión</div>
+          </div>
+          <div class="mg-stat-box">
+            <div class="mg-stat-value mg-text-primary" id="stat-level">–</div>
+            <div class="mg-stat-label">Nivel actual</div>
+          </div>
+          <div class="mg-stat-box">
+            <div class="mg-stat-value" id="stat-completed">–</div>
+            <div class="mg-stat-label">Niveles completados</div>
+          </div>
+          <div class="mg-stat-box">
+            <div class="mg-stat-value mg-text-streak" id="stat-best-streak">–</div>
+            <div class="mg-stat-label">Mejor racha</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mis objetivos -->
+      <div class="mg-card">
+        <h2 class="mg-card-title">
+          <i class="fa-solid fa-bullseye" style="color:var(--mg-primary);"></i> Mis objetivos personales
+        </h2>
+        <div id="objetivos-lista" style="min-height:48px;">
+          <div class="mg-empty" style="padding:16px 0;">
+            <div class="mg-empty-icon" style="font-size:32px; color: var(--mg-muted-2);"><i class="fa-solid fa-bullseye"></i></div>
+            <div class="mg-empty-text">No tienes objetivos. ¡Agrega uno abajo!</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <input type="text" id="objetivo-input" class="mg-input"
+            placeholder="Escribe un objetivo personal..."
+            style="border-radius:12px; padding:12px 16px; font-size:14px;" />
+          <button id="objetivo-add-btn" class="mg-btn mg-btn-primary mg-btn-sm" aria-label="Agregar objetivo">+</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { getAnalytics } from '../js/services/api.js';
+    import { db } from '../js/firebaseConfig.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    function getLeague(xp) {
+      if (xp < 500) return 'Bronce';
+      if (xp < 1500) return 'Plata';
+      if (xp < 4000) return 'Oro';
+      if (xp < 10000) return 'Diamante';
+      return 'Maestro';
+    }
+
+    function renderObjetivos(objetivos, uid) {
+      const lista = document.getElementById('objetivos-lista');
+      if (!objetivos?.length) {
+        lista.innerHTML = `<div class="mg-empty" style="padding:16px 0;">
+          <div class="mg-empty-icon" style="font-size:32px; color: var(--mg-muted-2);"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="mg-empty-text">No tienes objetivos. ¡Agrega uno abajo!</div>
+        </div>`;
+        return;
       }
+      lista.innerHTML = objetivos.map((obj, i) => {
+        const safe = obj.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<div class="objetivo-item">
+          <span style="font-size:16px; color: var(--mg-primary); margin-right: 8px;"><i class="fa-solid fa-bullseye"></i></span>
+          <span class="objetivo-text">${safe}</span>
+          <button class="objetivo-del" data-idx="${i}" title="Eliminar">×</button>
+        </div>`;
+      }).join('');
 
-      function renderObjetivos(objetivos, uid) {
-        const lista = document.getElementById('objetivos-lista');
-        if (!lista) return;
-        if (!objetivos || objetivos.length === 0) {
-          lista.innerHTML = '<p style="color:#9ca3af;font-size:14px;margin:0 0 8px">No tienes objetivos. ¡Agrega uno abajo!</p>';
-          return;
-        }
-        lista.innerHTML = objetivos.map((obj, i) =>
-          `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
-            <span style="flex:1;font-size:14px;color:#374151">🎯 ${escapeHtml(obj)}</span>
-            <button data-idx="${i}" class="del-obj-btn" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:20px;padding:2px 6px;line-height:1;border-radius:8px;" title="Eliminar">×</button>
-          </div>`
-        ).join('');
-        lista.querySelectorAll('.del-obj-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const idx = parseInt(btn.dataset.idx);
-            const updated = objetivos.filter((_, i) => i !== idx);
-            try {
-              await setDoc(doc(db, "users", uid), { objetivos: updated }, { merge: true });
-              renderObjetivos(updated, uid);
-            } catch (e) { console.error('Error eliminando objetivo:', e); }
-          });
+      lista.querySelectorAll('.objetivo-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const idx = parseInt(btn.dataset.idx);
+          const updated = objetivos.filter((_, i) => i !== idx);
+          await setDoc(doc(db, 'users', uid), { objetivos: updated }, { merge: true });
+          renderObjetivos(updated, uid);
         });
-      }
-
-      // Función para cerrar sesión
-      window.cerrarSesion = async function() {
-        try {
-          await signOut(auth);
-          localStorage.removeItem('mathgo_user');
-          window.location.href = '../index.html';
-        } catch (error) {
-          console.error('Error al cerrar sesión:', error);
-          alert('Error al cerrar sesión: ' + error.message);
-        }
-      };
-      
-      // Función para ver racha
-      window.verRacha = function() {
-        alert("🔥 Tu racha actual: " + (document.getElementById('streak-value').textContent || "0") + " días!\n\nSigue así para desbloquear logros especiales.");
-      };
-      
-      // Cargar datos del usuario
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          window.location.href = '../index.html';
-        } else {
-          console.log('Usuario logueado:', user.email);
-          
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              
-              // Actualizar sidebar
-              document.getElementById('xp-value-sidebar').textContent = userData.totalXp || 0;
-              document.getElementById('gems-value-sidebar').textContent = userData.gems || 0;
-              
-              // Actualizar estadísticas
-              document.getElementById('gems-value').textContent = userData.gems || 0;
-              document.getElementById('xp-value').textContent = userData.totalXp || 0;
-              document.getElementById('streak-value').textContent = userData.streak || 0;
-              document.getElementById('league-value').textContent = userData.league || "Principiante";
-              
-              // Actualizar información del perfil si existe
-              if (document.getElementById('first-and-last-name')) {
-                document.getElementById('first-and-last-name').textContent = userData.name || user.email.split('@')[0];
-              }
-              if (document.getElementById('email')) {
-                document.getElementById('email').textContent = user.email;
-              }
-              if (document.getElementById('join-date')) {
-                document.getElementById('join-date').textContent = userData.joinDate || "Recién llegado";
-              }
-
-              const objetivos = userData.objetivos || [];
-              renderObjetivos(objetivos, user.uid);
-            }
-          } catch (error) {
-            console.error('Error cargando datos:', error);
-          }
-
-          const addBtn = document.getElementById('objetivos-btn');
-          const addInput = document.getElementById('objetivos-input');
-          if (addBtn && addInput) {
-            const doAdd = async () => {
-              const text = addInput.value.trim();
-              if (!text) return;
-              try {
-                const freshDoc = await getDoc(doc(db, "users", user.uid));
-                const current = freshDoc.exists() ? (freshDoc.data().objetivos || []) : [];
-                const updated = [...current, text];
-                await setDoc(doc(db, "users", user.uid), { objetivos: updated }, { merge: true });
-                addInput.value = '';
-                renderObjetivos(updated, user.uid);
-              } catch (e) { console.error('Error agregando objetivo:', e); }
-            };
-            addBtn.addEventListener('click', doAdd);
-            addInput.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
-          }
-        }
       });
-    </script>
-      <script src="../js/frontend-ui-fixes.js"></script>
-  </body>
+    }
+
+    async function load(user) {
+      await initSidebar('profile');
+
+      const [userSnap, progressSnap] = await Promise.allSettled([
+        getDoc(doc(db, 'users', user.uid)),
+        getDoc(doc(db, 'mathgo_progress', user.uid)),
+      ]);
+
+      const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
+      const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
+
+      const displayName = userData.name || user.displayName || user.email?.split('@')[0] || 'Usuario';
+      const xp    = userData.totalXp ?? progress.totalXp ?? 0;
+      const gems  = userData.gems ?? progress.gems ?? 0;
+      const streak = userData.streak ?? progress.dailyStreak ?? 0;
+
+      let totalCompleted = 0;
+      Object.values(progress.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
+
+      // Hero
+      document.getElementById('profile-avatar').textContent = getInitials(displayName);
+      document.getElementById('profile-name').textContent = displayName;
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('profile-join').textContent =
+        `📅 Miembro desde ${userData.joinDate || new Date(user.metadata?.creationTime).toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' }) || 'Fecha desconocida'}`;
+
+      // Stats top
+      document.getElementById('stat-xp').textContent     = xp;
+      document.getElementById('stat-streak').textContent  = streak;
+      document.getElementById('stat-gems').textContent    = gems;
+      document.getElementById('stat-league').textContent  = getLeague(xp);
+
+      // Stats de aprendizaje (intentar del backend)
+      const { data: analytics } = await getAnalytics();
+      if (analytics) {
+        const acc = analytics.accuracyRate ?? analytics.accuracy;
+        document.getElementById('stat-accuracy').textContent = acc !== undefined ? `${Math.round(acc * 100)}%` : '–';
+      } else {
+        document.getElementById('stat-accuracy').textContent = '–';
+      }
+      document.getElementById('stat-level').textContent        = totalCompleted + 1;
+      document.getElementById('stat-completed').textContent    = totalCompleted;
+      document.getElementById('stat-best-streak').textContent  = userData.bestStreak ?? streak;
+
+      // Objetivos
+      const objetivos = userData.objetivos ?? [];
+      renderObjetivos(objetivos, user.uid);
+
+      // Agregar objetivo
+      const addBtn   = document.getElementById('objetivo-add-btn');
+      const addInput = document.getElementById('objetivo-input');
+      const doAdd = async () => {
+        const text = addInput.value.trim();
+        if (!text) return;
+        const fresh = await getDoc(doc(db, 'users', user.uid));
+        const current = fresh.exists() ? (fresh.data().objetivos ?? []) : [];
+        const updated = [...current, text];
+        await setDoc(doc(db, 'users', user.uid), { objetivos: updated }, { merge: true });
+        addInput.value = '';
+        renderObjetivos(updated, user.uid);
+        showToast('¡Objetivo agregado!', 'success');
+      };
+      addBtn.addEventListener('click', doAdd);
+      addInput.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+    }
+
+    requireAuth(false).then(user => load(user));
+  </script>
+</body>
 </html>

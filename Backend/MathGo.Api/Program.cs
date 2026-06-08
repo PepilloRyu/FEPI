@@ -6,6 +6,8 @@ using MathGo.Application.Services;
 using MathGo.Application.Validators;
 using MathGo.Infrastructure.Extensions;
 using MathGo.Infrastructure.Repositories;
+using MathGo.Infrastructure.Configuration;
+using MathGo.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -62,6 +64,10 @@ builder.Services.AddSwaggerGen(c =>
 // Firebase Init and Repositories DI
 builder.Services.AddFirebaseServices(builder.Configuration);
 
+// Email Service Configuration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 // Application Services DI
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -93,9 +99,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://mathgo.app")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:3000", 
+            "https://mathgo.app",
+            "http://127.0.0.1:5501",
+            "http://localhost:5501",
+            "http://127.0.0.1:5500",
+            "http://localhost:5500"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 

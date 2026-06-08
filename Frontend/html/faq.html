@@ -1,219 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MathGo - Preguntas Frecuentes</title>
-    <link rel="icon" href="../assets/images/favicon.ico" />
-    <link rel="stylesheet" href="../scss/faq.css" />
-    <link rel="stylesheet" href="../css/learn.css" />
-    <link rel="stylesheet" href="../css/mathgo-mockup-theme.css" />
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/mathgo-redesign.css" />
-    <link rel="stylesheet" href="../css/frontend-polish.css?v=sidebar-deep-fix" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Ayuda y FAQ</title>
+  <meta name="description" content="Preguntas frecuentes y ayuda sobre MathGo." />
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    .faq-wrapper {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+    .faq-title-container {
+      margin-bottom: var(--mg-space-6);
+      text-align: center;
+    }
+    .faq-title-container h1 {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--mg-text);
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .faq-title-container p {
+      color: var(--mg-muted);
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .faq-category-card {
+      margin-bottom: var(--mg-space-4);
+    }
+    .faq-category-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--mg-primary);
+      margin-bottom: var(--mg-space-4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--mg-border-soft);
+    }
+    .faq-item {
+      background: var(--mg-surface);
+      border: 1px solid var(--mg-border);
+      border-radius: var(--mg-radius-md);
+      margin-bottom: var(--mg-space-3);
+      overflow: hidden;
+      transition: all var(--mg-transition);
+    }
+    .faq-item:hover {
+      border-color: var(--mg-primary-light);
+      box-shadow: var(--mg-shadow-sm);
+    }
+    .faq-question-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 16px 20px;
+      text-align: left;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--mg-text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .faq-question-btn i {
+      color: var(--mg-muted);
+      transition: transform var(--mg-transition);
+    }
+    .faq-item.active .faq-question-btn i {
+      transform: rotate(180deg);
+      color: var(--mg-primary);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--mg-border-soft);
+    }
+    .faq-answer-inner {
+      padding: 16px 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--mg-text-2);
+      font-weight: 600;
+    }
+  </style>
 </head>
-  <body>
-    <div class="main-container">
-      <!-- LEFT SIDEBAR -->
-            <aside class="mockup-sidebar">
-        <div class="brand">
-          <div class="brand-mark">M</div>
-          <div class="brand-name">Math<span>Go</span></div>
+<body>
+
+  <div class="mg-layout-2col" id="mg-layout">
+    <!-- Sidebar inyectado dinámicamente -->
+
+    <main class="mg-main" id="mg-main">
+      <div class="faq-wrapper">
+        <div class="faq-title-container">
+          <h1>Preguntas Frecuentes</h1>
+          <p>Todo lo que necesitas saber sobre MathGo y el aprendizaje de álgebra</p>
         </div>
 
-        <nav class="mockup-nav" aria-label="Navegación principal">
-        <a href="../html/learn.html">
-          <span>🏠</span>
-          Aprender
-        </a>
-
-        <a href="../html/profile-page.html">
-          <span>👤</span>
-          Perfil
-        </a>
-
-        <a href="../html/faq.html" class="active" aria-current="page">
-          <span>❔</span>
-          Preguntas Frecuentes
-        </a>
-        </nav>
-
-        <div class="sidebar-footer">
-          <a onclick="window.cerrarSesion && window.cerrarSesion()" id="logout-button" style="cursor:pointer;">
-            ⛔ Cerrar sesión
-          </a>
+        <div id="faq-content-list">
+          <!-- Categorías y preguntas inyectadas por JS -->
+          <div class="mg-skeleton" style="height: 120px; border-radius: 18px; margin-bottom: 16px;"></div>
+          <div class="mg-skeleton" style="height: 120px; border-radius: 18px; margin-bottom: 16px;"></div>
+          <div class="mg-skeleton" style="height: 120px; border-radius: 18px;"></div>
         </div>
-      </aside>
-
-      <!-- CONTENIDO PRINCIPAL + RIGHT SIDEBAR -->
-      <div class="content-container">
-        <!-- RIGHT SIDEBAR -->
-        <div class="right-sidebar">
-          <div class="right-sidebar-header">
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img src="../assets/svg/lesson-xp.svg" alt="xp-icon" class="profile" />
-                </div>
-                <span class="text-in-button fire-text" id="user-xp">0</span>
-              </span>
-            </a>
-            <a href="" class="button-in-sidebar">
-              <span class="icon-and-text-wrap">
-                <div class="icon-in-button">
-                  <img src="../assets/svg/gems-icon.svg" alt="gems-icon" class="profile" />
-                </div>
-                <span class="text-in-button gem-text" id="user-gems">0</span>
-              </span>
-            </a>
-          </div>
-          <div class="try-super-box">
-            <img src="../assets/images/emocionado.png" alt="math-learning" id="try-super-image-two" />
-            <div class="content-text">
-              <h2>🔥 Mantén tu racha</h2>
-              <div class="description">
-                ¡7 días seguidos aprendiendo álgebra! Desbloquea logros especiales y gana XP extra.
-              </div>
-              <button id="streak-button" onclick="verRacha();">Ver mi racha actual →</button>
-            </div>
-          </div>
-          <div class="try-super-box">
-            <h2 style="margin:0 0 12px">🎯 Mis objetivos</h2>
-            <div id="objetivos-lista"></div>
-            <div style="display:flex;gap:8px;margin-top:12px">
-              <input type="text" id="objetivos-input" placeholder="Agregar objetivo..."
-                style="flex:1;padding:10px 14px;border:1px solid var(--mg-border,#e5e9f2);border-radius:12px;font-size:14px;outline:none;font-family:inherit" />
-              <button id="objetivos-btn"
-                style="padding:10px 18px;background:var(--mg-primary,#4f46e5);color:#fff;border:none;border-radius:12px;font-weight:900;cursor:pointer;font-size:20px;line-height:1;">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CONTENEDOR DE PREGUNTAS FRECUENTES (VACÍO, SE LLENA CON faq.js) -->
-        <div class="faq-container"></div>
       </div>
-    </div>
+    </main>
+  </div>
 
-    <!-- BOTTOM NAV (MÓVIL) -->
-    <div class="sidebar-buttons bottom-nav">
-      <a href="learn.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button"><img src="../assets/svg/home-in-sidebar.svg" alt="home-icon" /></div>
-        </span>
-      </a>
-      <a href="leaderboard.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button"><img src="../assets/svg/badge-in-sidebar.svg" alt="leaderboard-icon" /></div>
-        </span>
-      </a>
-      <a href="profile-page.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button"><img id="profile-image-bottom" src="../assets/svg/profile-image-temp.svg" alt="profile-icon" class="profile" /></div>
-        </span>
-      </a>
-      <a href="./shoppingpage.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap">
-          <div class="icon-in-button"><img src="../assets/svg/shop-in-sidebar.svg" alt="shop-icon" /></div>
-        </span>
-      </a>
-      <a href="./faq.html" class="button-in-sidebar">
-        <span class="icon-and-text-wrap selected">
-          <div class="icon-in-button"><img src="../assets/images/sidebar-icon-faq.png" alt="faq-icon" /></div>
-        </span>
-      </a>
-    </div>
+  <div class="mg-toast-container" id="mg-toast-container"></div>
 
-    <script src="../js/faq.js"></script>
-    <script type="module">
-      import { auth, db } from '../js/firebaseConfig.js';
-      import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-      import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-      
-      function escapeHtml(str) {
-        const d = document.createElement('div');
-        d.textContent = str;
-        return d.innerHTML;
-      }
-
-      function renderObjetivos(objetivos, uid) {
-        const lista = document.getElementById('objetivos-lista');
-        if (!lista) return;
-        if (!objetivos || objetivos.length === 0) {
-          lista.innerHTML = '<p style="color:#9ca3af;font-size:14px;margin:0 0 8px">No tienes objetivos. ¡Agrega uno abajo!</p>';
-          return;
-        }
-        lista.innerHTML = objetivos.map((obj, i) =>
-          `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
-            <span style="flex:1;font-size:14px;color:#374151">🎯 ${escapeHtml(obj)}</span>
-            <button data-idx="${i}" class="del-obj-btn" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:20px;padding:2px 6px;line-height:1;border-radius:8px;" title="Eliminar">×</button>
-          </div>`
-        ).join('');
-        lista.querySelectorAll('.del-obj-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const idx = parseInt(btn.dataset.idx);
-            const updated = objetivos.filter((_, i) => i !== idx);
-            try {
-              await setDoc(doc(db, "users", uid), { objetivos: updated }, { merge: true });
-              renderObjetivos(updated, uid);
-            } catch (e) { console.error('Error eliminando objetivo:', e); }
-          });
-        });
-      }
-
-      window.cerrarSesion = async function() {
-        try {
-          await signOut(auth);
-          localStorage.removeItem('mathgo_user');
-          window.location.href = '../index.html';
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error al cerrar sesión: ' + error.message);
-        }
-      };
-      
-      window.verRacha = function() {
-        alert("🔥 Tu racha actual: 5 días!\n\nSigue así para desbloquear logros especiales.");
-      };
-      
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          window.location.href = '../index.html';
-        } else {
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              document.getElementById('user-xp').textContent = userData.totalXp || 0;
-              document.getElementById('user-gems').textContent = userData.gems || 0;
-
-              const objetivos = userData.objetivos || [];
-              renderObjetivos(objetivos, user.uid);
-            }
-          } catch (error) {
-            console.error('Error cargando datos:', error);
-          }
-
-          const addBtn = document.getElementById('objetivos-btn');
-          const addInput = document.getElementById('objetivos-input');
-          if (addBtn && addInput) {
-            const doAdd = async () => {
-              const text = addInput.value.trim();
-              if (!text) return;
-              try {
-                const freshDoc = await getDoc(doc(db, "users", user.uid));
-                const current = freshDoc.exists() ? (freshDoc.data().objetivos || []) : [];
-                const updated = [...current, text];
-                await setDoc(doc(db, "users", user.uid), { objetivos: updated }, { merge: true });
-                addInput.value = '';
-                renderObjetivos(updated, user.uid);
-              } catch (e) { console.error('Error agregando objetivo:', e); }
-            };
-            addBtn.addEventListener('click', doAdd);
-            addInput.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
-          }
-        }
-      });
-    </script>
-      <script src="../js/frontend-ui-fixes.js"></script>
-  </body>
+  <script type="module">
+    import { requireAuth } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    
+    requireAuth(false).then(() => {
+      initSidebar('faq');
+    });
+  </script>
+  <script src="../js/faq.js"></script>
+</body>
 </html>

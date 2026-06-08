@@ -1,224 +1,253 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MathGo - Iniciar Sesión</title>
-    <link rel="icon" href="../assets/images/favicon.ico" />
-    <link rel="stylesheet" href="../css/loginpage.css" />
-    <link rel="stylesheet" href="../css/signup.css">
-    <link rel="stylesheet" href="../css/main.css" />
-  </head>
-  <body>
-    <div class="main-container">
-      <div class="signup-page-container">
-        <div class="close-button-div">
-          <a href="../index.html">
-            <img src="../assets/svg/close-button.svg" alt="close button" />
-          </a>
-        </div>
-        <div class="login-button-container">
-          <button
-            class="login-button button-div"
-            id="login-button"
-            onclick="window.location.href='../html/signup.html'"
-          >
-            Comenzar
-          </button>
-        </div>
-        
-        <form class="signup-section-main" id="main-form">
-          <div class="signup-information-div">
-            <h1 class="create-profile-heading">Ingresar</h1>
-            <div class="input-fields-div">
-              <div class="field-one">
-                <input
-                  class="input-field"
-                  id="email-input"
-                  type="email"
-                  placeholder="Email"
-                />
-                <div class="error-message" id="email-error-message"></div>
-              </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Iniciar sesión</title>
+  <meta name="description" content="Ingresa a tu cuenta de MathGo y continua aprendiendo algebra." />
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0f1a 0%, #1e1e35 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .auth-page {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 560px;
+      max-width: 900px;
+      width: 100%;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    }
+    .auth-left {
+      background: linear-gradient(135deg, var(--mg-secondary), var(--mg-primary));
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+    }
+    .auth-logo { font-size: 30px; font-weight: 900; letter-spacing: -0.04em; }
+    .auth-logo span { opacity: 0.7; }
+    .auth-tagline { font-size: 32px; font-weight: 900; letter-spacing: -0.04em; line-height: 1.15; }
+    .auth-features { display: flex; flex-direction: column; gap: 14px; }
+    .auth-feature { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; opacity: 0.9; }
+    .auth-feature-icon { font-size: 24px; }
 
-              <div class="field-one password-div">
-                <input
-                  class="input-field password-input"
-                  id="password-input"
-                  type="password"
-                  placeholder="Contraseña"
-                />
-                <a class="forgot" id="forgot-password" style="cursor: pointer;">
-                  ¿Olvidaste tu contraseña?
-                </a>
-                <div class="error-message" id="password-error-message"></div>
-              </div>
-            </div>
+    .auth-right {
+      background: #fff;
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .auth-right h1 { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; color: var(--mg-text); margin-bottom: 6px; }
+    .auth-sub { color: var(--mg-muted); font-size: 15px; margin-bottom: 28px; }
+    .auth-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--mg-muted); }
+    .auth-link a { color: var(--mg-primary); font-weight: 800; text-decoration: none; }
+    .auth-link a:hover { text-decoration: underline; }
+    .forgot-link {
+      text-align: right;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--mg-primary);
+      cursor: pointer;
+      margin-top: -6px;
+      margin-bottom: 12px;
+    }
+    .forgot-link:hover { text-decoration: underline; }
 
-            <div class="create-account-button-container">
-              <button
-                type="submit"
-                class="create-account-button button-div"
-                id="create-account-button"
-              >
-                <span id="login-span">INICIAR SESIÓN</span>
-                <div
-                  class="loading-balls-container hidden"
-                  style="transition-duration: 250ms"
-                  id="loading-balls-container"
-                >
-                  <div class="animation loading-ball"></div>
-                  <div class="animation second-animation loading-ball"></div>
-                  <div class="animation third-animation loading-ball"></div>
-                </div>
-              </button>
-            </div>
-          </div>
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 700ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-          <div class="split-line"></div>
-        </form>
+    .verify-warning {
+      display: none;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.4);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 16px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-left  { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <!-- Panel izquierdo -->
+    <div class="auth-left">
+      <div class="auth-logo">Math<span>Go</span></div>
+      <div>
+        <div class="auth-tagline">¡Bienvenido<br>de vuelta!</div>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-fire"></i></span> Tu racha te espera</div>
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-bolt"></i></span> Sigue ganando XP</div>
+        <div class="auth-feature"><span class="auth-feature-icon"><i class="fa-solid fa-trophy"></i></span> Defiende tu posicion en ligas</div>
       </div>
     </div>
 
-    <script type="module">
-      // Importar Firebase
-      import { auth, db } from '../js/firebaseConfig.js';
-      import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-      import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-      
-      // Verificar si el usuario ya está logueado
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // Si ya está logueado, redirigir a learn.html
-          window.location.href = '../html/learn.html';
-        }
-      });
-      
-      // Manejar el formulario de login
-      const form = document.getElementById('main-form');
-      const emailInput = document.getElementById('email-input');
-      const passwordInput = document.getElementById('password-input');
-      const loginButton = document.getElementById('create-account-button');
-      const loadingContainer = document.getElementById('loading-balls-container');
-      const loginSpan = document.getElementById('login-span');
-      const emailError = document.getElementById('email-error-message');
-      const passwordError = document.getElementById('password-error-message');
-      
-      // Función para mostrar errores
-      function showError(element, message) {
-        element.textContent = message;
-        element.style.display = 'block';
+    <!-- Panel derecho -->
+    <div class="auth-right">
+      <h1>Ingresar</h1>
+      <p class="auth-sub">Continúa tu aprendizaje.</p>
+
+      <!-- Advertencia de correo no verificado -->
+      <div class="verify-warning" id="verify-warning">
+        ⚠️ Tu correo no está verificado. <a href="verify-email.html" style="color:#92400e; text-decoration:underline;">Verificar ahora →</a>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div class="mg-input-group">
+          <label class="mg-label" for="email-input">Correo electrónico</label>
+          <input class="mg-input" type="email" id="email-input"
+            placeholder="tu@correo.com" autocomplete="email" required />
+          <span class="mg-error-msg" id="email-error"></span>
+        </div>
+
+        <div class="mg-input-group">
+          <label class="mg-label" for="password-input">Contraseña</label>
+          <input class="mg-input" type="password" id="password-input"
+            placeholder="Tu contraseña" autocomplete="current-password" required />
+          <span class="mg-error-msg" id="password-error"></span>
+        </div>
+
+        <div class="forgot-link" id="forgot-link">¿Olvidaste tu contraseña?</div>
+
+        <button type="submit" class="mg-btn mg-btn-primary mg-btn-full" id="login-btn">
+          <span id="login-text"><i class="fa-solid fa-right-to-bracket"></i> Ingresar</span>
+          <div class="spinner" id="login-spinner" style="display:none;"></div>
+        </button>
+      </form>
+
+      <p class="auth-link">¿No tienes cuenta? <a href="signup.html">Crear cuenta gratis</a></p>
+    </div>
+  </div>
+
+  <div class="mg-toast-container" id="mg-toast-container"></div>
+
+  <script type="module">
+    import { auth, db } from '../js/firebaseConfig.js';
+    import {
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+    import { showToast } from '../js/services/auth.js';
+    import { forgotPassword } from '../js/services/api.js';
+
+    // Redirigir si ya hay sesion activa y verificada
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.emailVerified) {
+        window.location.replace('./learn.html');
       }
-      
-      function clearErrors() {
-        emailError.textContent = '';
-        emailError.style.display = 'none';
-        passwordError.textContent = '';
-        passwordError.style.display = 'none';
+    });
+
+    const loginForm = document.getElementById('login-form');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email    = document.getElementById('email-input').value.trim();
+      const password = document.getElementById('password-input').value;
+
+      // Limpiar errores
+      document.getElementById('email-error').textContent    = '';
+      document.getElementById('password-error').textContent = '';
+      document.getElementById('verify-warning').style.display = 'none';
+
+      // Validar
+      if (!email) {
+        document.getElementById('email-error').textContent = 'Ingresa tu correo';
+        document.getElementById('email-input').classList.add('error');
+        return;
       }
-      
-      // Manejar el submit del formulario
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        clearErrors();
-        
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        // Validaciones básicas
-        if (!email) {
-          showError(emailError, 'Por favor ingresa tu email');
+      if (!password) {
+        document.getElementById('password-error').textContent = 'Ingresa tu contraseña';
+        document.getElementById('password-input').classList.add('error');
+        return;
+      }
+
+      // Estado de carga
+      document.getElementById('login-text').style.display    = 'none';
+      document.getElementById('login-spinner').style.display = 'block';
+      document.getElementById('login-btn').disabled = true;
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const user = cred.user;
+
+        if (!user.emailVerified) {
+          // Mostrar advertencia en lugar de bloquear
+          document.getElementById('verify-warning').style.display = 'flex';
+          document.getElementById('login-text').style.display    = 'block';
+          document.getElementById('login-spinner').style.display = 'none';
+          document.getElementById('login-btn').disabled = false;
           return;
         }
-        
-        if (!password) {
-          showError(passwordError, 'Por favor ingresa tu contraseña');
-          return;
+
+        // Login exitoso
+        window.location.replace('./learn.html');
+
+      } catch (err) {
+        document.getElementById('login-text').style.display    = 'block';
+        document.getElementById('login-spinner').style.display = 'none';
+        document.getElementById('login-btn').disabled = false;
+
+        const MESSAGES = {
+          'auth/invalid-email':        'El formato del correo no es válido',
+          'auth/user-not-found':       'No existe una cuenta con este correo',
+          'auth/wrong-password':       'Contraseña incorrecta',
+          'auth/invalid-credential':   'Correo o contraseña incorrectos',
+          'auth/too-many-requests':    'Demasiados intentos. Intenta más tarde',
+        };
+        const msg = MESSAGES[err.code] || err.message;
+        document.getElementById('password-error').textContent = msg;
+        document.getElementById('password-input').classList.add('error');
+      }
+    });
+
+    // Recuperar contraseña
+    document.getElementById('forgot-link').addEventListener('click', async () => {
+      const email = document.getElementById('email-input').value.trim();
+      if (!email) {
+        showToast('Escribe tu correo primero para recuperar la contraseña.', 'error');
+        document.getElementById('email-input').focus();
+        return;
+      }
+      try {
+        const { error } = await forgotPassword(email);
+        if (error) {
+          showToast(error, 'error');
+        } else {
+          showToast('¡Correo de recuperación enviado! Revisa tu bandeja.', 'success');
         }
-        
-        // Mostrar loading
-        loginSpan.classList.add('hidden');
-        loadingContainer.classList.remove('hidden');
-        loginButton.disabled = true;
-        
-        try {
-          // Iniciar sesión con Firebase
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-          
-          // Obtener datos del usuario desde Firestore
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            // Guardar datos en localStorage para usar en la app
-            localStorage.setItem('mathgo_user', JSON.stringify({
-              uid: user.uid,
-              name: userData.name,
-              email: userData.email,
-              level: userData.level || 'beginner',
-              totalXp: userData.totalXp || 0,
-              streak: userData.streak || 0
-            }));
-          }
-          
-          // Redirigir a la página de aprendizaje
-          window.location.href = '../html/learn.html';
-          
-        } catch (error) {
-          console.error('Error al iniciar sesión:', error);
-          
-          // Mostrar mensaje de error según el código
-          let errorMessage = 'Error al iniciar sesión';
-          switch (error.code) {
-            case 'auth/invalid-email':
-              errorMessage = 'El formato del email no es válido';
-              break;
-            case 'auth/user-not-found':
-              errorMessage = 'No existe una cuenta con este email';
-              break;
-            case 'auth/wrong-password':
-              errorMessage = 'Contraseña incorrecta';
-              break;
-            case 'auth/too-many-requests':
-              errorMessage = 'Demasiados intentos. Intenta más tarde';
-              break;
-            default:
-              errorMessage = error.message;
-          }
-          
-          showError(passwordError, errorMessage);
-          
-          // Ocultar loading
-          loginSpan.classList.remove('hidden');
-          loadingContainer.classList.add('hidden');
-          loginButton.disabled = false;
-        }
-      });
-      
-      // Manejar el botón de "¿Olvidaste tu contraseña?"
-      const forgotPasswordLink = document.getElementById('forgot-password');
-      forgotPasswordLink.addEventListener('click', async () => {
-        const email = emailInput.value.trim();
-        
-        if (!email) {
-          showError(emailError, 'Por favor ingresa tu email para restablecer la contraseña');
-          return;
-        }
-        
-        try {
-          const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js");
-          await sendPasswordResetEmail(auth, email);
-          alert('Se ha enviado un correo para restablecer tu contraseña');
-        } catch (error) {
-          console.error('Error al enviar correo:', error);
-          let errorMessage = 'Error al enviar correo';
-          if (error.code === 'auth/user-not-found') {
-            errorMessage = 'No existe una cuenta con este email';
-          }
-          showError(emailError, errorMessage);
-        }
-      });
-    </script>
-  </body>
+      } catch {
+        showToast('Error al enviar el correo. ¿Es el correo correcto?', 'error');
+      }
+    });
+  </script>
+</body>
 </html>

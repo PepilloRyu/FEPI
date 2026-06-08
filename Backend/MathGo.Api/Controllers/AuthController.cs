@@ -43,4 +43,21 @@ public class AuthController : ControllerBase
         await _authService.RevokeRefreshTokensAsync(uid);
         return Ok(new { Message = "Logged out successfully" });
     }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
+        {
+            await _authService.ForgotPasswordAsync(request.Email);
+            return Ok(new { Message = "Enlace de recuperación enviado exitosamente." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }
