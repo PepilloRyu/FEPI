@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Panel Admin</title>
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* Hero */
+    .admin-hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, var(--mg-primary) 60%, var(--mg-secondary) 100%);
+      border-radius: var(--mg-radius-xl);
+      padding: 32px 36px;
+      color: #fff;
+      margin-bottom: var(--mg-space-8);
+      box-shadow: 0 16px 48px rgba(79,70,229,0.35);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .admin-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%; right: -4%;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .admin-hero-icon {
+      width: 68px; height: 68px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; flex-shrink: 0;
+    }
+    .admin-hero h1 { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 4px; }
+    .admin-hero p  { opacity: 0.8; font-size: 15px; }
+
+    /* Stats grid */
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: var(--mg-space-8);
+    }
+    .admin-stat-card {
+      background: var(--mg-surface);
+      border: 1px solid var(--mg-border);
+      border-radius: var(--mg-radius-lg);
+      padding: 22px 18px;
+      text-align: center;
+      box-shadow: var(--mg-shadow-sm);
+      transition: all var(--mg-transition);
+    }
+    .admin-stat-card:hover { transform: translateY(-2px); box-shadow: var(--mg-shadow-md); }
+    .admin-stat-icon  { font-size: 28px; margin-bottom: 8px; }
+    .admin-stat-value { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .admin-stat-label { font-size: 11px; font-weight: 700; color: var(--mg-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Section header */
+    .admin-section-hd {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: var(--mg-space-4);
+    }
+    .admin-section-hd h2 { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+
+    /* Table */
+    .admin-table-wrap { overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .admin-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--mg-muted);
+      border-bottom: 2px solid var(--mg-border);
+      white-space: nowrap;
+    }
+    .admin-table td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--mg-border-soft);
+      color: var(--mg-text-2);
+      vertical-align: middle;
+    }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: var(--mg-surface-2); }
+
+    /* Role badge */
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px;
+      border-radius: var(--mg-radius-full);
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .role-badge.admin   { background: rgba(79,70,229,0.12); color: var(--mg-primary); }
+    .role-badge.student { background: rgba(100,116,139,0.1); color: var(--mg-muted); }
+
+    /* Toggle role button */
+    .btn-role {
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 12px; font-weight: 800;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all var(--mg-transition);
+      white-space: nowrap;
+    }
+    .btn-role.to-admin   { background: rgba(79,70,229,0.08); color: var(--mg-primary); border-color: rgba(79,70,229,0.2); }
+    .btn-role.to-admin:hover   { background: rgba(79,70,229,0.15); }
+    .btn-role.to-student { background: rgba(239,68,68,0.07); color: var(--mg-danger); border-color: rgba(239,68,68,0.2); }
+    .btn-role.to-student:hover { background: rgba(239,68,68,0.14); }
+    .btn-role:disabled  { opacity: 0.5; cursor: not-allowed; }
+
+    /* World progress bar */
+    .world-bar {
+      height: 8px; min-width: 100px;
+      background: var(--mg-border);
+      border-radius: var(--mg-radius-full);
+      overflow: hidden;
+    }
+    .world-bar-fill {
+      height: 100%;
+      border-radius: var(--mg-radius-full);
+      background: linear-gradient(90deg, var(--mg-primary), var(--mg-secondary));
+      transition: width 700ms cubic-bezier(0.4,0,0.2,1);
+    }
+
+    @media (max-width: 900px) {
+      .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mg-layout-2col" id="mg-layout">
+    <!-- Sidebar inyectado por JS -->
+
+    <main class="mg-main" id="mg-main">
+
+      <!-- Hero -->
+      <div class="admin-hero">
+        <div class="admin-hero-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <h1>Panel de Administrador</h1>
+          <p>Gestión de usuarios y estadísticas globales de MathGo</p>
+        </div>
+      </div>
+
+      <!-- 1. Estadísticas generales -->
+      <div class="admin-section-hd">
+        <i class="fa-solid fa-chart-bar" style="color:var(--mg-primary);font-size:20px;"></i>
+        <h2>Estadísticas generales</h2>
+      </div>
+      <div class="admin-stats-grid" id="admin-stats">
+        <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
+        <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
+        <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
+        <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
+      </div>
+
+      <!-- 2. Gestión de usuarios -->
+      <div class="admin-section-hd mg-mb-4">
+        <i class="fa-solid fa-users" style="color:var(--mg-primary);font-size:20px;"></i>
+        <h2>Gestión de usuarios</h2>
+      </div>
+      <div class="mg-card mg-mb-8" id="users-card">
+        <div class="mg-skeleton" style="height:220px;border-radius:12px;"></div>
+      </div>
+
+      <!-- 3. Progreso por mundo -->
+      <div class="admin-section-hd mg-mb-4">
+        <i class="fa-solid fa-map" style="color:var(--mg-primary);font-size:20px;"></i>
+        <h2>Progreso por mundo</h2>
+      </div>
+      <div class="mg-card" id="worlds-card">
+        <div class="mg-skeleton" style="height:200px;border-radius:12px;"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="mg-toast-container" id="mg-toast-container"></div>
+
+  <script type="module">
+    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { db } from '../js/firebaseConfig.js';
+    import {
+      doc, getDoc, setDoc,
+      collection, getDocs,
+    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    const WORLDS = [
+      { id: '1', title: 'Las Bases del Álgebra',           icon: 'fa-solid fa-drafting-compass' },
+      { id: '2', title: 'Números Reales',                  icon: 'fa-solid fa-infinity' },
+      { id: '3', title: 'Funciones y Ecuaciones Lineales', icon: 'fa-solid fa-chart-simple' },
+      { id: '4', title: 'Funciones Cuadráticas',           icon: 'fa-solid fa-wave-square' },
+      { id: '5', title: 'Matrices y Sistemas Avanzados',   icon: 'fa-solid fa-table-cells' },
+      { id: '6', title: 'Números Complejos y Vectores',    icon: 'fa-solid fa-atom' },
+    ];
+
+    let cachedUsers = [];
+    let cachedProgressMap = {};
+
+    // ── Guard + carga ──────────────────────────────────────
+    async function loadAdmin(user) {
+      const selfSnap = await getDoc(doc(db, 'users', user.uid));
+      if (!selfSnap.exists() || selfSnap.data().role !== 'admin') {
+        window.location.replace('learn.html');
+        return;
+      }
+
+      await initSidebar('admin');
+
+      const [usersSnap, progressSnap] = await Promise.all([
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'mathgo_progress')),
+      ]);
+
+      cachedUsers = [];
+      usersSnap.forEach(d => cachedUsers.push({ uid: d.id, ...d.data() }));
+      progressSnap.forEach(d => { cachedProgressMap[d.id] = d.data(); });
+
+      // Calcular estadísticas globales
+      let totalLevels = 0;
+      let totalXpSum  = 0;
+      let topUser     = null;
+
+      cachedUsers.forEach(u => {
+        const p   = cachedProgressMap[u.uid] ?? {};
+        const xp  = p.totalXp ?? u.totalXp ?? 0;
+        totalXpSum += xp;
+        if (!topUser || xp > topUser.xp) topUser = { ...u, xp };
+        Object.values(p.worlds ?? {}).forEach(w => {
+          totalLevels += (w.levelsCompleted ?? []).length;
+        });
+      });
+
+      const avgXp = cachedUsers.length > 0 ? Math.round(totalXpSum / cachedUsers.length) : 0;
+
+      renderStats(cachedUsers.length, totalLevels, topUser, avgXp);
+      renderUsers(cachedUsers, cachedProgressMap);
+      renderWorlds(cachedUsers, cachedProgressMap);
+    }
+
+    // ── Sección 1: Estadísticas generales ─────────────────
+    function renderStats(totalUsers, totalLevels, topUser, avgXp) {
+      const topName = topUser
+        ? (topUser.name || topUser.email?.split('@')[0] || '–').replace(/</g, '&lt;')
+        : '–';
+      document.getElementById('admin-stats').innerHTML = `
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon"><i class="fa-solid fa-users" style="color:var(--mg-primary);"></i></div>
+          <div class="admin-stat-value mg-text-primary">${totalUsers}</div>
+          <div class="admin-stat-label">Usuarios registrados</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon"><i class="fa-solid fa-circle-check" style="color:var(--mg-success);"></i></div>
+          <div class="admin-stat-value" style="color:var(--mg-success);">${totalLevels}</div>
+          <div class="admin-stat-label">Niveles completados</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon"><i class="fa-solid fa-crown" style="color:var(--mg-xp);"></i></div>
+          <div class="admin-stat-value mg-text-xp" style="font-size:16px;padding-top:4px;">${topName}</div>
+          <div class="admin-stat-label">Mayor XP · ${topUser?.xp ?? 0} pts</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon"><i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i></div>
+          <div class="admin-stat-value mg-text-xp">${avgXp}</div>
+          <div class="admin-stat-label">Promedio XP</div>
+        </div>
+      `;
+    }
+
+    // ── Sección 2: Gestión de usuarios ────────────────────
+    function renderUsers(users, progressMap) {
+      if (!users.length) {
+        document.getElementById('users-card').innerHTML = `
+          <div class="mg-empty">
+            <div class="mg-empty-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="mg-empty-title">Sin usuarios</div>
+          </div>`;
+        return;
+      }
+
+      const rows = users.map(u => {
+        const p    = progressMap[u.uid] ?? {};
+        const xp   = p.totalXp ?? u.totalXp ?? 0;
+        const racha = p.dailyStreak ?? u.streak ?? 0;
+        const role  = u.role ?? 'student';
+        let totalCompleted = 0;
+        Object.values(p.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
+        const nivel    = totalCompleted + 1;
+        const initials = getInitials(u.name || u.email);
+        const isAdm    = role === 'admin';
+        const safeName = (u.name  || '–').replace(/</g,'&lt;');
+        const safeMail = (u.email || '–').replace(/</g,'&lt;');
+
+        return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="mg-avatar" style="width:34px;height:34px;font-size:13px;">${initials}</div>
+                <div>
+                  <div style="font-weight:700;color:var(--mg-text);">${safeName}</div>
+                  <div style="font-size:12px;color:var(--mg-muted);">${safeMail}</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-weight:700;">Nv. ${nivel}</td>
+            <td><span class="mg-badge mg-badge-xp"><i class="fa-solid fa-bolt"></i> ${xp}</span></td>
+            <td><span class="mg-badge mg-badge-streak"><i class="fa-solid fa-fire"></i> ${racha}</span></td>
+            <td><span class="role-badge ${role}">${isAdm ? '👑 Admin' : '🎓 Estudiante'}</span></td>
+            <td>
+              <button
+                class="btn-role ${isAdm ? 'to-student' : 'to-admin'}"
+                onclick="window.toggleRole('${u.uid}', '${role}', this)">
+                ${isAdm ? '<i class="fa-solid fa-arrow-down"></i> Hacer estudiante' : '<i class="fa-solid fa-arrow-up"></i> Hacer admin'}
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+
+      document.getElementById('users-card').innerHTML = `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nivel</th>
+                <th>XP</th>
+                <th>Racha</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    // ── Sección 3: Progreso por mundo ─────────────────────
+    function renderWorlds(users, progressMap) {
+      const total = users.length;
+      const rows = WORLDS.map(w => {
+        const completed = users.filter(u =>
+          progressMap[u.uid]?.worlds?.[w.id]?.allComplete === true
+        ).length;
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+        return `
+          <tr>
+            <td style="width:36px;text-align:center;">
+              <i class="${w.icon}" style="color:var(--mg-primary);font-size:18px;"></i>
+            </td>
+            <td style="font-weight:700;color:var(--mg-text);">Mundo ${w.id} — ${w.title}</td>
+            <td style="text-align:center;width:80px;">
+              <span class="mg-badge mg-badge-primary">${completed} / ${total}</span>
+            </td>
+            <td style="width:180px;">
+              <div class="world-bar">
+                <div class="world-bar-fill" style="width:${pct}%;"></div>
+              </div>
+            </td>
+            <td style="font-weight:800;color:var(--mg-primary);text-align:right;width:48px;">${pct}%</td>
+          </tr>`;
+      }).join('');
+
+      document.getElementById('worlds-card').innerHTML = `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Mundo</th>
+                <th style="text-align:center;">Completaron</th>
+                <th>Progreso</th>
+                <th style="text-align:right;">%</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    // ── Cambio de rol ─────────────────────────────────────
+    async function toggleRole(uid, currentRole, btn) {
+      const newRole = currentRole === 'admin' ? 'student' : 'admin';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      try {
+        await setDoc(doc(db, 'users', uid), { role: newRole }, { merge: true });
+        // Actualizar caché local y re-renderizar tabla
+        const idx = cachedUsers.findIndex(u => u.uid === uid);
+        if (idx !== -1) cachedUsers[idx] = { ...cachedUsers[idx], role: newRole };
+        renderUsers(cachedUsers, cachedProgressMap);
+        showToast(`Rol actualizado a "${newRole}"`, 'success');
+      } catch {
+        showToast('Error al cambiar el rol', 'error');
+        btn.disabled = false;
+        btn.innerHTML = currentRole === 'admin'
+          ? '<i class="fa-solid fa-arrow-down"></i> Hacer estudiante'
+          : '<i class="fa-solid fa-arrow-up"></i> Hacer admin';
+      }
+    }
+
+    window.toggleRole = toggleRole;
+
+    requireAuth(false).then(user => loadAdmin(user));
+  </script>
+</body>
+</html>

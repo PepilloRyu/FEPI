@@ -157,6 +157,7 @@ export async function initEngine({
         <a href="dashboard.html"><span><i class="fa-solid fa-chart-line"></i></span>Mi progreso</a>
         <a href="profile-page.html"><span><i class="fa-solid fa-user"></i></span>Perfil</a>
         <a href="faq.html"><span><i class="fa-solid fa-circle-question"></i></span>Ayuda</a>
+        ${isAdmin ? `<a href="admin.html"><span><i class="fa-solid fa-shield-halved"></i></span>Admin</a>` : ''}
       </nav>
       <div class="sidebar-footer">
         <a onclick="MG.signOut()" style="cursor:pointer;"><span><i class="fa-solid fa-right-from-bracket"></i></span>Cerrar sesión</a>

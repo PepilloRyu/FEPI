@@ -1,19 +1,24 @@
 /**
- * MathGo Sidebar Component v2.1
+ * MathGo Sidebar Component v2.2
  * - Sin tienda (shop)
  * - Sin logros (achievements)
  * - Iconos FontAwesome 6
+ * - Enlace Admin visible solo para usuarios con role: "admin"
  */
 
 import { logout, getInitials } from '../services/auth.js';
 import { getProfile } from '../services/api.js';
+import { auth, db } from '../firebaseConfig.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
 const NAV_ITEMS = [
-  { id: 'learn',      icon: 'fa-solid fa-graduation-cap', label: 'Aprender',    href: 'learn.html' },
-  { id: 'dashboard',  icon: 'fa-solid fa-chart-line',     label: 'Mi progreso', href: 'dashboard.html' },
-  { id: 'profile',    icon: 'fa-solid fa-user',           label: 'Perfil',       href: 'profile-page.html' },
-  { id: 'faq',        icon: 'fa-solid fa-circle-question',label: 'Ayuda',        href: 'faq.html' },
+  { id: 'learn',     icon: 'fa-solid fa-graduation-cap', label: 'Aprender',    href: 'learn.html' },
+  { id: 'dashboard', icon: 'fa-solid fa-chart-line',     label: 'Mi progreso', href: 'dashboard.html' },
+  { id: 'profile',   icon: 'fa-solid fa-user',           label: 'Perfil',      href: 'profile-page.html' },
+  { id: 'faq',       icon: 'fa-solid fa-circle-question',label: 'Ayuda',       href: 'faq.html' },
 ];
+
+const ADMIN_ITEM = { id: 'admin', icon: 'fa-solid fa-shield-halved', label: 'Admin', href: 'admin.html' };
 
 function buildNavItem(item, activeId, basePath) {
   const isActive = item.id === activeId;
@@ -116,8 +121,15 @@ export async function initSidebar(activeId = 'learn') {
     logout();
   });
 
-  // Cargar datos del usuario desde el backend
-  const { data: profile } = await getProfile();
+  // Cargar perfil (backend) y rol (Firestore) en paralelo
+  const currentUser = auth.currentUser;
+  const [profileResult, roleResult] = await Promise.allSettled([
+    getProfile(),
+    currentUser ? getDoc(doc(db, 'users', currentUser.uid)) : Promise.resolve(null),
+  ]);
+
+  // Actualizar datos del perfil
+  const profile = profileResult.status === 'fulfilled' ? profileResult.value?.data : null;
   if (profile) {
     const nameEl   = document.getElementById('sb-name');
     const xpEl     = document.getElementById('sb-xp');
@@ -128,5 +140,34 @@ export async function initSidebar(activeId = 'learn') {
     if (xpEl)     xpEl.textContent     = profile.xpTotal ?? 0;
     if (streakEl) streakEl.textContent = profile.streakDays ?? 0;
     if (avatarEl) avatarEl.textContent = getInitials(profile.name || profile.email);
+  }
+
+  // Inyectar enlace Admin si el usuario es administrador
+  const roleSnap = roleResult.status === 'fulfilled' ? roleResult.value : null;
+  if (roleSnap?.exists?.() && roleSnap.data().role === 'admin') {
+    const isActive = activeId === ADMIN_ITEM.id;
+
+    // Enlace en sidebar desktop
+    const nav = sidebarEl.querySelector('.mg-nav');
+    if (nav) {
+      const adminEl = document.createElement('a');
+      adminEl.href = `${basePath}${ADMIN_ITEM.href}`;
+      if (isActive) { adminEl.className = 'active'; adminEl.setAttribute('aria-current', 'page'); }
+      adminEl.title = ADMIN_ITEM.label;
+      adminEl.style.cssText = isActive ? '' : 'color:var(--mg-primary);';
+      adminEl.innerHTML = `
+        <span class="mg-nav-icon" style="background:rgba(79,70,229,0.1);color:var(--mg-primary);">
+          <i class="${ADMIN_ITEM.icon}"></i>
+        </span>${ADMIN_ITEM.label}`;
+      nav.appendChild(adminEl);
+    }
+
+    // Enlace en bottom nav móvil
+    const adminBottom = document.createElement('a');
+    adminBottom.href = `${basePath}${ADMIN_ITEM.href}`;
+    if (isActive) { adminBottom.className = 'active'; adminBottom.setAttribute('aria-current', 'page'); }
+    adminBottom.title = ADMIN_ITEM.label;
+    adminBottom.innerHTML = `<i class="${ADMIN_ITEM.icon}"></i><span class="nav-label">${ADMIN_ITEM.label}</span>`;
+    bottomNavEl.appendChild(adminBottom);
   }
 }
