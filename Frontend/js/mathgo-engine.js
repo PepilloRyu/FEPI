@@ -146,14 +146,18 @@ export async function initEngine({
   // ---- Fragmentos HTML reutilizables ----
   function sidebar() {
     return `<aside class="mockup-sidebar">
-      <div class="brand"><div class="brand-mark">M</div><div class="brand-name">Math<span>Go</span></div></div>
+      <div class="brand">
+        <div class="brand-mark"><i class="fa-solid fa-square-root-variable"></i></div>
+        <div class="brand-name">Math<span>Go</span></div>
+      </div>
       <nav class="mockup-nav">
-        <a href="learn.html" class="active"><span>🏠</span>Aprender</a>
-        <a href="profile-page.html"><span>👤</span>Perfil</a>
-        <a href="faq.html"><span>❔</span>Preguntas Frecuentes</a>
+        <a href="learn.html" class="active" aria-current="page"><span><i class="fa-solid fa-graduation-cap"></i></span>Aprender</a>
+        <a href="dashboard.html"><span><i class="fa-solid fa-chart-line"></i></span>Mi progreso</a>
+        <a href="profile-page.html"><span><i class="fa-solid fa-user"></i></span>Perfil</a>
+        <a href="faq.html"><span><i class="fa-solid fa-circle-question"></i></span>Ayuda</a>
       </nav>
-      <div class="mg-sidebar-footer">
-        <a onclick="MG.signOut()" style="cursor:pointer;">⛔ Cerrar sesión</a>
+      <div class="sidebar-footer">
+        <a onclick="MG.signOut()" style="cursor:pointer;"><span><i class="fa-solid fa-right-from-bracket"></i></span>Cerrar sesión</a>
       </div>
     </aside>`;
   }
@@ -170,7 +174,7 @@ export async function initEngine({
         <div><h3>${name}</h3><span>Nivel ${globalCompleted + 1}</span></div>
       </div>
       <div class="card">
-        <h2>Misiones diarias</h2>
+        <h2><i class="fa-solid fa-bullseye" style="color:#4f46e5;margin-right:6px;"></i>Misiones diarias</h2>
         <div class="mission"><p>Gana 100 XP</p>
           <div class="bar"><span style="width:${xpPct}%"></span></div></div>
         <div class="mission"><p>Completa 1 lección perfecta</p>
@@ -178,6 +182,9 @@ export async function initEngine({
         <div class="mission"><p>Racha activa</p>
           <div class="bar"><span style="width:${Math.min(100, dailyStreak * 20)}%"></span></div></div>
       </div>
+      <a href="dashboard.html" style="display:block;text-align:center;padding:12px 16px;border-radius:14px;border:1px solid #e5e9f2;color:#4f46e5;font-weight:900;font-size:14px;text-decoration:none;background:#fff;transition:background .15s;">
+        <i class="fa-solid fa-chart-line"></i> Ver mi progreso completo
+      </a>
     </aside>`;
   }
 
@@ -470,9 +477,9 @@ export async function initEngine({
         ${sidebar()}
         <main class="main-content">
           <div class="stats-bar">
-            <div class="stat-chip">🔥 <strong>${dailyStreak}</strong></div>
-            <div class="stat-chip">💎 <strong>${raw.gems ?? 0}</strong></div>
-            <div class="stat-chip xp">⚡ <strong>${S.xp} XP</strong></div>
+            <div class="stat-chip"><i class="fa-solid fa-fire" style="color:#ff9600;"></i><strong>${dailyStreak}</strong> días</div>
+            <div class="stat-chip"><i class="fa-solid fa-gem" style="color:#1cb0f6;"></i><strong>${raw.gems ?? 0}</strong></div>
+            <div class="stat-chip xp"><i class="fa-solid fa-bolt"></i><strong>${S.xp}</strong> XP</div>
           </div>
           <section class="hero-banner">
             <div>

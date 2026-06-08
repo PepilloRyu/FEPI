@@ -9,11 +9,10 @@ import { logout, getInitials } from '../services/auth.js';
 import { getProfile } from '../services/api.js';
 
 const NAV_ITEMS = [
-  { id: 'learn',        icon: 'fa-solid fa-graduation-cap', label: 'Aprender',    href: 'learn.html' },
-  { id: 'dashboard',   icon: 'fa-solid fa-chart-line',     label: 'Mi progreso', href: 'dashboard.html' },
-  { id: 'leaderboard', icon: 'fa-solid fa-trophy',         label: 'Ligas',        href: 'leaderboard.html' },
-  { id: 'profile',     icon: 'fa-solid fa-user',           label: 'Perfil',       href: 'profile-page.html' },
-  { id: 'faq',         icon: 'fa-solid fa-circle-question',label: 'Ayuda',        href: 'faq.html' },
+  { id: 'learn',      icon: 'fa-solid fa-graduation-cap', label: 'Aprender',    href: 'learn.html' },
+  { id: 'dashboard',  icon: 'fa-solid fa-chart-line',     label: 'Mi progreso', href: 'dashboard.html' },
+  { id: 'profile',    icon: 'fa-solid fa-user',           label: 'Perfil',       href: 'profile-page.html' },
+  { id: 'faq',        icon: 'fa-solid fa-circle-question',label: 'Ayuda',        href: 'faq.html' },
 ];
 
 function buildNavItem(item, activeId, basePath) {

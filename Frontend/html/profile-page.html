@@ -69,7 +69,7 @@
     /* Stats grid grande */
     .profile-stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-bottom: var(--mg-space-6);
     }
@@ -145,16 +145,6 @@
           <div class="profile-stat-value mg-text-streak" id="stat-streak">–</div>
           <div class="profile-stat-label">Racha actual</div>
         </div>
-        <div class="profile-stat-box">
-          <div class="profile-stat-icon"><i class="fa-solid fa-gem" style="color:var(--mg-gems);"></i></div>
-          <div class="profile-stat-value mg-text-gem" id="stat-gems">–</div>
-          <div class="profile-stat-label">Gemas</div>
-        </div>
-        <div class="profile-stat-box">
-          <div class="profile-stat-icon"><i class="fa-solid fa-medal" style="color:var(--mg-league);"></i></div>
-          <div class="profile-stat-value" id="stat-league" style="font-size:18px;">–</div>
-          <div class="profile-stat-label">Liga actual</div>
-        </div>
       </div>
 
       <!-- Precision y progreso -->
@@ -210,14 +200,6 @@
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
-    function getLeague(xp) {
-      if (xp < 500) return 'Bronce';
-      if (xp < 1500) return 'Plata';
-      if (xp < 4000) return 'Oro';
-      if (xp < 10000) return 'Diamante';
-      return 'Maestro';
-    }
-
     function renderObjetivos(objetivos, uid) {
       const lista = document.getElementById('objetivos-lista');
       if (!objetivos?.length) {
@@ -259,7 +241,6 @@
 
       const displayName = userData.name || user.displayName || user.email?.split('@')[0] || 'Usuario';
       const xp    = userData.totalXp ?? progress.totalXp ?? 0;
-      const gems  = userData.gems ?? progress.gems ?? 0;
       const streak = userData.streak ?? progress.dailyStreak ?? 0;
 
       let totalCompleted = 0;
@@ -273,10 +254,8 @@
         `📅 Miembro desde ${userData.joinDate || new Date(user.metadata?.creationTime).toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' }) || 'Fecha desconocida'}`;
 
       // Stats top
-      document.getElementById('stat-xp').textContent     = xp;
-      document.getElementById('stat-streak').textContent  = streak;
-      document.getElementById('stat-gems').textContent    = gems;
-      document.getElementById('stat-league').textContent  = getLeague(xp);
+      document.getElementById('stat-xp').textContent    = xp;
+      document.getElementById('stat-streak').textContent = streak;
 
       // Stats de aprendizaje (intentar del backend)
       const { data: analytics } = await getAnalytics();
