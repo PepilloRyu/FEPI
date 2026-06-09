@@ -29,21 +29,29 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(uid);
         if (user == null) return null;
 
+        // XP, racha y gemas viven en mathgo_progress, no en users
+        var progress = await _progressRepository.GetByIdAsync(uid);
+
+        int totalCompleted = 0;
+        if (progress?.Worlds != null)
+            foreach (var w in progress.Worlds.Values)
+                totalCompleted += w.LevelsCompleted?.Count ?? 0;
+
         return new UserProfileResponse
         {
-            Uid = user.Uid,
+            Uid = uid,
             Name = user.Name,
             Email = user.Email,
-            Role = user.Role.ToString().ToLower(),
+            Role = user.Role,
             AvatarUrl = user.AvatarUrl ?? "",
-            Level = user.Level,
-            XpTotal = user.Gamification?.XpTotal ?? 0,
-            StreakDays = user.Gamification?.StreakDays ?? 0,
-            DailyStreak = user.Gamification?.DailyStreak ?? 0,
-            CurrentLeague = user.Gamification?.CurrentLeague ?? "Rookie",
-            Gems = user.Gamification?.Gems ?? 0,
-            Hearts = user.Gamification?.Hearts ?? 5,
-            CreatedAt = user.CreatedAt
+            Level = totalCompleted + 1,
+            XpTotal = progress?.TotalXp ?? 0,
+            DailyStreak = progress?.DailyStreak ?? 0,
+            StreakDays = progress?.DailyStreak ?? 0,
+            Gems = progress?.Gems ?? 0,
+            Hearts = 5,
+            CurrentLeague = "Rookie",
+            CreatedAt = user.CreatedAt,
         };
     }
 
@@ -72,54 +80,58 @@ public class UserService : IUserService
         if (profile == null) throw new Exception("User not found");
 
         var progress = await _progressRepository.GetByIdAsync(uid);
-        
-        var progressSummary = new ProgressSummary();
-        if (progress != null)
+
+        // TotalLevelsCompleted y TotalWorldsCompleted no los escribe el frontend:
+        // se calculan desde el diccionario worlds en mathgo_progress
+        int totalLevels = 0;
+        int totalWorlds = 0;
+        var progressSummary = new ProgressSummary { TotalXp = progress?.TotalXp ?? 0 };
+
+        if (progress?.Worlds != null)
         {
-            progressSummary.TotalXp = progress.TotalXp;
-            progressSummary.TotalLevelsCompleted = progress.TotalLevelsCompleted;
-            progressSummary.TotalWorldsCompleted = progress.TotalWorldsCompleted;
-            
-            if (progress.Worlds != null)
+            foreach (var kv in progress.Worlds)
             {
-                foreach (var wp in progress.Worlds)
+                int count = kv.Value.LevelsCompleted?.Count ?? 0;
+                totalLevels += count;
+                if (kv.Value.AllComplete) totalWorlds++;
+                progressSummary.Worlds[kv.Key] = new WorldProgressSummary
                 {
-                    progressSummary.Worlds.Add(wp.Key, new WorldProgressSummary
-                    {
-                        LevelsCompleted = wp.Value.LevelsCompleted?.Count ?? 0,
-                        AllComplete = wp.Value.AllComplete
-                    });
-                }
+                    LevelsCompleted = count,
+                    AllComplete = kv.Value.AllComplete,
+                };
             }
         }
+        progressSummary.TotalLevelsCompleted = totalLevels;
+        progressSummary.TotalWorldsCompleted = totalWorlds;
 
-        // Just returning an empty mock for now, actual implementation depends on joining other collections
         return new DashboardResponse
         {
             Profile = profile,
             Progress = progressSummary,
             ActiveMissions = new List<MissionSummary>(),
             RecentAchievements = new List<AchievementSummary>(),
-            Stats = new StatsResponse()
+            Stats = new StatsResponse { XpTotal = progress?.TotalXp ?? 0 },
         };
     }
 
     public async Task<List<LeaderboardEntry>> GetLeaderboardAsync(int top = 20)
     {
-        var users = await _userRepository.GetTopByXpAsync(top);
+        // XP viene de mathgo_progress, nombre/avatar de users
+        var progressList = await _progressRepository.GetTopByXpAsync(top);
         var leaderboard = new List<LeaderboardEntry>();
         int rank = 1;
 
-        foreach (var user in users)
+        foreach (var p in progressList)
         {
+            var user = await _userRepository.GetByIdAsync(p.Uid);
             leaderboard.Add(new LeaderboardEntry
             {
                 Rank = rank++,
-                Uid = user.Uid,
-                Name = user.Name,
-                AvatarUrl = user.AvatarUrl ?? "",
-                XpTotal = user.Gamification?.XpTotal ?? 0,
-                League = user.Gamification?.CurrentLeague ?? "Rookie"
+                Uid = p.Uid,
+                Name = user?.Name ?? "Usuario",
+                AvatarUrl = user?.AvatarUrl ?? "",
+                XpTotal = p.TotalXp,
+                League = "Rookie",
             });
         }
 

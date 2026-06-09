@@ -9,4 +9,16 @@ public class ProgressRepository : FirestoreRepository<UserProgress>, IProgressRe
     public ProgressRepository(FirestoreDb firestoreDb) : base(firestoreDb, "mathgo_progress")
     {
     }
+
+    public async Task<IEnumerable<UserProgress>> GetTopByXpAsync(int limit)
+    {
+        var snapshot = await _firestoreDb.Collection(_collectionName)
+            .OrderByDescending("totalXp")
+            .Limit(limit)
+            .GetSnapshotAsync();
+
+        return snapshot.Documents
+            .Where(d => d.Exists)
+            .Select(d => d.ConvertTo<UserProgress>());
+    }
 }
