@@ -14,17 +14,24 @@ public static class FirebaseServiceCollectionExtensions
     {
         var projectId = configuration["Firebase:ProjectId"];
         var credentialsPath = configuration["Firebase:CredentialsPath"];
-        
+
+        // En Railway (produccion) se usa la variable de entorno FIREBASE_CREDENTIALS_JSON
+        // con el contenido del JSON de credenciales como string.
+        // En local se usa el archivo firebase-credentials.json.
+        var credentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS_JSON");
+
         if (FirebaseApp.DefaultInstance == null)
         {
             var options = new AppOptions { ProjectId = projectId };
-            
-            if (!string.IsNullOrEmpty(credentialsPath))
+
+            if (!string.IsNullOrEmpty(credentialsJson))
             {
-                if (!File.Exists(credentialsPath))
-                {
-                    throw new FileNotFoundException($"El archivo de credenciales de Firebase no se encontró en la ruta: {credentialsPath}");
-                }
+                // Credenciales desde variable de entorno (Railway / produccion)
+                options.Credential = GoogleCredential.FromJson(credentialsJson);
+            }
+            else if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
+            {
+                // Credenciales desde archivo local (desarrollo)
                 options.Credential = GoogleCredential.FromFile(credentialsPath);
             }
             else
@@ -35,7 +42,10 @@ public static class FirebaseServiceCollectionExtensions
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException("No se encontraron credenciales de Firebase. Configura 'Firebase:CredentialsPath' en appsettings.Development.json o la variable de entorno GOOGLE_APPLICATION_CREDENTIALS.", ex);
+                    throw new InvalidOperationException(
+                        "No se encontraron credenciales de Firebase. " +
+                        "Configura la variable de entorno FIREBASE_CREDENTIALS_JSON en Railway, " +
+                        "o el archivo firebase-credentials.json para desarrollo local.", ex);
                 }
             }
 
@@ -43,7 +53,15 @@ public static class FirebaseServiceCollectionExtensions
         }
 
         FirestoreDb firestoreDb;
-        if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
+        if (!string.IsNullOrEmpty(credentialsJson))
+        {
+            firestoreDb = new FirestoreDbBuilder
+            {
+                ProjectId = projectId,
+                JsonCredentials = credentialsJson
+            }.Build();
+        }
+        else if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
         {
             firestoreDb = new FirestoreDbBuilder
             {
@@ -53,10 +71,9 @@ public static class FirebaseServiceCollectionExtensions
         }
         else
         {
-            // Ojo: Esto fallará si no está la variable de entorno GOOGLE_APPLICATION_CREDENTIALS
             firestoreDb = FirestoreDb.Create(projectId);
         }
-        
+
         services.AddSingleton(firestoreDb);
 
         services.AddScoped(typeof(IBaseRepository<>), typeof(FirestoreRepository<>));
@@ -65,7 +82,7 @@ public static class FirebaseServiceCollectionExtensions
         services.AddScoped<IPracticeRepository, PracticeRepository>();
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
-        
+
         // Gamification and progress repositories
         services.AddScoped<IProgressRepository, ProgressRepository>();
         services.AddScoped<IAttemptRepository, AttemptRepository>();
