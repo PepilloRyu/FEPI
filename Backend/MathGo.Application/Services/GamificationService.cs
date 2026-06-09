@@ -50,23 +50,30 @@ public class GamificationService : IGamificationService
         var progress = await _progressRepository.GetByIdAsync(uid);
         if (progress == null) return 0;
 
-        // Implement logic for checking lastActiveDate against today
-        // For simplicity, assuming caller passes "yyyy-MM-dd"
-        string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
-        
-        if (lastActiveDate != today)
+        string today = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
+
+        // Ya jugó hoy: no modificar racha
+        if (lastActiveDate == today)
+            return progress.DailyStreak;
+
+        int newStreak;
+        if (!DateTime.TryParse(lastActiveDate, out var lastDate))
         {
-            // If they didn't play yesterday, reset streak, else increment
-            // Actual check requires parsing dates. For now, incrementing.
-            progress.DailyStreak += 1;
-            if (progress.DailyStreak > progress.StreakDays)
-            {
-                progress.StreakDays = progress.DailyStreak;
-            }
-            progress.LastActiveDate = today;
-            await _progressRepository.UpdateAsync(uid, progress);
+            newStreak = 1; // sin fecha previa válida → primer día de racha
+        }
+        else
+        {
+            int daysDiff = (DateTime.UtcNow.Date - lastDate.Date).Days;
+            // daysDiff == 1: jugó ayer → incrementar; > 1: rompió la racha → reiniciar
+            newStreak = daysDiff == 1 ? progress.DailyStreak + 1 : 1;
         }
 
-        return progress.DailyStreak;
+        progress.DailyStreak = newStreak;
+        if (newStreak > progress.StreakDays)
+            progress.StreakDays = newStreak;
+        progress.LastActiveDate = today;
+        await _progressRepository.UpdateAsync(uid, progress);
+
+        return newStreak;
     }
 }

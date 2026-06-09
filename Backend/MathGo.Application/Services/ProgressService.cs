@@ -85,8 +85,9 @@ public class ProgressService : IProgressService
             progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
             progress.CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp);
             
-            // Update streak
-            progress.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(uid, DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd"));
+            progress.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(uid, progress.LastActiveDate);
+            progress.StreakDays = Math.Max(progress.StreakDays, progress.DailyStreak);
+            progress.LastActiveDate = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
             // Track weekly activity (0 = Sunday, 6 = Saturday)
             int dayOfWeek = (int)DateTime.UtcNow.DayOfWeek;
