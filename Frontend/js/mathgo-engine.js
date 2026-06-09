@@ -405,7 +405,6 @@ export async function initEngine({
     try {
       await setDoc(doc(db, "mathgo_progress", uid), {
         totalXp: S.xp,
-        streak:  S.streak,
         worlds: {
           [worldId]: {
             levelsCompleted: completedArr,

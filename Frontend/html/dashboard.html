@@ -358,9 +358,9 @@ function updateXpRing(xp, xpNeeded = 1000) {
       const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
       const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
 
-      const xp = progress.totalXp ?? userData.totalXp ?? 0;
-      const streak = progress.dailyStreak ?? userData.streak ?? 0;
-      const gems = progress.gems ?? userData.gems ?? 0;
+      const xp = progress.totalXp ?? 0;
+      const streak = progress.dailyStreak ?? 0;
+      const gems = progress.gems ?? 0;
       
       let totalCompleted = 0;
       Object.values(progress.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });

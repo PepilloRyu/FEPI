@@ -161,9 +161,9 @@
         setDoc(doc(db, 'mathgo_progress', user.uid), { dailyStreak: streak, lastActiveDate: todayStr }, { merge: true }).catch(() => {});
       }
 
-      const xp = progress.totalXp ?? userData.totalXp ?? 0;
+      const xp = progress.totalXp ?? 0;
       document.getElementById('stat-streak').textContent = streak;
-      document.getElementById('stat-gems').textContent   = progress.gems ?? userData.gems ?? 0;
+      document.getElementById('stat-gems').textContent   = progress.gems ?? 0;
       document.getElementById('stat-xp').textContent     = xp;
 
       // Perfil derecho

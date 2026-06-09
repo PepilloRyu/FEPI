@@ -102,6 +102,7 @@ mainForm.addEventListener("submit", signInUser);
 // js/firebaseLogin.js
 import { auth } from './firebaseConfig.js';
 import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { BASE_URL } from './services/api.js';
 
 // Función para iniciar sesión
 async function loginUser(email, password) {
@@ -113,7 +114,7 @@ async function loginUser(email, password) {
         const token = await user.getIdToken();
         
         // Obtener datos del perfil desde nuestro Backend
-        const response = await fetch("http://localhost:5000/api/Users/me", {
+        const response = await fetch(`${BASE_URL}/Users/me`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
