@@ -240,8 +240,8 @@
       const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
 
       const displayName = userData.name || user.displayName || user.email?.split('@')[0] || 'Usuario';
-      const xp    = userData.totalXp ?? progress.totalXp ?? 0;
-      const streak = userData.streak ?? progress.dailyStreak ?? 0;
+      const xp    = progress.totalXp ?? 0;
+      const streak = progress.dailyStreak ?? 0;
 
       let totalCompleted = 0;
       Object.values(progress.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });

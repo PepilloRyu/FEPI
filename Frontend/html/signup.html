@@ -224,13 +224,9 @@
   </div>
 
   <script type="module">
-    import { auth } from '../js/firebaseConfig.js';
-    import {
-      signInWithEmailAndPassword,
-      sendEmailVerification,
-      onAuthStateChanged,
-    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
-    import { registerUser } from '../js/services/api.js';
+    import { auth, db } from '../js/firebaseConfig.js';
+    import { createUserWithEmailAndPassword, sendEmailVerification, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+    import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
     // Redirigir si ya hay sesion activa y verificada
     onAuthStateChanged(auth, user => {
@@ -330,33 +326,40 @@
       document.getElementById('submit-spinner').style.display = 'block';
       submitBtn.disabled = true;
 
-      // 1. Registrar en el backend (crea usuario en Firebase Auth + Firestore)
-      const { data, error } = await registerUser(name, email, password);
+      try {
+        // 1. Crear usuario en Firebase Auth
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
 
-      if (error) {
+        // 2. Escribir documento limpio en Firestore — solo los campos permitidos
+        await setDoc(doc(db, 'users', user.uid), {
+          name,
+          email,
+          role: 'student',
+          avatarUrl: '',
+          objetivos: [],
+          createdAt: serverTimestamp(),
+        });
+
+        // 3. Enviar email de verificación
+        await sendEmailVerification(user);
+
+        // 4. Redirigir a la pantalla de verificación
+        window.location.replace('./verify-email.html');
+
+      } catch (err) {
         document.getElementById('submit-text').style.display = 'block';
         document.getElementById('submit-spinner').style.display = 'none';
         submitBtn.disabled = false;
 
         const errEl = document.getElementById('global-error');
         errEl.style.display = 'flex';
-        errEl.textContent = error;
-        return;
+        errEl.textContent = {
+          'auth/email-already-in-use': 'Ya existe una cuenta con este correo.',
+          'auth/invalid-email':        'El formato del correo no es válido.',
+          'auth/weak-password':        'La contraseña es muy débil (mínimo 6 caracteres).',
+          'auth/network-request-failed': 'Sin conexión. Verifica tu internet.',
+        }[err.code] ?? 'Ocurrió un error al crear la cuenta. Intenta de nuevo.';
       }
-
-      // 2. Iniciar sesion en Firebase + enviar verificacion directamente con Firebase SDK
-      //    (sin depender del SMTP del backend)
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(userCredential.user);
-      } catch (err) {
-        // Si falla el envio del correo no bloqueamos el flujo.
-        // El usuario puede reenviar desde la pagina de verificacion.
-        console.warn('[MathGo] No se pudo enviar la verificación automáticamente:', err.message);
-      }
-
-      // 3. Redirigir a la pagina de verificacion de email
-      window.location.replace('./verify-email.html');
     });
   </script>
 </body>

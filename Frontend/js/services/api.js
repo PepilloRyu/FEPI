@@ -6,9 +6,9 @@
 
 import { auth } from '../firebaseConfig.js';
 
-// URL base del backend
-// const BASE_URL = 'http://localhost:5000/api';
-const BASE_URL = 'https://mathgo-backend.onrender.com/api';
+const BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:5000/api'
+  : 'https://mathgo-backend.onrender.com/api';
 
 // ──────────────────────────────────────────────────────
 // NUCLEO HTTP
