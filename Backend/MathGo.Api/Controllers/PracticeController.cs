@@ -48,7 +48,7 @@ public class PracticeController : ControllerBase
             Questions = request.Questions.Select(q => new PracticeQuestion
             {
                 QuestionText = q.QuestionText,
-                ExpectedAnswer = string.Empty, // Se añadirá a DTO después
+                ExpectedAnswer = q.ExpectedAnswer,
                 UserAnswer = q.UserAnswer,
                 IsCorrect = q.IsCorrect
             }).ToList(),

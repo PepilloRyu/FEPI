@@ -5,11 +5,11 @@ namespace MathGo.Application.Services;
 
 public class GamificationService : IGamificationService
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IProgressRepository _progressRepository;
 
-    public GamificationService(IUserRepository userRepository)
+    public GamificationService(IProgressRepository progressRepository)
     {
-        _userRepository = userRepository;
+        _progressRepository = progressRepository;
     }
 
     public int CalculateXpEarned(bool isCorrect, bool usedHint, int currentStreak)
@@ -47,8 +47,8 @@ public class GamificationService : IGamificationService
 
     public async Task<int> UpdateDailyStreakAsync(string uid, string lastActiveDate)
     {
-        var user = await _userRepository.GetByIdAsync(uid);
-        if (user == null || user.Gamification == null) return 0;
+        var progress = await _progressRepository.GetByIdAsync(uid);
+        if (progress == null) return 0;
 
         // Implement logic for checking lastActiveDate against today
         // For simplicity, assuming caller passes "yyyy-MM-dd"
@@ -58,14 +58,15 @@ public class GamificationService : IGamificationService
         {
             // If they didn't play yesterday, reset streak, else increment
             // Actual check requires parsing dates. For now, incrementing.
-            user.Gamification.DailyStreak += 1;
-            if (user.Gamification.DailyStreak > user.Gamification.StreakDays)
+            progress.DailyStreak += 1;
+            if (progress.DailyStreak > progress.StreakDays)
             {
-                user.Gamification.StreakDays = user.Gamification.DailyStreak;
+                progress.StreakDays = progress.DailyStreak;
             }
-            await _userRepository.UpdateAsync(uid, user);
+            progress.LastActiveDate = today;
+            await _progressRepository.UpdateAsync(uid, progress);
         }
 
-        return user.Gamification.DailyStreak;
+        return progress.DailyStreak;
     }
 }

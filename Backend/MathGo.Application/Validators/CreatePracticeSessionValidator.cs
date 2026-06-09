@@ -20,6 +20,7 @@ public class QuestionDtoValidator : AbstractValidator<QuestionDto>
     public QuestionDtoValidator()
     {
         RuleFor(x => x.QuestionText).NotEmpty().WithMessage("QuestionText is required.");
+        RuleFor(x => x.ExpectedAnswer).NotEmpty().WithMessage("ExpectedAnswer is required.");
         RuleFor(x => x.UserAnswer).NotEmpty().WithMessage("UserAnswer is required.");
     }
 }

@@ -2,6 +2,7 @@ using MathGo.Application.DTOs.Requests;
 using MathGo.Application.DTOs.Responses;
 using MathGo.Application.Interfaces.Repositories;
 using MathGo.Application.Interfaces.Services;
+using MathGo.Domain.Entities;
 
 namespace MathGo.Application.Services;
 
@@ -29,6 +30,18 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(uid);
         if (user == null) return null;
 
+        var progress = await _progressRepository.GetByIdAsync(uid) ?? new UserProgress
+        {
+            Uid = uid,
+            TotalXp = 0,
+            DailyStreak = 0,
+            StreakDays = 0,
+            Gems = 500,
+            Lives = 5,
+            Level = 1,
+            CurrentLeague = "Rookie"
+        };
+
         return new UserProfileResponse
         {
             Uid = user.Uid,
@@ -36,13 +49,13 @@ public class UserService : IUserService
             Email = user.Email,
             Role = user.Role.ToString().ToLower(),
             AvatarUrl = user.AvatarUrl ?? "",
-            Level = user.Level,
-            XpTotal = user.Gamification?.XpTotal ?? 0,
-            StreakDays = user.Gamification?.StreakDays ?? 0,
-            DailyStreak = user.Gamification?.DailyStreak ?? 0,
-            CurrentLeague = user.Gamification?.CurrentLeague ?? "Rookie",
-            Gems = user.Gamification?.Gems ?? 0,
-            Hearts = user.Gamification?.Hearts ?? 5,
+            Level = progress.Level,
+            XpTotal = progress.TotalXp,
+            StreakDays = progress.StreakDays,
+            DailyStreak = progress.DailyStreak,
+            CurrentLeague = progress.CurrentLeague,
+            Gems = progress.Gems,
+            Hearts = progress.Lives,
             CreatedAt = user.CreatedAt
         };
     }
@@ -106,21 +119,25 @@ public class UserService : IUserService
 
     public async Task<List<LeaderboardEntry>> GetLeaderboardAsync(int top = 20)
     {
-        var users = await _userRepository.GetTopByXpAsync(top);
+        var topProgress = await _progressRepository.GetTopByXpAsync(top);
         var leaderboard = new List<LeaderboardEntry>();
         int rank = 1;
 
-        foreach (var user in users)
+        foreach (var prog in topProgress)
         {
-            leaderboard.Add(new LeaderboardEntry
+            var user = await _userRepository.GetByIdAsync(prog.Uid);
+            if (user != null)
             {
-                Rank = rank++,
-                Uid = user.Uid,
-                Name = user.Name,
-                AvatarUrl = user.AvatarUrl ?? "",
-                XpTotal = user.Gamification?.XpTotal ?? 0,
-                League = user.Gamification?.CurrentLeague ?? "Rookie"
-            });
+                leaderboard.Add(new LeaderboardEntry
+                {
+                    Rank = rank++,
+                    Uid = user.Uid,
+                    Name = user.Name,
+                    AvatarUrl = user.AvatarUrl ?? "",
+                    XpTotal = prog.TotalXp,
+                    League = prog.CurrentLeague ?? "Rookie"
+                });
+            }
         }
 
         return leaderboard;

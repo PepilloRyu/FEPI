@@ -11,6 +11,7 @@ public class CreatePracticeSessionRequest
 public class QuestionDto
 {
     public string QuestionText { get; set; } = string.Empty;
+    public string ExpectedAnswer { get; set; } = string.Empty;
     public string UserAnswer { get; set; } = string.Empty;
     public bool IsCorrect { get; set; }
 }

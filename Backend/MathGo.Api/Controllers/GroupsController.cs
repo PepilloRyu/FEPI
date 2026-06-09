@@ -14,11 +14,13 @@ public class GroupsController : ControllerBase
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IProgressRepository _progressRepository;
 
-    public GroupsController(IGroupRepository groupRepository, IUserRepository userRepository)
+    public GroupsController(IGroupRepository groupRepository, IUserRepository userRepository, IProgressRepository progressRepository)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
+        _progressRepository = progressRepository;
     }
 
     [HttpPost]
@@ -90,13 +92,15 @@ public class GroupsController : ControllerBase
         if (group.Members.Any(m => m.StudentId == uid))
             return Conflict("Ya estás inscrito en este grupo.");
 
+        var progress = await _progressRepository.GetByIdAsync(uid);
+
         // Aplicamos la Desnormalización
         var newMember = new GroupMember
         {
             StudentId = uid,
             Name = currentUser.Name,
             AvatarUrl = currentUser.AvatarUrl,
-            XpTotal = currentUser.Gamification?.XpTotal ?? 0
+            XpTotal = progress?.TotalXp ?? 0
         };
 
         group.Members.Add(newMember);
