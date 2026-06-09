@@ -8,13 +8,13 @@ namespace MathGo.Tests;
 
 public class GamificationServiceTests
 {
-    private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IProgressRepository> _progressRepositoryMock;
     private readonly GamificationService _gamificationService;
 
     public GamificationServiceTests()
     {
-        _userRepositoryMock = new Mock<IUserRepository>();
-        _gamificationService = new GamificationService(_userRepositoryMock.Object);
+        _progressRepositoryMock = new Mock<IProgressRepository>();
+        _gamificationService = new GamificationService(_progressRepositoryMock.Object);
     }
 
     [Fact]

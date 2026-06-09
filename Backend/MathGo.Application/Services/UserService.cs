@@ -2,6 +2,7 @@ using MathGo.Application.DTOs.Requests;
 using MathGo.Application.DTOs.Responses;
 using MathGo.Application.Interfaces.Repositories;
 using MathGo.Application.Interfaces.Services;
+using MathGo.Domain.Entities;
 
 namespace MathGo.Application.Services;
 
@@ -29,13 +30,17 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(uid);
         if (user == null) return null;
 
-        // XP, racha y gemas viven en mathgo_progress, no en users
-        var progress = await _progressRepository.GetByIdAsync(uid);
-
-        int totalCompleted = 0;
-        if (progress?.Worlds != null)
-            foreach (var w in progress.Worlds.Values)
-                totalCompleted += w.LevelsCompleted?.Count ?? 0;
+        var progress = await _progressRepository.GetByIdAsync(uid) ?? new UserProgress
+        {
+            Uid = uid,
+            TotalXp = 0,
+            DailyStreak = 0,
+            StreakDays = 0,
+            Gems = 500,
+            Lives = 5,
+            Level = 1,
+            CurrentLeague = "Rookie"
+        };
 
         return new UserProfileResponse
         {
@@ -44,14 +49,14 @@ public class UserService : IUserService
             Email = user.Email,
             Role = user.Role,
             AvatarUrl = user.AvatarUrl ?? "",
-            Level = totalCompleted + 1,
-            XpTotal = progress?.TotalXp ?? 0,
-            DailyStreak = progress?.DailyStreak ?? 0,
-            StreakDays = progress?.DailyStreak ?? 0,
-            Gems = progress?.Gems ?? 0,
-            Hearts = 5,
-            CurrentLeague = "Rookie",
-            CreatedAt = user.CreatedAt,
+            Level = progress.Level,
+            XpTotal = progress.TotalXp,
+            StreakDays = progress.StreakDays,
+            DailyStreak = progress.DailyStreak,
+            CurrentLeague = progress.CurrentLeague,
+            Gems = progress.Gems,
+            Hearts = progress.Lives,
+            CreatedAt = user.CreatedAt
         };
     }
 
@@ -81,8 +86,7 @@ public class UserService : IUserService
 
         var progress = await _progressRepository.GetByIdAsync(uid);
 
-        // TotalLevelsCompleted y TotalWorldsCompleted no los escribe el frontend:
-        // se calculan desde el diccionario worlds en mathgo_progress
+        // TotalLevelsCompleted y TotalWorldsCompleted se calculan desde el diccionario worlds en mathgo_progress
         int totalLevels = 0;
         int totalWorlds = 0;
         var progressSummary = new ProgressSummary { TotalXp = progress?.TotalXp ?? 0 };
@@ -116,23 +120,25 @@ public class UserService : IUserService
 
     public async Task<List<LeaderboardEntry>> GetLeaderboardAsync(int top = 20)
     {
-        // XP viene de mathgo_progress, nombre/avatar de users
-        var progressList = await _progressRepository.GetTopByXpAsync(top);
+        var topProgress = await _progressRepository.GetTopByXpAsync(top);
         var leaderboard = new List<LeaderboardEntry>();
         int rank = 1;
 
-        foreach (var p in progressList)
+        foreach (var prog in topProgress)
         {
-            var user = await _userRepository.GetByIdAsync(p.Uid);
-            leaderboard.Add(new LeaderboardEntry
+            var user = await _userRepository.GetByIdAsync(prog.Uid);
+            if (user != null)
             {
-                Rank = rank++,
-                Uid = p.Uid,
-                Name = user?.Name ?? "Usuario",
-                AvatarUrl = user?.AvatarUrl ?? "",
-                XpTotal = p.TotalXp,
-                League = "Rookie",
-            });
+                leaderboard.Add(new LeaderboardEntry
+                {
+                    Rank = rank++,
+                    Uid = user.Uid,
+                    Name = user.Name,
+                    AvatarUrl = user.AvatarUrl ?? "",
+                    XpTotal = prog.TotalXp,
+                    League = prog.CurrentLeague ?? "Rookie"
+                });
+            }
         }
 
         return leaderboard;

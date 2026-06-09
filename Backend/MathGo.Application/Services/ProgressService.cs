@@ -55,12 +55,12 @@ public class ProgressService : IProgressService
     public async Task<AttemptResultResponse> SubmitAttemptAsync(string uid, SubmitAttemptRequest request)
     {
         var user = await _userRepository.GetByIdAsync(uid);
-        if (user == null || user.Gamification == null) throw new Exception("User not found");
+        if (user == null) throw new Exception("User not found");
 
         var progress = await _progressRepository.GetByIdAsync(uid);
         if (progress == null) throw new Exception("Progress not found");
 
-        int xpEarned = _gamificationService.CalculateXpEarned(request.IsCorrect, request.UsedHint, user.Gamification.DailyStreak);
+        int xpEarned = _gamificationService.CalculateXpEarned(request.IsCorrect, request.UsedHint, progress.DailyStreak);
         
         // Log attempt
         var attempt = new AttemptLog
@@ -81,18 +81,27 @@ public class ProgressService : IProgressService
 
         if (request.IsCorrect)
         {
-            user.Gamification.XpTotal += xpEarned;
-            user.Level = _gamificationService.CalculateLevel(user.Gamification.XpTotal);
-            user.Gamification.CurrentLeague = _gamificationService.CalculateLeague(user.Gamification.XpTotal);
+            progress.TotalXp += xpEarned;
+            progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
+            progress.CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp);
             
             // Update streak
-            user.Gamification.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(uid, DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd"));
+            progress.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(uid, DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd"));
 
-            await _userRepository.UpdateAsync(uid, user);
+            // Track weekly activity (0 = Sunday, 6 = Saturday)
+            int dayOfWeek = (int)DateTime.UtcNow.DayOfWeek;
+            if (progress.WeeklyActivity == null || progress.WeeklyActivity.Count != 7)
+            {
+                progress.WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 };
+            }
+            progress.WeeklyActivity[dayOfWeek] += xpEarned;
 
-            progress.TotalXp += xpEarned;
-            // Additional logic for levels/worlds completed would go here
-
+            await _progressRepository.UpdateAsync(uid, progress);
+        }
+        else
+        {
+            // si incorrecto -> -1 Vida
+            progress.Lives = Math.Max(0, progress.Lives - 1);
             await _progressRepository.UpdateAsync(uid, progress);
         }
 
@@ -100,9 +109,9 @@ public class ProgressService : IProgressService
         {
             IsCorrect = request.IsCorrect,
             XpEarned = xpEarned,
-            NewXpTotal = user.Gamification.XpTotal,
-            NewLevel = user.Level,
-            CurrentStreak = user.Gamification.DailyStreak,
+            NewXpTotal = progress.TotalXp,
+            NewLevel = progress.Level,
+            CurrentStreak = progress.DailyStreak,
             NewAchievements = new List<AchievementSummary>() // Achievements logic would plug in here
         };
     }

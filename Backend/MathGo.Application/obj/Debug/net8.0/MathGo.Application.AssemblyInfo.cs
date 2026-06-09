@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MathGo.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5169c6f38607f0b9af7d0afdfe50fb5e1f24e324")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+10e93f079aa711ccc9408fe70cd936ff870cd345")]
 [assembly: System.Reflection.AssemblyProductAttribute("MathGo.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MathGo.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

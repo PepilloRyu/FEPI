@@ -37,13 +37,13 @@ public class ProgressServiceTests
         string uid = "user123";
         var user = new User
         {
-            Uid = uid,
-            Gamification = new UserGamification { DailyStreak = 2, XpTotal = 10 }
+            Uid = uid
         };
         var progress = new UserProgress
         {
             Uid = uid,
-            TotalXp = 10
+            TotalXp = 10,
+            DailyStreak = 2
         };
 
         _userRepoMock.Setup(x => x.GetByIdAsync(uid)).ReturnsAsync(user);
@@ -74,7 +74,6 @@ public class ProgressServiceTests
         Assert.Equal(22, result.NewXpTotal); // 10 + 12
 
         _attemptRepoMock.Verify(x => x.AddAsync(It.IsAny<AttemptLog>(), It.IsAny<string>()), Times.Once);
-        _userRepoMock.Verify(x => x.UpdateAsync(uid, It.IsAny<User>()), Times.Once);
         _progressRepoMock.Verify(x => x.UpdateAsync(uid, It.IsAny<UserProgress>()), Times.Once);
     }
 }

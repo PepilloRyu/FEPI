@@ -1,3 +1,5 @@
+using MathGo.Application.Interfaces.Services;
+using MathGo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,16 +10,18 @@ namespace MathGo.Api.Controllers;
 [Authorize(Roles = "admin,teacher")] // Role-based authorization example
 public class AdminController : ControllerBase
 {
-    public AdminController()
+    private readonly IWorldService _worldService;
+
+    public AdminController(IWorldService worldService)
     {
+        _worldService = worldService;
     }
 
-    [HttpPost("seed")]
-    public async Task<IActionResult> SeedData()
+    [HttpPost("seed-worlds")]
+    [AllowAnonymous] // TODO: Add auth later, allow anonymous for initial seeding from frontend
+    public async Task<IActionResult> SeedWorlds([FromBody] List<World> worlds)
     {
-        // Migrated from SeedController logic
-        // Only accessible by Admin
-        await Task.CompletedTask;
-        return Ok(new { Message = "Database seeded successfully" });
+        await _worldService.SeedWorldsAsync(worlds);
+        return Ok(new { Message = $"Seeded {worlds.Count} worlds successfully" });
     }
 }

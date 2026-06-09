@@ -22,22 +22,31 @@ public class UserProgress
     public int TotalWorldsCompleted { get; set; }
 
     [FirestoreProperty("updatedAt")]
-    public DateTime UpdatedAt { get; set; }
-
-    [FirestoreProperty("streak")]
-    public int Streak { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     [FirestoreProperty("dailyStreak")]
     public int DailyStreak { get; set; }
+
+    [FirestoreProperty("streakDays")]
+    public int StreakDays { get; set; }
 
     [FirestoreProperty("lastActiveDate")]
     public string LastActiveDate { get; set; } = string.Empty;
 
     [FirestoreProperty("gems")]
-    public int Gems { get; set; }
+    public int Gems { get; set; } = 500;
 
     [FirestoreProperty("lives")]
     public int Lives { get; set; } = 5;
+
+    [FirestoreProperty("level")]
+    public int Level { get; set; } = 1;
+
+    [FirestoreProperty("currentLeague")]
+    public string CurrentLeague { get; set; } = "Rookie";
+
+    [FirestoreProperty("weeklyActivity")]
+    public List<int> WeeklyActivity { get; set; } = new() { 0, 0, 0, 0, 0, 0, 0 };
 
     [FirestoreProperty("worlds")]
     public Dictionary<string, WorldProgress> Worlds { get; set; } = new();
