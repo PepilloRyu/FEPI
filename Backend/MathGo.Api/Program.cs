@@ -77,6 +77,7 @@ builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IAchievementService, AchievementService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<IWorldService, WorldService>();
 
 // Authentication
 var projectId = builder.Configuration["Firebase:ProjectId"];
