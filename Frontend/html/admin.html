@@ -292,8 +292,8 @@
 
       const rows = users.map(u => {
         const p    = progressMap[u.uid] ?? {};
-        const xp   = p.totalXp ?? u.totalXp ?? 0;
-        const racha = p.dailyStreak ?? u.streak ?? 0;
+        const xp   = p.totalXp ?? 0;
+        const racha = p.dailyStreak ?? 0;
         const role  = u.role ?? 'student';
         let totalCompleted = 0;
         Object.values(p.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
