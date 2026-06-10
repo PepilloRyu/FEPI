@@ -430,6 +430,7 @@ export async function initEngine({
   function renderLocked() {
     const prevNum = prereqWorldId ?? worldId - 1;
     const attemptsLeft = 2 - E.attempts;
+    document.body.classList.remove('mg-player-mode');
     if (layoutEl) layoutEl.className = 'mg-layout';
     if (rightEl) { rightEl.innerHTML = rightPanel(); rightEl.style.display = ''; }
     app.innerHTML = `
@@ -468,6 +469,7 @@ export async function initEngine({
       const click  = st === "locked" ? "" : `onclick="MG.node(${li})"`;
       return `<div class="lesson ${st} ${offClass}" ${click}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
     }).join("");
+    document.body.classList.remove('mg-player-mode');
     if (layoutEl) layoutEl.className = 'mg-layout';
     if (rightEl) { rightEl.innerHTML = rightPanel(completedCount); rightEl.style.display = ''; }
     app.innerHTML = `
@@ -488,6 +490,7 @@ export async function initEngine({
 
   function renderNodeOptions(li) {
     const lv = worldData.levels[li];
+    document.body.classList.remove('mg-player-mode');
     if (layoutEl) layoutEl.className = 'mg-layout';
     if (rightEl) { rightEl.innerHTML = rightPanel(); rightEl.style.display = ''; }
     app.innerHTML = `
@@ -512,6 +515,7 @@ export async function initEngine({
   function renderPreview() {
     if (layoutEl) layoutEl.className = 'mg-layout-2col';
     if (rightEl) rightEl.style.display = 'none';
+    document.body.classList.add('mg-player-mode');
     const lv = worldData.levels[P.levelIdx];
     const challenges = lv.challenges;
     const total = challenges.length;
@@ -552,6 +556,7 @@ export async function initEngine({
   function renderPlayer() {
     if (layoutEl) layoutEl.className = 'mg-layout-2col';
     if (rightEl) rightEl.style.display = 'none';
+    document.body.classList.add('mg-player-mode');
     if (S.phase === "leveldone") {
       const lv = worldData.levels[S.level];
       const nextIdx = S.level + 1;

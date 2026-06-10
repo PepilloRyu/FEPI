@@ -1284,6 +1284,16 @@ input, select, textarea { font-family: inherit; }
   100% { transform: translateY(-160px) rotate(420deg); opacity: 0; }
 }
 
+/* ── Modo pantalla completa del reproductor (oculta sidebar) ── */
+body.mg-player-mode .mg-sidebar     { display: none !important; }
+body.mg-player-mode .mg-bottom-nav  { display: none !important; }
+body.mg-player-mode #mg-layout {
+  grid-template-columns: 1fr;
+}
+body.mg-player-mode #app {
+  padding: 0;
+}
+
 /* ── Responsive del reproductor ── */
 @media (max-width: 480px) {
   .exam-modal-content { max-height: 100vh; border-radius: 0; }
