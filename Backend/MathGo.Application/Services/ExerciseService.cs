@@ -1,6 +1,7 @@
 using MathGo.Application.DTOs.Responses;
 using MathGo.Application.Interfaces.Repositories;
 using MathGo.Application.Interfaces.Services;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace MathGo.Application.Services;
@@ -11,17 +12,23 @@ public class ExerciseService : IExerciseService
     private readonly ExerciseAnswersCache _cache;
     private readonly IProgressRepository _progressRepository;
     private readonly IGamificationService _gamificationService;
+    private readonly IMissionService _missionService;
+    private readonly IAchievementService _achievementService;
 
     public ExerciseService(
         IExerciseRepository exerciseRepository,
         ExerciseAnswersCache cache,
         IProgressRepository progressRepository,
-        IGamificationService gamificationService)
+        IGamificationService gamificationService,
+        IMissionService missionService,
+        IAchievementService achievementService)
     {
         _exerciseRepository = exerciseRepository;
         _cache = cache;
         _progressRepository = progressRepository;
         _gamificationService = gamificationService;
+        _missionService = missionService;
+        _achievementService = achievementService;
     }
 
     public Task<List<ExerciseDto>> GetExercisesByWorldAsync(int worldId)
@@ -71,6 +78,11 @@ public class ExerciseService : IExerciseService
                 progress.WeeklyActivity[dayOfWeek] += xpAwarded;
 
                 await _progressRepository.UpdateAsync(uid, progress);
+
+                _ = _missionService.EvaluateMissionProgressAsync(uid, "xp_earned", xpAwarded)
+                    .ContinueWith(t => Debug.WriteLine($"[MissionService] EvaluateMissionProgress error: {t.Exception}"), TaskContinuationOptions.OnlyOnFaulted);
+                _ = _achievementService.EvaluateNewAchievementsAsync(uid)
+                    .ContinueWith(t => Debug.WriteLine($"[AchievementService] EvaluateNewAchievements error: {t.Exception}"), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
