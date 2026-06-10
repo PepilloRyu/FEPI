@@ -13,12 +13,18 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IProgressRepository _progressRepository;
     private readonly IEmailService _emailService;
+    private readonly IGamificationService _gamificationService;
 
-    public AuthService(IUserRepository userRepository, IProgressRepository progressRepository, IEmailService emailService)
+    public AuthService(
+        IUserRepository userRepository,
+        IProgressRepository progressRepository,
+        IEmailService emailService,
+        IGamificationService gamificationService)
     {
         _userRepository = userRepository;
         _progressRepository = progressRepository;
         _emailService = emailService;
+        _gamificationService = gamificationService;
     }
 
     public async Task<UserProfileResponse> RegisterAsync(RegisterRequest request)
@@ -51,8 +57,7 @@ public class AuthService : IAuthService
             Email = request.Email,
             Name = request.Name,
             Role = UserRole.Student.ToString().ToLower(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow
         };
 
         await _userRepository.AddAsync(user, user.Uid);
@@ -62,17 +67,12 @@ public class AuthService : IAuthService
         {
             Uid = userRecord.Uid,
             TotalXp = 0,
-            TotalLevelsCompleted = 0,
-            TotalWorldsCompleted = 0,
             DailyStreak = 0,
-            StreakDays = 0,
             Gems = 500,
             Lives = 5,
             Level = 1,
-            CurrentLeague = "Rookie",
             LastActiveDate = DateTime.UtcNow.ToString("yyyy-MM-dd"),
             WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
-            UpdatedAt = DateTime.UtcNow,
             Worlds = new Dictionary<string, WorldProgress>()
         };
 
@@ -86,9 +86,8 @@ public class AuthService : IAuthService
             Role = user.Role.ToString().ToLower(),
             Level = progress.Level,
             XpTotal = progress.TotalXp,
-            StreakDays = progress.StreakDays,
             DailyStreak = progress.DailyStreak,
-            CurrentLeague = progress.CurrentLeague,
+            CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp),
             Gems = progress.Gems,
             Hearts = progress.Lives,
             CreatedAt = user.CreatedAt
@@ -105,11 +104,9 @@ public class AuthService : IAuthService
             Uid = uid,
             TotalXp = 0,
             DailyStreak = 0,
-            StreakDays = 0,
             Gems = 500,
             Lives = 5,
             Level = 1,
-            CurrentLeague = "Rookie",
             WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 }
         };
 
@@ -122,9 +119,8 @@ public class AuthService : IAuthService
             AvatarUrl = user.AvatarUrl ?? "",
             Level = progress.Level,
             XpTotal = progress.TotalXp,
-            StreakDays = progress.StreakDays,
             DailyStreak = progress.DailyStreak,
-            CurrentLeague = progress.CurrentLeague,
+            CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp),
             Gems = progress.Gems,
             Hearts = progress.Lives,
             CreatedAt = user.CreatedAt

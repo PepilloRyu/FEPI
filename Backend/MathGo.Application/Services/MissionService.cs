@@ -72,7 +72,6 @@ public class MissionService : IMissionService
 
         progress.TotalXp += mission.XpReward;
         progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
-        progress.CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp);
         await _progressRepository.UpdateAsync(uid, progress);
 
         _ = _achievementService.EvaluateNewAchievementsAsync(uid)

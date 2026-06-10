@@ -138,7 +138,7 @@ export async function initSidebar(activeId = 'learn') {
 
     if (nameEl)   nameEl.textContent   = profile.name || profile.email || 'Usuario';
     if (xpEl)     xpEl.textContent     = profile.xpTotal ?? 0;
-    if (streakEl) streakEl.textContent = profile.streakDays ?? 0;
+    if (streakEl) streakEl.textContent = profile.dailyStreak ?? 0;
     if (avatarEl) avatarEl.textContent = getInitials(profile.name || profile.email);
   }
 

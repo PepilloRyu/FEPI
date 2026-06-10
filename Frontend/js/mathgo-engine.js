@@ -118,7 +118,7 @@ export async function initEngine({
     phase: "home",
     level: 0, step: 0,
     xp: raw.totalXp ?? 0,
-    streak: raw.streak ?? 0,
+    streak: raw.dailyStreak ?? 0,
     selected: [], chosen: null, placed: {}, result: null, showHint: false,
     completed: buildCompleted(),
   };

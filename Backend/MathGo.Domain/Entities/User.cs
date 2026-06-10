@@ -27,8 +27,5 @@ public class User
 
     [FirestoreProperty("createdAt")]
     public DateTime CreatedAt { get; set; }
-    
-    [FirestoreProperty("updatedAt")]
-    public DateTime UpdatedAt { get; set; }
 }
 

@@ -69,8 +69,6 @@ public class GamificationService : IGamificationService
         }
 
         progress.DailyStreak = newStreak;
-        if (newStreak > progress.StreakDays)
-            progress.StreakDays = newStreak;
         progress.LastActiveDate = today;
         await _progressRepository.UpdateAsync(uid, progress);
 

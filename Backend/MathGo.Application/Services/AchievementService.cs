@@ -83,10 +83,10 @@ public class AchievementService : IAchievementService
 
             int userValue = a.Condition.Type switch
             {
-                "xp_total" => progress.TotalXp,
-                "levels_completed" => progress.TotalLevelsCompleted,
-                "streak_days" => progress.StreakDays,
-                "worlds_completed" => progress.TotalWorldsCompleted,
+                "xp_total"         => progress.TotalXp,
+                "levels_completed" => progress.Worlds?.Values.Sum(w => w.LevelsCompleted?.Count ?? 0) ?? 0,
+                "streak_days"      => progress.DailyStreak,
+                "worlds_completed" => progress.Worlds?.Values.Count(w => w.AllComplete) ?? 0,
                 _ => 0
             };
 

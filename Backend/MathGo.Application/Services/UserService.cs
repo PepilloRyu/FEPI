@@ -12,17 +12,20 @@ public class UserService : IUserService
     private readonly IProgressRepository _progressRepository;
     private readonly IMissionRepository _missionRepository;
     private readonly IAchievementRepository _achievementRepository;
+    private readonly IGamificationService _gamificationService;
 
     public UserService(
         IUserRepository userRepository,
         IProgressRepository progressRepository,
         IMissionRepository missionRepository,
-        IAchievementRepository achievementRepository)
+        IAchievementRepository achievementRepository,
+        IGamificationService gamificationService)
     {
         _userRepository = userRepository;
         _progressRepository = progressRepository;
         _missionRepository = missionRepository;
         _achievementRepository = achievementRepository;
+        _gamificationService = gamificationService;
     }
 
     public async Task<UserProfileResponse?> GetProfileAsync(string uid)
@@ -35,11 +38,9 @@ public class UserService : IUserService
             Uid = uid,
             TotalXp = 0,
             DailyStreak = 0,
-            StreakDays = 0,
             Gems = 500,
             Lives = 5,
-            Level = 1,
-            CurrentLeague = "Rookie"
+            Level = 1
         };
 
         return new UserProfileResponse
@@ -51,9 +52,8 @@ public class UserService : IUserService
             AvatarUrl = user.AvatarUrl ?? "",
             Level = progress.Level,
             XpTotal = progress.TotalXp,
-            StreakDays = progress.StreakDays,
             DailyStreak = progress.DailyStreak,
-            CurrentLeague = progress.CurrentLeague,
+            CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp),
             Gems = progress.Gems,
             Hearts = progress.Lives,
             CreatedAt = user.CreatedAt
@@ -136,7 +136,7 @@ public class UserService : IUserService
                     Name = user.Name,
                     AvatarUrl = user.AvatarUrl ?? "",
                     XpTotal = prog.TotalXp,
-                    League = prog.CurrentLeague ?? "Rookie"
+                    League = _gamificationService.CalculateLeague(prog.TotalXp)
                 });
             }
         }

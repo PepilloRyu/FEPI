@@ -64,12 +64,10 @@ public class ExerciseService : IExerciseService
                 xpAwarded = _gamificationService.CalculateXpEarned(true, false, progress.DailyStreak);
                 progress.TotalXp += xpAwarded;
                 progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
-                progress.CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp);
 
                 // Actualizar racha (igual que ProgressService.SubmitAttemptAsync)
                 progress.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(
                     uid, progress.LastActiveDate);
-                progress.StreakDays = Math.Max(progress.StreakDays, progress.DailyStreak);
                 progress.LastActiveDate = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
                 int dayOfWeek = (int)DateTime.UtcNow.DayOfWeek;

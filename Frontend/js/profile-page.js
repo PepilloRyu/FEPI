@@ -32,7 +32,7 @@ const displayName = (data = {}) => data.name || data.displayName || data.usernam
 const displayEmail = (data = {}) => data.email || 'Sin correo registrado';
 const displayXp = (data = {}) => data.totalXp ?? data.xp ?? 0;
 const displayGems = (data = {}) => data.gems ?? 0;
-const displayStreak = (data = {}) => data.streak ?? 0;
+const displayStreak = (data = {}) => data.dailyStreak ?? 0;
 
 const formatJoinDate = (creationDate) => {
   if (!creationDate) return 'Recién llegado';

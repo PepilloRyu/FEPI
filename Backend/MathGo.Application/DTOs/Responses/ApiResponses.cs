@@ -23,7 +23,6 @@ public class UserProfileResponse
     public string AvatarUrl { get; set; } = string.Empty;
     public int Level { get; set; }
     public int XpTotal { get; set; }
-    public int StreakDays { get; set; }
     public int DailyStreak { get; set; }
     public string CurrentLeague { get; set; } = "Rookie";
     public int Gems { get; set; }

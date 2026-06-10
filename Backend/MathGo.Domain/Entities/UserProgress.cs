@@ -15,20 +15,8 @@ public class UserProgress
     [FirestoreProperty("totalXp")]
     public int TotalXp { get; set; }
 
-    [FirestoreProperty("totalLevelsCompleted")]
-    public int TotalLevelsCompleted { get; set; }
-
-    [FirestoreProperty("totalWorldsCompleted")]
-    public int TotalWorldsCompleted { get; set; }
-
-    [FirestoreProperty("updatedAt")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
     [FirestoreProperty("dailyStreak")]
     public int DailyStreak { get; set; }
-
-    [FirestoreProperty("streakDays")]
-    public int StreakDays { get; set; }
 
     [FirestoreProperty("lastActiveDate")]
     public string LastActiveDate { get; set; } = string.Empty;
@@ -41,9 +29,6 @@ public class UserProgress
 
     [FirestoreProperty("level")]
     public int Level { get; set; } = 1;
-
-    [FirestoreProperty("currentLeague")]
-    public string CurrentLeague { get; set; } = "Rookie";
 
     [FirestoreProperty("weeklyActivity")]
     public List<int> WeeklyActivity { get; set; } = new() { 0, 0, 0, 0, 0, 0, 0 };

@@ -40,9 +40,9 @@ public class ProgressService : IProgressService
         if (progress != null)
         {
             summary.TotalXp = progress.TotalXp;
-            summary.TotalLevelsCompleted = progress.TotalLevelsCompleted;
-            summary.TotalWorldsCompleted = progress.TotalWorldsCompleted;
-            
+            summary.TotalLevelsCompleted = progress.Worlds?.Values.Sum(w => w.LevelsCompleted?.Count ?? 0) ?? 0;
+            summary.TotalWorldsCompleted = progress.Worlds?.Values.Count(w => w.AllComplete) ?? 0;
+
             if (progress.Worlds != null)
             {
                 foreach (var wp in progress.Worlds)
@@ -90,10 +90,8 @@ public class ProgressService : IProgressService
         {
             progress.TotalXp += xpEarned;
             progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
-            progress.CurrentLeague = _gamificationService.CalculateLeague(progress.TotalXp);
-            
+
             progress.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(uid, progress.LastActiveDate);
-            progress.StreakDays = Math.Max(progress.StreakDays, progress.DailyStreak);
             progress.LastActiveDate = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
             // Track weekly activity (0 = Sunday, 6 = Saturday)
@@ -147,14 +145,12 @@ public class ProgressService : IProgressService
         if (!levelAlreadyDone)
         {
             worldProgress.LevelsCompleted.Add(request.LevelId);
-            progress.TotalLevelsCompleted++;
         }
 
         bool worldJustCompleted = false;
         if (request.IsWorldComplete && !worldProgress.AllComplete)
         {
             worldProgress.AllComplete = true;
-            progress.TotalWorldsCompleted++;
             worldJustCompleted = true;
         }
 
