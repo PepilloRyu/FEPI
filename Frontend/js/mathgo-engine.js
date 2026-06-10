@@ -11,10 +11,12 @@ export async function initEngine({
 }) {
   const app = document.getElementById("app");
   const examModal = document.getElementById("exam-modal");
+  const rightEl = document.getElementById("mg-right");
+  const layoutEl = document.getElementById("mg-layout");
   const uid = user.uid;
   const totalLevels = worldData.levels.length;
 
-  app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="brand-mark">M</div><span>Cargando…</span></div></div>`;
+  app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="mg-brand-icon">M</div><span>Cargando…</span></div></div>`;
 
   // ---- Cargar rol y progreso en paralelo (fallos independientes) ----
   let raw = {};
@@ -146,34 +148,15 @@ export async function initEngine({
   }
 
   // ---- Fragmentos HTML reutilizables ----
-  function sidebar() {
-    return `<aside class="mockup-sidebar">
-      <div class="brand">
-        <div class="brand-mark"><i class="fa-solid fa-square-root-variable"></i></div>
-        <div class="brand-name">Math<span>Go</span></div>
-      </div>
-      <nav class="mockup-nav">
-        <a href="learn.html" class="active" aria-current="page"><span><i class="fa-solid fa-graduation-cap"></i></span>Aprender</a>
-        <a href="dashboard.html"><span><i class="fa-solid fa-chart-line"></i></span>Mi progreso</a>
-        <a href="profile-page.html"><span><i class="fa-solid fa-user"></i></span>Perfil</a>
-        <a href="faq.html"><span><i class="fa-solid fa-circle-question"></i></span>Ayuda</a>
-        ${isAdmin ? `<a href="admin.html"><span><i class="fa-solid fa-shield-halved"></i></span>Admin</a>` : ''}
-      </nav>
-      <div class="sidebar-footer">
-        <a onclick="MG.signOut()" style="cursor:pointer;"><span><i class="fa-solid fa-right-from-bracket"></i></span>Cerrar sesión</a>
-      </div>
-    </aside>`;
-  }
-
   function buildObjHtml() {
     if (!firestoreObjetivos.length)
-      return `<p style="font-size:13px;color:#9aa3b2;margin:6px 0 2px;">No tienes objetivos aún.</p>`;
+      return `<p style="font-size:13px;color:var(--mg-muted-2);margin:6px 0 2px;">No tienes objetivos aún.</p>`;
     return firestoreObjetivos.map((obj, i) => {
       const safe = obj.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f2f7;">
-        <i class="fa-solid fa-bullseye" style="color:#4f46e5;font-size:12px;flex-shrink:0;"></i>
-        <span style="flex:1;font-size:13px;font-weight:600;color:#344563;word-break:break-word;">${safe}</span>
-        <button onclick="MG.delObjetivo(${i})" style="background:none;border:none;cursor:pointer;color:#c5cdd8;font-size:20px;line-height:1;padding:0 4px;" onmouseover="this.style.color='#ef4770'" onmouseout="this.style.color='#c5cdd8'" title="Eliminar">×</button>
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--mg-border-soft);">
+        <i class="fa-solid fa-bullseye" style="color:var(--mg-primary);font-size:12px;flex-shrink:0;"></i>
+        <span style="flex:1;font-size:13px;font-weight:600;color:var(--mg-text-2);word-break:break-word;">${safe}</span>
+        <button onclick="MG.delObjetivo(${i})" style="background:none;border:none;cursor:pointer;color:var(--mg-muted-2);font-size:20px;line-height:1;padding:0 4px;border-radius:6px;" title="Eliminar">×</button>
       </div>`;
     }).join('');
   }
@@ -183,25 +166,27 @@ export async function initEngine({
     const initials = name.slice(0, 2).toUpperCase();
     let globalCompleted = 0;
     Object.values(raw.worlds ?? {}).forEach(w => { globalCompleted += (w.levelsCompleted ?? []).length; });
-    return `<aside class="right-panel">
-      <div class="profile-card">
-        <div class="avatar">${initials}</div>
-        <div><h3>${name}</h3><span>Nivel ${globalCompleted + 1}</span></div>
+    return `
+      <div class="mg-profile-card mg-mb-4" style="padding:12px;">
+        <div class="mg-avatar" style="width:38px;height:38px;font-size:14px;">${initials}</div>
+        <div class="mg-profile-card-info">
+          <h3 style="font-size:14px;">${name}</h3>
+          <span>Nivel ${globalCompleted + 1}</span>
+        </div>
       </div>
-      <div class="card">
-        <h2><i class="fa-solid fa-bullseye" style="color:#4f46e5;margin-right:6px;"></i>Mis objetivos</h2>
+      <div class="mg-card">
+        <h2 class="mg-card-title"><i class="fa-solid fa-bullseye" style="color:var(--mg-primary);margin-right:6px;"></i>Mis objetivos</h2>
         <div id="rp-obj-list">${buildObjHtml()}</div>
         <div style="display:flex;gap:8px;margin-top:14px;">
           <input id="rp-obj-input" type="text" placeholder="Nuevo objetivo..."
             onkeydown="if(event.key==='Enter')MG.addObjetivo()"
-            style="flex:1;padding:9px 12px;border:1.5px solid #e5e9f2;border-radius:12px;font-size:13px;font-family:inherit;color:#344563;outline:none;" />
-          <button onclick="MG.addObjetivo()" style="padding:9px 15px;background:#4f46e5;color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:900;font-size:16px;">+</button>
+            style="flex:1;padding:9px 12px;border:1.5px solid var(--mg-border);border-radius:12px;font-size:13px;font-family:inherit;color:var(--mg-text);outline:none;" />
+          <button onclick="MG.addObjetivo()" style="padding:9px 15px;background:var(--mg-primary);color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:900;font-size:16px;">+</button>
         </div>
       </div>
-      <a href="dashboard.html" style="display:block;text-align:center;padding:12px 16px;border-radius:14px;border:1px solid #e5e9f2;color:#4f46e5;font-weight:900;font-size:14px;text-decoration:none;background:#fff;transition:background .15s;">
+      <a href="dashboard.html" style="display:block;text-align:center;padding:12px 16px;border-radius:14px;border:1px solid var(--mg-border);color:var(--mg-primary);font-weight:900;font-size:14px;text-decoration:none;background:var(--mg-surface);transition:background .15s;">
         <i class="fa-solid fa-chart-line"></i> Ver mi progreso completo
-      </a>
-    </aside>`;
+      </a>`;
   }
 
   // ---- Confeti ----
@@ -445,35 +430,31 @@ export async function initEngine({
   function renderLocked() {
     const prevNum = prereqWorldId ?? worldId - 1;
     const attemptsLeft = 2 - E.attempts;
+    if (layoutEl) layoutEl.className = 'mg-layout';
+    if (rightEl) { rightEl.innerHTML = rightPanel(); rightEl.style.display = ''; }
     app.innerHTML = `
-      <div class="mockup-layout mg-fade">
-        ${sidebar()}
-        <main class="main-content">
-          <div class="locked-world-screen">
-            <div class="locked-world-icon">🔒</div>
-            <h1 class="locked-world-title">${worldData.title}</h1>
-            <p class="locked-world-desc">Completa el <strong>Mundo ${prevNum}</strong> para desbloquear este mundo.</p>
-            ${attemptsLeft > 0 && !E.passed ? `
-            <div class="jump-exam-card">
-              <h2>¿Ya dominas el contenido?</h2>
-              <p>Demuestra que conoces el Mundo ${prevNum} y desbloquea este mundo directamente.</p>
-              <div class="jump-exam-meta">
-                <span>📝 ${EXAM_SIZE} preguntas</span>
-                <span>🎯 ${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</span>
-                <span>🔁 ${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</span>
-              </div>
-              <div class="mg-btn-wrap blue" style="max-width:280px;margin:18px auto 0">
-                <button class="mg-btn" onclick="MG.press(this, MG.openExam)">Tomar examen de salto</button>
-              </div>
-            </div>` : !E.passed ? `
-            <div class="jump-exam-exhausted">
-              <p>Has agotado tus 2 intentos del examen de salto.</p>
-              <p>Completa el Mundo ${prevNum} para desbloquear este.</p>
-            </div>` : ""}
-            <a href="world-${prevNum}.html" class="back-world-link">← Ir al Mundo ${prevNum}</a>
+      <div class="locked-world-screen mg-fade">
+        <div class="locked-world-icon">🔒</div>
+        <h1 class="locked-world-title">${worldData.title}</h1>
+        <p class="locked-world-desc">Completa el <strong>Mundo ${prevNum}</strong> para desbloquear este mundo.</p>
+        ${attemptsLeft > 0 && !E.passed ? `
+        <div class="jump-exam-card">
+          <h2>¿Ya dominas el contenido?</h2>
+          <p>Demuestra que conoces el Mundo ${prevNum} y desbloquea este mundo directamente.</p>
+          <div class="jump-exam-meta">
+            <span>📝 ${EXAM_SIZE} preguntas</span>
+            <span>🎯 ${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</span>
+            <span>🔁 ${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</span>
           </div>
-        </main>
-        ${rightPanel()}
+          <div class="mg-btn-wrap blue" style="max-width:280px;margin:18px auto 0">
+            <button class="mg-btn" onclick="MG.press(this, MG.openExam)">Tomar examen de salto</button>
+          </div>
+        </div>` : !E.passed ? `
+        <div class="jump-exam-exhausted">
+          <p>Has agotado tus 2 intentos del examen de salto.</p>
+          <p>Completa el Mundo ${prevNum} para desbloquear este.</p>
+        </div>` : ""}
+        <a href="world-${prevNum}.html" class="back-world-link">← Ir al Mundo ${prevNum}</a>
       </div>`;
   }
 
@@ -487,56 +468,50 @@ export async function initEngine({
       const click  = st === "locked" ? "" : `onclick="MG.node(${li})"`;
       return `<div class="lesson ${st} ${offClass}" ${click}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
     }).join("");
+    if (layoutEl) layoutEl.className = 'mg-layout';
+    if (rightEl) { rightEl.innerHTML = rightPanel(completedCount); rightEl.style.display = ''; }
     app.innerHTML = `
-      <div class="mockup-layout mg-fade">
-        ${sidebar()}
-        <main class="main-content">
-          <div class="stats-bar">
-            <div class="stat-chip"><i class="fa-solid fa-fire" style="color:#ff9600;"></i><strong>${dailyStreak}</strong> días</div>
-            <div class="stat-chip"><i class="fa-solid fa-gem" style="color:#1cb0f6;"></i><strong>${raw.gems ?? 0}</strong></div>
-            <div class="stat-chip xp"><i class="fa-solid fa-bolt"></i><strong>${S.xp}</strong> XP</div>
-          </div>
-          <section class="hero-banner">
-            <div>
-              <small>Mundo ${worldData.id} · ${completedCount}/${totalLevels} niveles</small>
-              <h1>${worldData.title}</h1>
-            </div>
-          </section>
-          <section class="lesson-path">${nodes}</section>
-        </main>
-        ${rightPanel(completedCount)}
+      <div class="mg-fade">
+        <div class="mg-stats-bar mg-mb-6">
+          <div class="mg-stat-chip str"><i class="fa-solid fa-fire"></i><strong>${dailyStreak}</strong> días</div>
+          <div class="mg-stat-chip gem"><i class="fa-solid fa-gem"></i><strong>${raw.gems ?? 0}</strong></div>
+          <div class="mg-stat-chip xp"><i class="fa-solid fa-bolt"></i><strong>${S.xp}</strong> XP</div>
+        </div>
+        <div class="mg-hero-banner mg-mb-6">
+          <small>Mundo ${worldData.id} · ${completedCount}/${totalLevels} niveles</small>
+          <h1>${worldData.title}</h1>
+        </div>
+        <section class="lesson-path">${nodes}</section>
       </div>`;
     requestAnimationFrame(injectPathSVG);
   }
 
   function renderNodeOptions(li) {
     const lv = worldData.levels[li];
+    if (layoutEl) layoutEl.className = 'mg-layout';
+    if (rightEl) { rightEl.innerHTML = rightPanel(); rightEl.style.display = ''; }
     app.innerHTML = `
-      <div class="mockup-layout mg-fade">
-        ${sidebar()}
-        <main class="main-content">
-          <div class="mg-node-choice">
-            <div style="font-size:52px">${lv.icon ?? "⭐"}</div>
-            <h2>${lv.title}</h2>
-            <p>Nivel ${lv.id} · ${(lv.theory?.length ?? 0) + (lv.challenges?.length ?? 0)} pasos</p>
-            <div class="mg-node-choice__btns">
-              <div class="mg-btn-wrap green">
-                <button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${li}))">▶ Iniciar nivel</button>
-              </div>
-              <div class="mg-btn-wrap" style="box-shadow:0 4px 0 #4338ca">
-                <button class="mg-btn" style="background:#6366f1" onclick="MG.press(this,()=>MG.openPreview(${li}))">👁 Vista Previa</button>
-              </div>
-              <div class="mg-btn-wrap">
-                <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.home()">← Volver al mapa</button>
-              </div>
-            </div>
+      <div class="mg-node-choice mg-fade">
+        <div style="font-size:52px">${lv.icon ?? "⭐"}</div>
+        <h2>${lv.title}</h2>
+        <p>Nivel ${lv.id} · ${(lv.theory?.length ?? 0) + (lv.challenges?.length ?? 0)} pasos</p>
+        <div class="mg-node-choice__btns">
+          <div class="mg-btn-wrap green">
+            <button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${li}))">▶ Iniciar nivel</button>
           </div>
-        </main>
-        ${rightPanel()}
+          <div class="mg-btn-wrap" style="box-shadow:0 4px 0 #4338ca">
+            <button class="mg-btn" style="background:#6366f1" onclick="MG.press(this,()=>MG.openPreview(${li}))">👁 Vista Previa</button>
+          </div>
+          <div class="mg-btn-wrap">
+            <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.home()">← Volver al mapa</button>
+          </div>
+        </div>
       </div>`;
   }
 
   function renderPreview() {
+    if (layoutEl) layoutEl.className = 'mg-layout-2col';
+    if (rightEl) rightEl.style.display = 'none';
     const lv = worldData.levels[P.levelIdx];
     const challenges = lv.challenges;
     const total = challenges.length;
@@ -575,6 +550,8 @@ export async function initEngine({
   }
 
   function renderPlayer() {
+    if (layoutEl) layoutEl.className = 'mg-layout-2col';
+    if (rightEl) rightEl.style.display = 'none';
     if (S.phase === "leveldone") {
       const lv = worldData.levels[S.level];
       const nextIdx = S.level + 1;
