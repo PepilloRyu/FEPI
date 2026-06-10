@@ -1,9 +1,9 @@
-import { WORLD as w1 } from './js/worlds/world-1-data.js';
-import { WORLD as w2 } from './js/worlds/world-2-data.js';
-import { WORLD as w3 } from './js/worlds/world-3-data.js';
-import { WORLD as w4 } from './js/worlds/world-4-data.js';
-import { WORLD as w5 } from './js/worlds/world-5-data.js';
-import { WORLD as w6 } from './js/worlds/world-6-data.js';
+import { WORLD as w1 } from './js/worlds/world-1-meta.js';
+import { WORLD as w2 } from './js/worlds/world-2-meta.js';
+import { WORLD as w3 } from './js/worlds/world-3-meta.js';
+import { WORLD as w4 } from './js/worlds/world-4-meta.js';
+import { WORLD as w5 } from './js/worlds/world-5-meta.js';
+import { WORLD as w6 } from './js/worlds/world-6-meta.js';
 
 const worlds = [w1, w2, w3, w4, w5, w6];
 

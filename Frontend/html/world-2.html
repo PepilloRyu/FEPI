@@ -19,8 +19,8 @@
     import { auth, db } from '../js/firebaseConfig.js';
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
     import { initEngine } from '../js/mathgo-engine.js';
-    import { WORLD, getVisual } from '../js/worlds/world-2-data.js';
-    import { WORLD as PREREQ_WORLD } from '../js/worlds/world-1-data.js';
+    import { WORLD, getVisual } from '../js/worlds/world-2-meta.js';
+    import { WORLD as PREREQ_WORLD } from '../js/worlds/world-1-meta.js';
     import { initSidebar } from '../js/components/sidebar.js';
 
     onAuthStateChanged(auth, async (user) => {
