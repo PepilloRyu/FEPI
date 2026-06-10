@@ -20,15 +20,51 @@ public class ExercisesController : ControllerBase
         _progressService = progressService;
     }
 
-    [HttpPost("{id}/validate")]
-    public async Task<IActionResult> ValidateAnswer(string id, [FromBody] ValidateAnswerRequest request)
+    /// <summary>
+    /// Devuelve todos los ejercicios de un mundo en lista plana, sin respuestas correctas.
+    /// Cada ejercicio incluye su id compuesto "{worldId}_{levelId}_{exerciseId}".
+    /// </summary>
+    [HttpGet("world/{worldId:int}")]
+    public async Task<IActionResult> GetByWorld(int worldId)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        var isValid = await _exerciseService.ValidateAnswerAsync(id, request);
-        return Ok(new { IsCorrect = isValid });
+        try
+        {
+            var exercises = await _exerciseService.GetExercisesByWorldAsync(worldId);
+            return Ok(exercises);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
+    /// <summary>
+    /// Valida la respuesta del usuario para un ejercicio y otorga XP si es correcta.
+    /// Body: { userId: string, userAnswer: any }
+    /// Response: { correct: bool, xpAwarded: int }
+    /// </summary>
+    [HttpPost("{id}/answer")]
+    public async Task<IActionResult> SubmitAnswer(string id, [FromBody] AnswerRequest request)
+    {
+        var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(uid)) return Unauthorized();
+
+        try
+        {
+            var result = await _exerciseService.CheckAnswerAsync(id, uid, request.UserAnswer);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    /// <summary>Registra un intento de ejercicio y actualiza el progreso del usuario.</summary>
     [HttpPost("attempt")]
     public async Task<IActionResult> SubmitAttempt([FromBody] SubmitAttemptRequest request)
     {

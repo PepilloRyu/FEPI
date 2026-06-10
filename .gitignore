@@ -1,6 +1,7 @@
 config.js
 firebase-credentials.json
 appsettings.Development.json
+answers.json
 
 # Visual Studio / .NET ignores
 [Bb]in/

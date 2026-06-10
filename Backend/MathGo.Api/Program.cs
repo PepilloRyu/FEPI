@@ -64,6 +64,10 @@ builder.Services.AddSwaggerGen(c =>
 // Firebase Init and Repositories DI
 builder.Services.AddFirebaseServices(builder.Configuration);
 
+// answers.json — cargado una sola vez al iniciar la app
+var answersPath = Path.Combine(builder.Environment.ContentRootPath, "answers.json");
+builder.Services.AddSingleton(new MathGo.Application.Services.ExerciseAnswersCache(answersPath));
+
 // Email Service Configuration
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();

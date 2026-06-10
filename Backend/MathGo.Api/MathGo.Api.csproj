@@ -17,4 +17,11 @@
     <ProjectReference Include="..\MathGo.Application\MathGo.Application.csproj" />
     <ProjectReference Include="..\MathGo.Infrastructure\MathGo.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="firebase-credentials.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

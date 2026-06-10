@@ -1,6 +1,49 @@
 // js/mathgo-engine.js — Motor del juego MathGo
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
+const API_BASE = "http://localhost:5000";
+
+async function getToken(user) {
+  return user.getIdToken();
+}
+
+export async function fetchWorldExercises(worldId, user) {
+  const token = await getToken(user);
+  const res = await fetch(`${API_BASE}/api/Exercises/world/${worldId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function submitAnswer(exerciseId, userAnswer, user) {
+  const token = await getToken(user);
+  const uid   = user.uid;
+  const res = await fetch(`${API_BASE}/api/Exercises/${exerciseId}/answer`, {
+    method:  "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body:    JSON.stringify({ userId: uid, userAnswer }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json(); // { correct: bool, xpAwarded: int }
+}
+
+// Construye la respuesta del usuario en el formato que espera la API según tipo de ejercicio
+function buildUserAnswer(c, st) {
+  if (c.type === "mc" || c.type === "vf") return c.options[st.chosen].label;
+  // build: el orden no importa y los "+" son conectores, no parte de la respuesta
+  if (c.type === "build") return st.selected.map(s => s.label).filter(l => l !== "+").sort();
+  // buildSeq: el orden sí importa; no hay "+" en el banco
+  if (c.type === "buildSeq") return st.selected.map(s => s.label);
+  if (c.type === "slots") return Array.from({ length: c.slots }, (_, i) => st.placed[i] ?? "");
+  if (c.type === "match") {
+    const result = {};
+    c.pairs.forEach((p, i) => { if (st.placed[i] != null) result[st.placed[i]] = p.desc; });
+    return result;
+  }
+  return null;
+}
+
 const EXAM_SIZE = 12;
 const PASS_THRESHOLD = Math.ceil(EXAM_SIZE * 0.83); // 10 de 12
 
@@ -17,6 +60,9 @@ export async function initEngine({
   const totalLevels = worldData.levels.length;
 
   app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="mg-brand-icon">M</div><span>Cargando…</span></div></div>`;
+
+  // ---- Guardar retos locales antes de reemplazarlos (necesario para Vista Previa y examen) ----
+  const localChallenges = worldData.levels.map(lv => lv.challenges.slice());
 
   // ---- Cargar rol y progreso en paralelo (fallos independientes) ----
   let raw = {};
@@ -81,6 +127,39 @@ export async function initEngine({
     const map = {};
     (worldProg().levelsCompleted ?? []).forEach(li => { map[li] = true; });
     return map;
+  }
+
+  // ---- Cargar ejercicios desde la API y reemplazar retos locales ----
+  try {
+    const apiExercises = await fetchWorldExercises(worldId, user);
+    // Reagrupar por índice de nivel → índice de ejercicio
+    const byLevel = {};
+    apiExercises.forEach(ex => {
+      const parts = ex.id.split('_');
+      const li = parseInt(parts[1], 10);
+      const ei = parseInt(parts[2], 10);
+      if (!byLevel[li]) byLevel[li] = [];
+      byLevel[li][ei] = ex;
+    });
+    // Reemplazar challenges en worldData (preview y examen usan localChallenges)
+    worldData.levels.forEach((lv, li) => {
+      const fetched = byLevel[li]?.filter(Boolean);
+      if (fetched?.length) lv.challenges = fetched;
+    });
+  } catch (e) {
+    console.warn("API de ejercicios no disponible, usando datos locales:", e);
+    app.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                  min-height:60vh;gap:16px;text-align:center;padding:24px">
+        <div style="font-size:48px">⚠️</div>
+        <p style="font-size:16px;font-weight:700;color:var(--mg-text)">
+          Error al cargar ejercicios, intenta de nuevo
+        </p>
+        <div class="mg-btn-wrap blue" style="max-width:220px;width:100%">
+          <button class="mg-btn" onclick="location.reload()">Reintentar</button>
+        </div>
+      </div>`;
+    return; // detener init si el backend no responde
   }
 
   // ---- Estado del examen ----
@@ -298,7 +377,7 @@ export async function initEngine({
       const cls = c.type === "vf" ? "mg-vf" : "mg-options";
       return `<div class="${cls}">` + c.options.map((o, i) => {
         let btnCls = "";
-        if (st.result && o.correct) btnCls = "right";
+        if (st.result === "ok" && st.chosen === i) btnCls = "right";
         else if (st.result === "no" && st.chosen === i) btnCls = "wrong";
         else if (st.chosen === i) btnCls = "sel";
         return `<button class="mg-opt ${btnCls}" ${st.result === "ok" ? "disabled" : ""} onclick="${h.pick}(${i})">${o.label}</button>`;
@@ -517,8 +596,19 @@ export async function initEngine({
     if (rightEl) rightEl.style.display = 'none';
     document.body.classList.add('mg-player-mode');
     const lv = worldData.levels[P.levelIdx];
-    const challenges = lv.challenges;
+    const challenges = localChallenges[P.levelIdx]; // datos locales: incluyen respuestas correctas
     const total = challenges.length;
+    if (total === 0) {
+      app.innerHTML = `<div class="mg-player"><div class="mg-top" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)">
+        <button class="mg-close" onclick="MG.exitPreview()" title="Salir" style="color:#fff">✕</button></div>
+        <div class="mg-content mg-fade" style="text-align:center;padding:40px 20px">
+          <span class="mg-preview-badge">🔑 Admin · Vista Previa</span>
+          <p style="margin-top:24px;color:rgb(var(--wolf))">Vista Previa no disponible — los ejercicios de este nivel se sirven desde el backend.</p>
+          <div class="mg-btn-wrap red" style="max-width:200px;margin:24px auto 0">
+            <button class="mg-btn" onclick="MG.exitPreview()">Salir</button></div>
+        </div></div>`;
+      return;
+    }
     const c = challenges[P.stepIdx];
     const mid = previewChallengeHTML(c);
     const prevDisabled = P.stepIdx === 0;
@@ -751,12 +841,27 @@ export async function initEngine({
     unpick(id)    { if (S.result === "ok") return; S.selected = S.selected.filter(s => s.id !== id); render(); },
     drop(l, zone) { if (S.result === "ok") return; for (const k in S.placed) { if (S.placed[k] === l) delete S.placed[k]; } S.placed[zone] = l; S.result = null; render(); },
     takeOut(zone) { if (S.result === "ok") return; delete S.placed[zone]; render(); },
-    check() {
-      const c = curChallenges()[S.step - curTheory().length];
-      const ok = evaluate(c, S);
-      S.result = ok ? "ok" : "no";
-      if (ok) { S.xp += S.showHint ? 5 : 10; S.streak++; render(); confetti(); }
-      else    { S.showHint = true; S.streak = 0; render(); }
+    async check() {
+      const exIdx      = S.step - curTheory().length;
+      const c          = curChallenges()[exIdx];
+      const exerciseId = `${worldId}_${S.level}_${exIdx}`;
+      const userAnswer = buildUserAnswer(c, S);
+
+      // Mostrar spinner mientras espera respuesta de la API
+      const footerEl = app.querySelector('.mg-footer');
+      if (footerEl)
+        footerEl.innerHTML = `<div class="mg-btn-wrap disabled"><button class="mg-btn" disabled>Verificando…</button></div>`;
+
+      try {
+        const { correct, xpAwarded } = await submitAnswer(exerciseId, userAnswer, user);
+        S.result = correct ? "ok" : "no";
+        if (correct) { S.xp += xpAwarded; S.streak++; render(); confetti(); }
+        else          { S.showHint = true; S.streak = 0; render(); }
+      } catch (e) {
+        console.error("Error al verificar respuesta:", e);
+        MG.toast("Error al verificar, intenta de nuevo");
+        render(); // restaurar footer sin cambiar S.result
+      }
     },
 
     // -- Examen --
@@ -772,6 +877,17 @@ export async function initEngine({
     },
     startExam() {
       E.questions = sampleExamQuestions();
+      if (E.questions.length === 0) {
+        examModal.innerHTML = `<div class="exam-modal-content mg-fade">
+          <div class="exam-modal-header"><button class="mg-close" onclick="MG.closeExam()">✕</button>
+          <h2 class="exam-title">Examen no disponible</h2></div>
+          <div class="exam-intro-body"><div style="font-size:52px">📚</div>
+          <p>Los ejercicios del examen aún no están disponibles localmente.</p></div>
+          <div class="exam-modal-footer"><div class="mg-btn-wrap"><button class="mg-btn"
+            style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.closeExam()">Cerrar</button></div>
+          </div></div>`;
+        return;
+      }
       E.index = 0; E.score = 0; E.phase = "play";
       Object.assign(E, { selected: [], chosen: null, placed: {}, result: null, showHint: false });
       renderExam();
@@ -813,7 +929,7 @@ export async function initEngine({
       renderPreview();
     },
     previewNav(delta) {
-      const total = worldData.levels[P.levelIdx].challenges.length;
+      const total = localChallenges[P.levelIdx].length;
       P.stepIdx = Math.max(0, Math.min(total - 1, P.stepIdx + delta));
       renderPreview();
     },

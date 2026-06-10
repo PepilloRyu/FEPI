@@ -89,6 +89,7 @@ public static class FirebaseServiceCollectionExtensions
         services.AddScoped<IMissionRepository, MissionRepository>();
         services.AddScoped<IAchievementRepository, AchievementRepository>();
         services.AddScoped<IWorldRepository, WorldRepository>();
+        services.AddScoped<IExerciseRepository, ExerciseRepository>();
 
         return services;
     }
