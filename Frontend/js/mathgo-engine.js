@@ -1,7 +1,9 @@
 // js/mathgo-engine.js — Motor del juego MathGo
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:5000'
+  : 'https://mathgo-backend.onrender.com';
 
 async function getToken(user) {
   return user.getIdToken();

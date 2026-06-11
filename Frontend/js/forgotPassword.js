@@ -14,8 +14,6 @@ function forgotPassword() {
   
     sendPasswordResetEmail(auth, email)
     .then(() => {
-      // Password reset email sent successfully
-      console.log("Password reset email sent!");
       emailErrorMessage.innerHTML = '';
       emailInp.style.border = '';
       passwordErrorMessage.innerHTML = '<span>Password Reset Link Sent!</span>';

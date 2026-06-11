@@ -14,7 +14,6 @@ let emailErrorMessage = document.getElementById('email-error-message');
 let passwordErrorMessage = document.getElementById('password-error-message');
 
 let signInUser = (event) => {
-  console.log("Reached Signin");
   event.preventDefault();
 
   if(!validateEntry(event))
@@ -24,13 +23,10 @@ let signInUser = (event) => {
 
   signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value).then((credentials) => {
       const dbref = doc(db, "UsersAuthList", credentials.user.uid);
-      console.log(dbref);
 
       getDoc(dbref).then((docSnapshot) => {
-        console.log("Document data:", docSnapshot.data());
         if (docSnapshot.exists()) {
           const userData = docSnapshot.data();
-          console.log("userData = ", userData);
           sessionStorage.setItem("user-info", JSON.stringify(userData));
           
           window.location.href = "./learn.html";
@@ -66,7 +62,6 @@ let signInUser = (event) => {
           passwordInput.style.border = "2px solid #ff0000";
           break;
       }
-      console.log(error.message);
     });
 };
 

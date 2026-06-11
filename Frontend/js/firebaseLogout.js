@@ -9,8 +9,6 @@ const logoutButtonMobile = document.getElementById('logout-button-mobile');
 const logoutUser = async () => {
     try {
         await signOut(auth);
-        console.log('User signed out successfully');
-
         window.location.href = "../index.html";
         sessionStorage.clear();
     } catch (error) {

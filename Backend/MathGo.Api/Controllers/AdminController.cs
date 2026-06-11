@@ -18,7 +18,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpPost("seed-worlds")]
-    [AllowAnonymous] // TODO: Add auth later, allow anonymous for initial seeding from frontend
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> SeedWorlds([FromBody] List<World> worlds)
     {
         await _worldService.SeedWorldsAsync(worlds);

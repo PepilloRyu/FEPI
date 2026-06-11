@@ -26,12 +26,10 @@ const validate = (event) => {
     }
 
     if (!nameInput.value) {
-        console.log("Entering Name if Block"); // Add this line
         nameErrorMessage.innerHTML = '<img src="../assets/svg/error-message-icon.svg" alt=""> <span>Please enter your Name.</span>';
-        nameInput.style.border = '2px solid #ff0000'; // Change border color to red  
+        nameInput.style.border = '2px solid #ff0000'; // Change border color to red
     }
     else {
-        console.log("Name Input is not empty"); // Add this line
         nameErrorMessage.innerHTML = '';
         nameInput.style.border = ''; // Reset to the default border color
     }
