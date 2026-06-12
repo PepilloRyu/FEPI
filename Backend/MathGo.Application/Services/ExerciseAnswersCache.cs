@@ -13,9 +13,13 @@ public sealed class ExerciseAnswersCache
     public ExerciseAnswersCache(string filePath)
     {
         if (!File.Exists(filePath))
-            throw new FileNotFoundException(
-                $"answers.json no encontrado en '{filePath}'. " +
-                "Ejecuta migrate_exercises.py para generarlo.", filePath);
+        {
+            Console.Error.WriteLine(
+                $"[WARNING] answers.json no encontrado en '{filePath}' — " +
+                "los ejercicios no podrán validarse hasta que se configure.");
+            Answers = new Dictionary<string, JsonElement>();
+            return;
+        }
 
         var json = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
         Answers = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)

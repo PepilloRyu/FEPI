@@ -1,0 +1,93 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── users/{uid} ───────────────────────────────────────────────────────────
+    // Solo el propio usuario puede leer y escribir su documento.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── mathgo_progress/{uid} ─────────────────────────────────────────────────
+    // Solo el propio usuario puede leer y escribir su progreso.
+    match /mathgo_progress/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── subjects/ ─────────────────────────────────────────────────────────────
+    // Cualquier usuario autenticado puede leer los ejercicios.
+    // Nadie puede escribir desde el cliente (solo el backend con credenciales de servicio).
+    match /subjects/{subjectId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /units/{unitId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+
+        match /levels/{levelId} {
+          allow read: if request.auth != null;
+          allow write: if false;
+
+          match /exercises/{exerciseId} {
+            allow read: if request.auth != null;
+            allow write: if false;
+          }
+        }
+      }
+    }
+
+    // ── missions/ ─────────────────────────────────────────────────────────────
+    // Catálogo global: cualquier usuario autenticado puede leer.
+    // Solo el backend escribe (credenciales de servicio).
+    match /missions/{missionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ── achievements/ ─────────────────────────────────────────────────────────
+    // Catálogo global: cualquier usuario autenticado puede leer.
+    // Solo el backend escribe (credenciales de servicio).
+    match /achievements/{achievementId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ── user_missions/{uid}/missions/{missionId} ───────────────────────────────
+    // Solo el propio usuario puede leer su progreso en misiones.
+    // El backend escribe via credenciales de servicio (bypassa estas reglas).
+    match /user_missions/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /missions/{missionId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // ── user_achievements/{uid}/achievements/{achievementId} ───────────────────
+    // Solo el propio usuario puede leer sus logros desbloqueados.
+    match /user_achievements/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /achievements/{achievementId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // ── mathgo_worlds/ ────────────────────────────────────────────────────────
+    // Datos de mundos: cualquier usuario autenticado puede leer.
+    // Solo el backend escribe via Admin SDK.
+    match /mathgo_worlds/{worldId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ── Resto de colecciones ──────────────────────────────────────────────────
+    // Denegar acceso a todo lo no definido explícitamente.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}
