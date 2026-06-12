@@ -18,9 +18,9 @@
     <ProjectReference Include="..\MathGo.Infrastructure\MathGo.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="Exists('firebase-credentials.json')">
     <None Include="firebase-credentials.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
