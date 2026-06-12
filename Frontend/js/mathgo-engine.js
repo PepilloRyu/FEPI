@@ -216,6 +216,7 @@ export async function initEngine({
   // ---- Estado del examen ----
   const examData = raw?.worlds?.[worldId]?.jumpExam ?? {};
   const E = {
+    mode: 'jump',
     phase: "intro",
     questions: [], index: 0, score: 0,
     selected: [], chosen: null, placed: {}, result: null, showHint: false,
@@ -633,16 +634,33 @@ export async function initEngine({
     } catch (e) { console.warn("Error guardando examen:", e); }
   }
 
-  // ---- Examen de salto: muestreo ----
+  async function saveFinalExam(passed, xpBonus = 0) {
+    try {
+      const update = {
+        worlds: { [worldId]: { finalExam: { attempts: E.attempts, score: E.score, passed } } },
+      };
+      if (xpBonus > 0) update.totalXp = S.xp;
+      await setDoc(doc(db, "mathgo_progress", uid), update, { merge: true });
+    } catch (e) { console.warn("Error guardando examen final:", e); }
+  }
+
+  // ---- Muestreo de preguntas para examen (jump o final) ----
   function sampleExamQuestions() {
-    if (!prereqWorldData) return [];
     const all = [];
-    // prereqLocalAnswers viene de world-(N-1)-answers.js y tiene correct: true en opciones mc/vf.
-    // Es necesario para que evaluate() funcione localmente sin llamar a la API.
-    if (prereqLocalAnswers.length > 0) {
-      prereqLocalAnswers.forEach(lvChallenges => lvChallenges.forEach(c => all.push({ ...c })));
+    if (E.mode === 'final') {
+      if (localAnswers.length > 0) {
+        localAnswers.forEach(lvChallenges => { if (lvChallenges) lvChallenges.forEach(c => all.push({ ...c })); });
+      } else {
+        worldData.levels.forEach(lv => lv.challenges.forEach(c => all.push({ ...c })));
+      }
     } else {
-      prereqWorldData.levels.forEach(lv => lv.challenges.forEach(c => all.push({ ...c })));
+      if (!prereqWorldData) return [];
+      // prereqLocalAnswers tiene correct: true en opciones mc/vf; necesario para evaluate() local.
+      if (prereqLocalAnswers.length > 0) {
+        prereqLocalAnswers.forEach(lvChallenges => lvChallenges.forEach(c => all.push({ ...c })));
+      } else {
+        prereqWorldData.levels.forEach(lv => lv.challenges.forEach(c => all.push({ ...c })));
+      }
     }
     for (let i = all.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -687,6 +705,8 @@ export async function initEngine({
 
   function renderHome() {
     const completedCount = worldData.levels.filter((_, li) => S.completed[li]).length;
+    const allComplete = completedCount >= totalLevels;
+    const finalExamPassed = raw?.worlds?.[worldId]?.finalExam?.passed === true;
     const nodes = worldData.levels.map((lv, li) => {
       const st = levelState(li);
       const offClass = li % 2 === 0 ? "" : (Math.floor(li / 2) % 2 === 0 ? "off2" : "off1");
@@ -695,6 +715,17 @@ export async function initEngine({
       const click  = st === "locked" ? "" : `onclick="MG.node(${li})"`;
       return `<div class="lesson ${st} ${offClass}" ${click}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
     }).join("");
+    const examIdx = totalLevels;
+    const examOffClass = examIdx % 2 === 0 ? "" : (Math.floor(examIdx / 2) % 2 === 0 ? "off2" : "off1");
+    const examNodeState = !allComplete ? "locked" : (finalExamPassed ? "completed" : "current");
+    const examIcon = !allComplete
+      ? '<i class="fa-solid fa-lock" style="font-size:24px;"></i>'
+      : finalExamPassed
+        ? '<i class="fa-solid fa-award" style="color:#fcd34d;font-size:26px;"></i>'
+        : '<i class="fa-solid fa-award" style="font-size:26px;"></i>';
+    const examBubble = examNodeState === "current" ? `<div class="start-bubble">¡EXAMEN!</div>` : "";
+    const examClick = !allComplete ? "" : `onclick="MG.openFinalExam()"`;
+    const examNode = `<div class="lesson ${examNodeState} ${examOffClass}" ${examClick}>${examBubble}<div class="circle">${examIcon}</div><p>Examen Final</p></div>`;
     document.body.classList.remove('mg-player-mode');
     if (layoutEl) layoutEl.className = 'mg-layout';
     if (rightEl) { rightEl.innerHTML = rightPanel(completedCount); rightEl.style.display = ''; }
@@ -709,7 +740,7 @@ export async function initEngine({
           <small>Mundo ${worldData.id} · ${completedCount}/${totalLevels} niveles</small>
           <h1>${worldData.title}</h1>
         </div>
-        <section class="lesson-path">${nodes}</section>
+        <section class="lesson-path">${nodes}${examNode}</section>
       </div>`;
     requestAnimationFrame(injectPathSVG);
   }
@@ -802,7 +833,7 @@ export async function initEngine({
       const nextIdx = S.level + 1;
       const nextBtn = nextIdx < totalLevels
         ? `<div class="mg-btn-wrap green" style="max-width:280px;width:100%"><button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${nextIdx}))">Siguiente nivel →</button></div>`
-        : "";
+        : ``;
       app.innerHTML = `<div class="mg-player"><div class="mg-center mg-fade">
         <div style="font-size:60px"><i class="fa-solid fa-trophy" style="color:#fcd34d;"></i></div>
         <h1 style="font-family:'din-round-bold';font-weight:800;font-size:30px;margin:0">¡Nivel ${lv.id} completado!</h1>
@@ -873,20 +904,34 @@ export async function initEngine({
     examModal.classList.remove("hidden");
 
     if (E.phase === "intro") {
-      const attemptsLeft = 2 - E.attempts;
+      const isFinal = E.mode === 'final';
+      const attemptsLeft = isFinal ? null : 2 - E.attempts;
+      const examTitle = isFinal
+        ? `Examen Final · Mundo ${worldId}`
+        : `Examen de salto · Mundo ${prereqWorldId ?? worldId - 1}`;
+      const examDesc = isFinal
+        ? `Pon a prueba tu dominio del Mundo ${worldId}. Responde al menos <strong>${PASS_THRESHOLD} de ${EXAM_SIZE} preguntas</strong> correctamente.`
+        : `Responde correctamente al menos <strong>${PASS_THRESHOLD} de ${EXAM_SIZE} preguntas</strong> para desbloquear este mundo.`;
+      const attemptsItem = attemptsLeft !== null
+        ? `<div class="exam-meta-item"><i class="fa-solid fa-arrows-rotate" style="color:var(--mg-streak); margin-right:4px;"></i>${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</div>`
+        : `<div class="exam-meta-item"><i class="fa-solid fa-infinity" style="color:var(--mg-streak); margin-right:4px;"></i>Intentos ilimitados</div>`;
+      const bonusItem = isFinal
+        ? `<div class="exam-meta-item"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>+100 XP al pasar (1ª vez)</div>`
+        : '';
       examModal.innerHTML = `
         <div class="exam-modal-content mg-fade">
           <div class="exam-modal-header">
             <button class="mg-close" onclick="MG.closeExam()">✕</button>
-            <h2 class="exam-title">Examen de salto · Mundo ${prereqWorldId ?? worldId - 1}</h2>
+            <h2 class="exam-title">${examTitle}</h2>
           </div>
           <div class="exam-intro-body">
-            <div style="font-size:52px; color:var(--mg-primary);"><i class="fa-solid fa-clipboard-list"></i></div>
-            <p>Responde correctamente al menos <strong>${PASS_THRESHOLD} de ${EXAM_SIZE} preguntas</strong> para desbloquear este mundo.</p>
+            <div style="font-size:52px; color:${isFinal ? '#f59e0b' : 'var(--mg-primary)'};"><i class="fa-solid ${isFinal ? 'fa-award' : 'fa-clipboard-list'}"></i></div>
+            <p>${examDesc}</p>
             <div class="exam-meta-grid">
               <div class="exam-meta-item"><i class="fa-solid fa-file-pen" style="color:var(--mg-primary); margin-right:4px;"></i>${EXAM_SIZE} preguntas</div>
               <div class="exam-meta-item"><i class="fa-solid fa-bullseye" style="color:var(--mg-xp); margin-right:4px;"></i>${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</div>
-              <div class="exam-meta-item"><i class="fa-solid fa-arrows-rotate" style="color:var(--mg-streak); margin-right:4px;"></i>${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</div>
+              ${attemptsItem}
+              ${bonusItem}
             </div>
           </div>
           <div class="exam-modal-footer">
@@ -900,31 +945,45 @@ export async function initEngine({
     if (E.phase === "done") {
       const passed = E.score >= PASS_THRESHOLD;
       const pct = Math.round((E.score / EXAM_SIZE) * 100);
+      const isFinal = E.mode === 'final';
+      const resultMsg = isFinal
+        ? passed
+          ? `¡Dominas el Mundo ${worldId}!${E.score === EXAM_SIZE ? ' ¡Puntaje perfecto!' : ''}`
+          : `Necesitabas ${PASS_THRESHOLD} correctas. ¡Inténtalo de nuevo cuando quieras!`
+        : passed
+          ? `Excelente dominio del Mundo ${prereqWorldId ?? worldId - 1}. El Mundo ${worldId} queda desbloqueado.`
+          : E.attempts >= 2
+            ? `Has agotado tus 2 intentos. Completa el Mundo ${prereqWorldId ?? worldId - 1} para desbloquear este.`
+            : `Necesitabas ${PASS_THRESHOLD} correctas. Te queda 1 intento más.`;
+      const footerHtml = isFinal
+        ? passed
+          ? `<div class="mg-btn-wrap green"><button class="mg-btn" onclick="MG.examAccept()">¡Genial! Volver al mapa</button></div>`
+          : `<div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.startExam)">Reintentar</button></div>
+             <div class="mg-btn-wrap"><button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.closeExam()">Cancelar</button></div>`
+        : passed
+          ? `<div class="mg-btn-wrap green"><button class="mg-btn" onclick="MG.examAccept()">¡Continuar al Mundo ${worldId}!</button></div>`
+          : E.attempts >= 2
+            ? `<div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.closeExam()">Entendido</button></div>`
+            : `<div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.startExam)">Reintentar</button></div>
+               <div class="mg-btn-wrap"><button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.closeExam()">Cancelar</button></div>`;
+      const bonusBadge = isFinal && passed && E._xpBonusAwarded
+        ? `<div style="margin:8px 0 0;padding:6px 14px;background:rgba(245,158,11,.12);border:1.5px solid #f59e0b;border-radius:12px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#92400e;"><i class="fa-solid fa-bolt" style="color:#f59e0b;"></i>+100 XP obtenidos</div>`
+        : '';
       examModal.innerHTML = `
         <div class="exam-modal-content mg-fade">
           <div class="exam-modal-header">
-            <h2 class="exam-title">${passed ? "¡Aprobaste!" : "No aprobaste"}</h2>
+            <h2 class="exam-title">${passed ? (isFinal ? '¡Mundo dominado!' : '¡Aprobaste!') : 'No aprobaste'}</h2>
           </div>
           <div class="exam-intro-body">
-            <div style="font-size:52px">${passed ? '<i class="fa-solid fa-trophy" style="color:#fcd34d;"></i>' : '<i class="fa-solid fa-book-open" style="color:var(--mg-muted-2);"></i>'}</div>
+            <div style="font-size:52px">${passed ? `<i class="fa-solid ${isFinal ? 'fa-award' : 'fa-trophy'}" style="color:${isFinal ? '#f59e0b' : '#fcd34d'};"></i>` : '<i class="fa-solid fa-book-open" style="color:var(--mg-muted-2);"></i>'}</div>
             <div class="exam-score-display">
               <div class="exam-score-num" style="color:${passed ? "var(--owl-green)" : "var(--cardinal)"}">${E.score}/${EXAM_SIZE}</div>
               <div class="exam-score-pct">${pct}%</div>
             </div>
-            <p>${passed
-              ? `Excelente dominio del Mundo ${prereqWorldId ?? worldId - 1}. El Mundo ${worldId} queda desbloqueado.`
-              : E.attempts >= 2
-                ? `Has agotado tus 2 intentos. Completa el Mundo ${prereqWorldId ?? worldId - 1} para desbloquear este.`
-                : `Necesitabas ${PASS_THRESHOLD} correctas. Te queda 1 intento más.`}</p>
+            <p>${resultMsg}</p>
+            ${bonusBadge}
           </div>
-          <div class="exam-modal-footer">
-            ${passed
-              ? `<div class="mg-btn-wrap green"><button class="mg-btn" onclick="MG.examAccept()">¡Continuar al Mundo ${worldId}!</button></div>`
-              : E.attempts >= 2
-                ? `<div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.closeExam()">Entendido</button></div>`
-                : `<div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.startExam)">Reintentar</button></div>
-                   <div class="mg-btn-wrap"><button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.closeExam()">Cancelar</button></div>`}
-          </div>
+          <div class="exam-modal-footer">${footerHtml}</div>
         </div>`;
       if (passed) confetti();
       return;
@@ -1094,10 +1153,24 @@ export async function initEngine({
       }
     },
 
-    // -- Examen --
+    // -- Examen de salto --
     openExam() {
       if (!prereqWorldData) return;
+      const jumpData = raw?.worlds?.[worldId]?.jumpExam ?? {};
+      E.mode = 'jump';
       E.phase = "intro";
+      E.attempts = jumpData.attempts ?? 0;
+      E.passed = jumpData.passed ?? false;
+      renderExam();
+    },
+    openFinalExam() {
+      const finalData = raw?.worlds?.[worldId]?.finalExam ?? {};
+      E.mode = 'final';
+      E.phase = "intro";
+      E.attempts = finalData.attempts ?? 0;
+      E.passed = finalData.passed ?? false;
+      E._xpBonusAwarded = false;
+      Object.assign(E, { questions: [], index: 0, score: 0, selected: [], chosen: null, placed: {}, result: null, showHint: false });
       renderExam();
     },
     closeExam() {
@@ -1130,7 +1203,14 @@ export async function initEngine({
         E.attempts++;
         const passed = E.score >= PASS_THRESHOLD;
         E.passed = passed;
-        pendingExamSave = saveJumpExam(passed);
+        if (E.mode === 'final') {
+          const wasAlreadyPassed = raw?.worlds?.[worldId]?.finalExam?.passed === true;
+          const xpBonus = (passed && !wasAlreadyPassed) ? 100 : 0;
+          if (xpBonus) { S.xp += xpBonus; E._xpBonusAwarded = true; }
+          pendingExamSave = saveFinalExam(passed, xpBonus);
+        } else {
+          pendingExamSave = saveJumpExam(passed);
+        }
       }
       renderExam();
     },
@@ -1149,7 +1229,13 @@ export async function initEngine({
     },
     async examAccept() {
       if (pendingExamSave) await pendingExamSave.catch(console.warn);
-      window.location.reload();
+      if (E.mode === 'final') {
+        examModal.classList.add("hidden");
+        examModal.innerHTML = "";
+        render();
+      } else {
+        window.location.reload();
+      }
     },
 
     // -- Vista Previa (solo admin) --

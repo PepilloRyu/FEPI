@@ -110,18 +110,23 @@
       { id: '6', icon: 'fa-solid fa-atom',              title: 'Números Complejos y Vectores',    sub: 'Donde lo imaginario se vuelve real',         href: 'world-6.html' },
     ];
 
-    function renderWorlds(unlockedIds, isAdmin) {
+    function renderWorlds(unlockedIds, isAdmin, worlds) {
       const grid = document.getElementById('worlds-grid');
       grid.innerHTML = WORLD_DATA.map(w => {
         const unlocked = isAdmin || unlockedIds.includes(w.id);
+        const mastered = worlds[w.id]?.finalExam?.passed === true;
+        const badge = mastered
+          ? `<span title="Mundo dominado" style="position:absolute;top:-6px;right:-6px;background:#f59e0b;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 6px rgba(0,0,0,.2);"><i class="fa-solid fa-award"></i></span>`
+          : '';
         return `
           <a href="${w.href}"
              class="mg-world-card ${unlocked ? 'unlocked' : 'locked'}">
-            <span class="mg-world-icon" style="font-size:28px; width:52px; height:52px; background:${unlocked ? 'rgba(79,70,229,0.1)' : 'var(--mg-border)'}; border-radius:14px; display:flex; align-items:center; justify-content:center; color:${unlocked ? 'var(--mg-primary)' : 'var(--mg-muted-2)'}; flex-shrink:0;">
+            <span class="mg-world-icon" style="position:relative;font-size:28px; width:52px; height:52px; background:${unlocked ? 'rgba(79,70,229,0.1)' : 'var(--mg-border)'}; border-radius:14px; display:flex; align-items:center; justify-content:center; color:${unlocked ? 'var(--mg-primary)' : 'var(--mg-muted-2)'}; flex-shrink:0;">
               <i class="${w.icon}"></i>
+              ${badge}
             </span>
             <div class="mg-world-body">
-              <div class="mg-world-num">Mundo ${w.id}</div>
+              <div class="mg-world-num">Mundo ${w.id}${mastered ? ' <span style="font-size:10px;font-weight:700;color:#92400e;background:rgba(245,158,11,.15);border-radius:6px;padding:1px 6px;vertical-align:middle;">DOMINADO</span>' : ''}</div>
               <div class="mg-world-title">${w.title}</div>
               <p class="mg-world-sub">${w.sub}</p>
             </div>
@@ -180,7 +185,7 @@
       if (isAdmin || worlds['3']?.allComplete || worlds['4']?.jumpExam?.passed) unlocked.push('4');
       if (isAdmin || worlds['4']?.allComplete || worlds['5']?.jumpExam?.passed) unlocked.push('5');
       if (isAdmin || worlds['5']?.allComplete || worlds['6']?.jumpExam?.passed) unlocked.push('6');
-      renderWorlds(unlocked, isAdmin);
+      renderWorlds(unlocked, isAdmin, worlds);
 
       // Objetivos personales
       let currentObjetivos = userData.objetivos ?? [];
