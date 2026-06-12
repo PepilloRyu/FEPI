@@ -39,10 +39,10 @@ function buildSidebar(activeId, basePath, userName, userXp, userStreak) {
   const initials = getInitials(userName);
 
   return `
-    <div class="mg-brand">
+    <a href="${basePath}learn.html" class="mg-brand" aria-label="Ir a Mundos">
       <div class="mg-brand-icon"><i class="fa-solid fa-square-root-variable"></i></div>
       <div class="mg-brand-name">Math<span>Go</span></div>
-    </div>
+    </a>
 
     <nav class="mg-nav" aria-label="Navegacion principal">
       ${navHTML}
@@ -55,7 +55,7 @@ function buildSidebar(activeId, basePath, userName, userXp, userStreak) {
         </div>
         <div class="mg-profile-card-info">
           <h3 id="sb-name" style="font-size:14px;">${userName || 'Cargando...'}</h3>
-          <span><i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i> <strong id="sb-xp">${userXp ?? '–'}</strong> XP &nbsp;<i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i> <strong id="sb-streak">${userStreak ?? '–'}</strong></span>
+          <span><i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i> <strong id="sb-xp">${userXp ?? '–'}</strong> XP &nbsp;<i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i> <strong id="sb-streak">${userStreak ?? '–'}</strong> &nbsp;<i class="fa-solid fa-heart" style="color:var(--mg-hearts);"></i> <strong id="sb-hearts">–</strong></span>
         </div>
       </div>
       <button class="mg-logout-btn" id="mg-logout-btn" aria-label="Cerrar sesion">
@@ -145,7 +145,12 @@ export async function initSidebar(activeId = 'learn') {
 
   // Inyectar enlace Admin si el usuario es administrador
   const roleSnap = roleResult.status === 'fulfilled' ? roleResult.value : null;
-  if (roleSnap?.exists?.() && roleSnap.data().role === 'admin') {
+  const isAdminUser = roleSnap?.exists?.() && roleSnap.data().role === 'admin';
+
+  const heartsEl = document.getElementById('sb-hearts');
+  if (heartsEl) heartsEl.textContent = isAdminUser ? '∞' : (profile?.hearts ?? 15);
+
+  if (isAdminUser) {
     const isActive = activeId === ADMIN_ITEM.id;
 
     // Enlace en sidebar desktop

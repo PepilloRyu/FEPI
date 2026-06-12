@@ -21,6 +21,7 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
     import { initEngine } from '../js/mathgo-engine.js';
     import { WORLD, getVisual } from '../js/worlds/world-1-meta.js';
+    import { ANSWERS_W1 } from '../js/worlds/world-1-answers.js';
     import { initSidebar } from '../js/components/sidebar.js';
 
     onAuthStateChanged(auth, async (user) => {
@@ -36,6 +37,7 @@
         prereqWorldData: null,
         user,
         db,
+        localAnswers: ANSWERS_W1,
         onSignOut: async () => {
           await signOut(auth);
           localStorage.removeItem('mathgo_user');

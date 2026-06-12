@@ -36,10 +36,20 @@ public class ProgressService : IProgressService
     {
         var progress = await _progressRepository.GetByIdAsync(uid);
         var summary = new ProgressSummary();
-        
+
         if (progress != null)
         {
+            var (newLives, newTs, changed) = LivesHelper.CalculateRegenerated(
+                progress.Lives, progress.LastLifeLostAt);
+            if (changed)
+            {
+                progress.Lives = newLives;
+                progress.LastLifeLostAt = newTs;
+                await _progressRepository.UpdateAsync(uid, progress);
+            }
+
             summary.TotalXp = progress.TotalXp;
+            summary.Lives = progress.Lives;
             summary.TotalLevelsCompleted = progress.Worlds?.Values.Sum(w => w.LevelsCompleted?.Count ?? 0) ?? 0;
             summary.TotalWorldsCompleted = progress.Worlds?.Values.Count(w => w.AllComplete) ?? 0;
 
@@ -55,7 +65,7 @@ public class ProgressService : IProgressService
                 }
             }
         }
-        
+
         return summary;
     }
 

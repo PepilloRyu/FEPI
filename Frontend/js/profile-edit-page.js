@@ -1,6 +1,6 @@
 import { app } from './firebaseConfig.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
-import { getProfile, updateProfile } from './services/api.js';
+import { getProfile, updateProfile, forgotPassword } from './services/api.js';
 import { requireAuth, getInitials, showToast } from './services/auth.js';
 import { initSidebar } from './components/sidebar.js';
 
@@ -117,6 +117,27 @@ document.getElementById('edit-profile-form').addEventListener('submit', async (e
 // Botón Volver
 document.getElementById('go-back').addEventListener('click', () => {
   window.location.href = './profile-page.html';
+});
+
+// Enviar correo de restablecimiento de contraseña
+document.getElementById('send-reset-btn').addEventListener('click', async () => {
+  if (!currentUser?.email) return;
+
+  document.getElementById('reset-btn-label').style.display = 'none';
+  document.getElementById('reset-spinner').style.display = 'block';
+  document.getElementById('send-reset-btn').disabled = true;
+
+  const { error } = await forgotPassword(currentUser.email);
+
+  document.getElementById('reset-btn-label').style.display = 'inline';
+  document.getElementById('reset-spinner').style.display = 'none';
+  document.getElementById('send-reset-btn').disabled = false;
+
+  if (error) {
+    showToast('No se pudo enviar el correo. Inténtalo más tarde.', 'error');
+  } else {
+    showToast('Correo enviado. Revisa tu bandeja de entrada.', 'success');
+  }
 });
 
 // Arrancar validando sesión

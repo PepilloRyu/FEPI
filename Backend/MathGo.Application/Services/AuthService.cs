@@ -69,7 +69,7 @@ public class AuthService : IAuthService
             TotalXp = 0,
             DailyStreak = 0,
             Gems = 500,
-            Lives = 5,
+            Lives = 15,
             Level = 1,
             LastActiveDate = DateTime.UtcNow.ToString("yyyy-MM-dd"),
             WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
@@ -105,7 +105,7 @@ public class AuthService : IAuthService
             TotalXp = 0,
             DailyStreak = 0,
             Gems = 500,
-            Lives = 5,
+            Lives = 15,
             Level = 1,
             WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 }
         };

@@ -115,9 +115,8 @@
       grid.innerHTML = WORLD_DATA.map(w => {
         const unlocked = isAdmin || unlockedIds.includes(w.id);
         return `
-          <a href="${unlocked ? w.href : '#'}"
-             class="mg-world-card ${unlocked ? 'unlocked' : 'locked'}"
-             ${unlocked ? '' : 'aria-disabled="true" tabindex="-1"'}>
+          <a href="${w.href}"
+             class="mg-world-card ${unlocked ? 'unlocked' : 'locked'}">
             <span class="mg-world-icon" style="font-size:28px; width:52px; height:52px; background:${unlocked ? 'rgba(79,70,229,0.1)' : 'var(--mg-border)'}; border-radius:14px; display:flex; align-items:center; justify-content:center; color:${unlocked ? 'var(--mg-primary)' : 'var(--mg-muted-2)'}; flex-shrink:0;">
               <i class="${w.icon}"></i>
             </span>
@@ -176,11 +175,11 @@
       // Mundos desbloqueados
       const worlds = progress.worlds ?? {};
       const unlocked = ['1'];
-      if (isAdmin || worlds['1']?.allComplete) unlocked.push('2');
-      if (isAdmin || worlds['2']?.allComplete) unlocked.push('3');
-      if (isAdmin || worlds['3']?.allComplete) unlocked.push('4');
-      if (isAdmin || worlds['4']?.allComplete) unlocked.push('5');
-      if (isAdmin || worlds['5']?.allComplete) unlocked.push('6');
+      if (isAdmin || worlds['1']?.allComplete || worlds['2']?.jumpExam?.passed) unlocked.push('2');
+      if (isAdmin || worlds['2']?.allComplete || worlds['3']?.jumpExam?.passed) unlocked.push('3');
+      if (isAdmin || worlds['3']?.allComplete || worlds['4']?.jumpExam?.passed) unlocked.push('4');
+      if (isAdmin || worlds['4']?.allComplete || worlds['5']?.jumpExam?.passed) unlocked.push('5');
+      if (isAdmin || worlds['5']?.allComplete || worlds['6']?.jumpExam?.passed) unlocked.push('6');
       renderWorlds(unlocked, isAdmin);
 
       // Objetivos personales

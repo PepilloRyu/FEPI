@@ -63,6 +63,21 @@
           </div>
         </form>
       </div>
+
+      <!-- Seguridad: cambio de contraseña -->
+      <div class="mg-card" style="max-width: 600px; margin: 20px auto; padding: var(--mg-space-6);">
+        <h2 class="mg-card-title">
+          <i class="fa-solid fa-lock" style="color:var(--mg-primary);"></i> Seguridad
+        </h2>
+        <p style="font-size: 14px; color: var(--mg-text-2); margin: 12px 0 20px;">
+          Para cambiar tu contraseña, te enviaremos un enlace de restablecimiento al correo asociado a tu cuenta.
+        </p>
+        <button type="button" class="mg-btn mg-btn-secondary" id="send-reset-btn" style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-envelope"></i>
+          <span id="reset-btn-label">Enviar correo de restablecimiento</span>
+          <div class="spinner" id="reset-spinner" style="display: none; width: 16px; height: 16px; border-width: 2px;"></div>
+        </button>
+      </div>
     </main>
   </div>
 

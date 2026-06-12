@@ -9,5 +9,5 @@ public interface IExerciseService
     Task<List<ExerciseDto>> GetExercisesByWorldAsync(int worldId, bool isAdmin = false);
 
     /// <summary>Valida la respuesta del usuario y otorga XP si es correcta.</summary>
-    Task<AnswerResultDto> CheckAnswerAsync(string exerciseId, string uid, JsonElement userAnswer);
+    Task<AnswerResultDto> CheckAnswerAsync(string exerciseId, string uid, JsonElement userAnswer, bool isAdmin = false);
 }

@@ -23,8 +23,9 @@ async function submitAnswer(exerciseId, userAnswer, user) {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body:    JSON.stringify({ userId: uid, userAnswer }),
   });
+  if (res.status === 403) throw new Error("NO_LIVES");
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json(); // { correct: bool, xpAwarded: int }
+  return res.json(); // { correct: bool, xpAwarded: int, remainingLives: int }
 }
 
 // Construye la respuesta del usuario en el formato que espera la API según tipo de ejercicio
@@ -50,6 +51,8 @@ export async function initEngine({
   worldData, getVisual,
   worldId, prereqWorldId = null, prereqWorldData = null,
   user, db, onSignOut,
+  localAnswers = [],
+  prereqLocalAnswers = [],
 }) {
   const app = document.getElementById("app");
   const examModal = document.getElementById("exam-modal");
@@ -61,7 +64,10 @@ export async function initEngine({
   app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="mg-brand-icon">M</div><span>Cargando…</span></div></div>`;
 
   // ---- Guardar retos locales antes de reemplazarlos (necesario para Vista Previa y examen) ----
-  const localChallenges = worldData.levels.map(lv => lv.challenges.slice());
+  // localAnswers[li] viene de world-N-answers.js (admin preview); si está disponible, lo usa en lugar del meta vacío
+  const localChallenges = worldData.levels.map((lv, li) =>
+    localAnswers[li]?.length ? localAnswers[li] : lv.challenges.slice()
+  );
 
   // ---- Cargar rol y progreso en paralelo (fallos independientes) ----
   let raw = {};
@@ -84,6 +90,16 @@ export async function initEngine({
     firestoreObjetivos = ud.objetivos ?? [];
   } else if (userResult.status === "rejected") {
     console.warn("Error cargando rol (revisa reglas de Firestore para users/{uid}):", userResult.reason);
+  }
+
+  // Leer vidas iniciales del sidebar (ya poblado por initSidebar antes de llamar a initEngine)
+  let livesCount = 15;
+  if (!isAdmin) {
+    const heartsEl = document.getElementById('sb-hearts');
+    if (heartsEl && heartsEl.textContent !== '–') {
+      const parsed = parseInt(heartsEl.textContent, 10);
+      livesCount = isNaN(parsed) ? 15 : parsed;
+    }
   }
 
   // ---- Racha diaria ----
@@ -128,69 +144,73 @@ export async function initEngine({
     return map;
   }
 
-  // ---- Cargar ejercicios desde la API y reemplazar retos locales ----
-  try {
-    const fetchPromises = [fetchWorldExercises(worldId, user)];
-    if (prereqWorldId) {
-      fetchPromises.push(fetchWorldExercises(prereqWorldId, user));
-    }
-    const results = await Promise.all(
-      fetchPromises.map(p => p.catch(err => {
-        console.warn("Error fetching exercises for a world:", err);
-        return null;
-      }))
-    );
-    const apiExercises = results[0];
-    const prereqExercises = results[1] ?? null;
+  // ---- Cargar ejercicios desde la API (solo si el mundo está desbloqueado) ----
+  // Para mundos bloqueados el fetch no es necesario: renderLocked() no usa ejercicios
+  // y saltarlo evita que un backend caído impida mostrar la pantalla del examen de salto.
+  if (isUnlocked) {
+    try {
+      const fetchPromises = [fetchWorldExercises(worldId, user)];
+      if (prereqWorldId) {
+        fetchPromises.push(fetchWorldExercises(prereqWorldId, user));
+      }
+      const results = await Promise.all(
+        fetchPromises.map(p => p.catch(err => {
+          console.warn("Error fetching exercises for a world:", err);
+          return null;
+        }))
+      );
+      const apiExercises = results[0];
+      const prereqExercises = results[1] ?? null;
 
-    if (!apiExercises) {
-      throw new Error("Failed to fetch exercises for current world.");
-    }
+      if (!apiExercises) {
+        throw new Error("Failed to fetch exercises for current world.");
+      }
 
-    // Reagrupar por índice de nivel → índice de ejercicio
-    const byLevel = {};
-    apiExercises.forEach(ex => {
-      const parts = ex.id.split('_');
-      const li = parseInt(parts[1], 10);
-      const ei = parseInt(parts[2], 10);
-      if (!byLevel[li]) byLevel[li] = [];
-      byLevel[li][ei] = ex;
-    });
-    // Reemplazar challenges en worldData
-    worldData.levels.forEach((lv, li) => {
-      const fetched = byLevel[li]?.filter(Boolean);
-      if (fetched?.length) lv.challenges = fetched;
-    });
-
-    // Reagrupar por índice de nivel → índice de ejercicio (prerrequisito)
-    if (prereqWorldId && prereqExercises && prereqWorldData) {
-      const prereqByLevel = {};
-      prereqExercises.forEach(ex => {
+      // Reagrupar por índice de nivel → índice de ejercicio
+      const byLevel = {};
+      apiExercises.forEach(ex => {
         const parts = ex.id.split('_');
         const li = parseInt(parts[1], 10);
         const ei = parseInt(parts[2], 10);
-        if (!prereqByLevel[li]) prereqByLevel[li] = [];
-        prereqByLevel[li][ei] = ex;
+        if (!byLevel[li]) byLevel[li] = [];
+        byLevel[li][ei] = ex;
       });
-      prereqWorldData.levels.forEach((lv, li) => {
-        const fetched = prereqByLevel[li]?.filter(Boolean);
+      // Reemplazar challenges en worldData
+      worldData.levels.forEach((lv, li) => {
+        const fetched = byLevel[li]?.filter(Boolean);
         if (fetched?.length) lv.challenges = fetched;
       });
+
+      // Reagrupar por índice de nivel → índice de ejercicio (prerrequisito)
+      if (prereqWorldId && prereqExercises && prereqWorldData) {
+        const prereqByLevel = {};
+        prereqExercises.forEach(ex => {
+          const parts = ex.id.split('_');
+          const li = parseInt(parts[1], 10);
+          const ei = parseInt(parts[2], 10);
+          if (!prereqByLevel[li]) prereqByLevel[li] = [];
+          prereqByLevel[li][ei] = ex;
+        });
+        prereqWorldData.levels.forEach((lv, li) => {
+          const fetched = prereqByLevel[li]?.filter(Boolean);
+          if (fetched?.length) lv.challenges = fetched;
+        });
+      }
+    } catch (e) {
+      console.warn("API de ejercicios no disponible, usando datos locales o error:", e);
+      app.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    min-height:60vh;gap:16px;text-align:center;padding:24px">
+          <div style="font-size:48px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--mg-danger);"></i></div>
+          <p style="font-size:16px;font-weight:700;color:var(--mg-text)">
+            Error al cargar ejercicios, intenta de nuevo
+          </p>
+          <div class="mg-btn-wrap blue" style="max-width:220px;width:100%">
+            <button class="mg-btn" onclick="location.reload()">Reintentar</button>
+          </div>
+        </div>`;
+      return; // detener init si el backend no responde
     }
-  } catch (e) {
-    console.warn("API de ejercicios no disponible, usando datos locales o error:", e);
-    app.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                  min-height:60vh;gap:16px;text-align:center;padding:24px">
-        <div style="font-size:48px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--mg-danger);"></i></div>
-        <p style="font-size:16px;font-weight:700;color:var(--mg-text)">
-          Error al cargar ejercicios, intenta de nuevo
-        </p>
-        <div class="mg-btn-wrap blue" style="max-width:220px;width:100%">
-          <button class="mg-btn" onclick="location.reload()">Reintentar</button>
-        </div>
-      </div>`;
-    return; // detener init si el backend no responde
   }
 
   // ---- Estado del examen ----
@@ -350,6 +370,29 @@ export async function initEngine({
       </a>`;
   }
 
+  // ---- Vidas ----
+  function updateLivesUI(count) {
+    const sbEl = document.getElementById('sb-hearts');
+    if (sbEl) sbEl.textContent = count;
+    const playerEl = document.getElementById('player-hearts');
+    if (playerEl) playerEl.textContent = count;
+  }
+
+  function showNoLivesModal() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+    overlay.innerHTML = `
+      <div style="background:var(--mg-surface);border-radius:20px;padding:36px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25);">
+        <div style="font-size:52px;margin-bottom:4px;"><i class="fa-solid fa-heart-crack" style="color:var(--mg-hearts);"></i></div>
+        <h2 style="font-family:'din-round-bold';font-weight:800;font-size:22px;margin:12px 0 8px;">¡Sin vidas!</h2>
+        <p style="font-size:14px;color:var(--mg-text-2);line-height:1.5;margin:0 0 24px;">Te quedaste sin vidas. Espera a que se regeneren o continúa mañana.</p>
+        <div class="mg-btn-wrap blue" style="max-width:280px;margin:0 auto;">
+          <button class="mg-btn" onclick="window.location.href='learn.html'">Salir al mapa de mundos</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+
   // ---- Confeti ----
   function confetti() {
     const cols = ["#4A6CF7", "#58cc02", "#ffc800", "#1cb0f6", "#ff4b4b"];
@@ -435,17 +478,20 @@ export async function initEngine({
   function evaluate(c, st) {
     if (c.type === "mc" || c.type === "vf") return c.options[st.chosen].correct;
     if (c.type === "build") {
+      if (!c.operands) return false;
       const ops = st.selected.map(s => s.label).filter(l => l !== "+").sort();
       const plus = st.selected.filter(s => s.label === "+").length;
       const need = [...c.operands].sort();
       return ops.length === need.length && ops.every((v, i) => v === need[i]) && plus === need.length - 1;
     }
     if (c.type === "buildSeq") {
+      if (!c.answers?.length) return false;
       const seq = st.selected.map(s => s.label);
       return c.answers.some(a => a.length === seq.length && a.every((v, i) => v === seq[i]));
     }
     if (c.type === "match") return c.pairs.every((p, i) => st.placed[i] === p.sym);
     if (c.type === "slots") {
+      if (!c.answer) return false;
       const vals = Object.values(st.placed).sort();
       const ans  = [...c.answer].sort();
       return vals.length === ans.length && vals.every((v, i) => v === ans[i]);
@@ -454,15 +500,23 @@ export async function initEngine({
   }
 
   // ---- Render de un reto (compartido player/examen) ----
-  function challengeHTML(c, st, h) {
+  // isPreview=true: solo admin, muestra respuesta correcta resaltada sin interacción
+  function challengeHTML(c, st, h, isPreview = false) {
     if (c.type === "mc" || c.type === "vf") {
       const cls = c.type === "vf" ? "mg-vf" : "mg-options";
       return `<div class="${cls}">` + c.options.map((o, i) => {
         let btnCls = "";
-        if (st.result === "ok" && st.chosen === i) btnCls = "right";
-        else if (st.result === "no" && st.chosen === i) btnCls = "wrong";
-        else if (st.chosen === i) btnCls = "sel";
-        return `<button class="mg-opt ${btnCls}" ${st.result === "ok" ? "disabled" : ""} onclick="${h.pick}(${i})">${o.label}</button>`;
+        if (isPreview) {
+          if (o.correct) btnCls = "right";
+        } else {
+          if (st.result === "ok" && st.chosen === i) btnCls = "right";
+          else if (st.result === "no" && st.chosen === i) btnCls = "wrong";
+          else if (st.chosen === i) btnCls = "sel";
+        }
+        const disabled = isPreview || st.result === "ok";
+        const clickHtml = isPreview ? "" : ` onclick="${h.pick}(${i})"`;
+        const label = (isPreview && o.correct) ? `${o.label} ✓` : o.label;
+        return `<button class="mg-opt ${btnCls}" ${disabled ? "disabled" : ""}${clickHtml}>${label}</button>`;
       }).join("") + `</div>`;
     }
     if (c.type === "build" || c.type === "buildSeq") {
@@ -510,10 +564,8 @@ export async function initEngine({
   function previewChallengeHTML(c) {
     if (c.type === "mc" || c.type === "vf") {
       if (!c.options) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Opciones no disponibles</div>`;
-      const cls = c.type === "vf" ? "mg-vf" : "mg-options";
-      return `<div class="${cls}">${c.options.map(o =>
-        `<button class="mg-opt${o.correct ? " right" : ""}" disabled>${o.label}${o.correct ? " ✓" : ""}</button>`
-      ).join("")}</div>`;
+      // Delega a challengeHTML con isPreview=true para mantener la lógica centralizada
+      return challengeHTML(c, null, null, true);
     }
     if (c.type === "build" || c.type === "buildSeq") {
       const tokens = c.type === "build" ? c.operands : (c.answers ? c.answers[0] : null);
@@ -582,7 +634,13 @@ export async function initEngine({
   function sampleExamQuestions() {
     if (!prereqWorldData) return [];
     const all = [];
-    prereqWorldData.levels.forEach(lv => lv.challenges.forEach(c => all.push({ ...c })));
+    // prereqLocalAnswers viene de world-(N-1)-answers.js y tiene correct: true en opciones mc/vf.
+    // Es necesario para que evaluate() funcione localmente sin llamar a la API.
+    if (prereqLocalAnswers.length > 0) {
+      prereqLocalAnswers.forEach(lvChallenges => lvChallenges.forEach(c => all.push({ ...c })));
+    } else {
+      prereqWorldData.levels.forEach(lv => lv.challenges.forEach(c => all.push({ ...c })));
+    }
     for (let i = all.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [all[i], all[j]] = [all[j], all[i]];
@@ -681,8 +739,8 @@ export async function initEngine({
     if (layoutEl) layoutEl.className = 'mg-layout-2col';
     if (rightEl) rightEl.style.display = 'none';
     document.body.classList.add('mg-player-mode');
-    const lv = worldData.levels[P.levelIdx];
-    const challenges = lv.challenges; // usa las cargadas del API
+    // Usa localChallenges: tienen el flag correct en opciones mc/vf y los campos de respuesta completos
+    const challenges = localChallenges[P.levelIdx] ?? worldData.levels[P.levelIdx].challenges;
     const total = challenges.length;
     if (total === 0) {
       app.innerHTML = `<div class="mg-player"><div class="mg-top" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)">
@@ -752,10 +810,11 @@ export async function initEngine({
     }
 
     const streakHtml = S.streak > 1 ? `<span class="mg-streak" style="margin-right:12px;"><i class="fa-solid fa-fire" style="color:var(--mg-streak); margin-right:4px;"></i>${S.streak}</span>` : "";
+    const heartsHtml = !isAdmin ? `<span class="mg-hearts-player" style="margin-right:12px;"><i class="fa-solid fa-heart" style="color:var(--mg-hearts); margin-right:4px;"></i><span id="player-hearts">${livesCount}</span></span>` : "";
     const top = `<div class="mg-top">
       <button class="mg-close" onclick="MG.home()" title="Salir">✕</button>
       <div class="mg-progress"><div class="mg-progress-fill" style="width:${(S.step / levelTotal()) * 100}%"></div></div>
-      ${streakHtml}<span class="mg-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${S.xp} XP</span></div>`;
+      ${heartsHtml}${streakHtml}<span class="mg-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${S.xp} XP</span></div>`;
 
     if (S.step < curTheory().length) {
       const t = curTheory()[S.step];
@@ -939,14 +998,30 @@ export async function initEngine({
         footerEl.innerHTML = `<div class="mg-btn-wrap disabled"><button class="mg-btn" disabled>Verificando…</button></div>`;
 
       try {
-        const { correct, xpAwarded } = await submitAnswer(exerciseId, userAnswer, user);
+        const { correct, xpAwarded, remainingLives } = await submitAnswer(exerciseId, userAnswer, user);
         S.result = correct ? "ok" : "no";
-        if (correct) { S.xp += xpAwarded; S.streak++; render(); confetti(); }
-        else          { S.showHint = true; S.streak = 0; render(); }
+        if (correct) {
+          S.xp += xpAwarded; S.streak++;
+          render(); confetti();
+        } else {
+          S.showHint = true; S.streak = 0;
+          if (!isAdmin && remainingLives !== undefined) {
+            livesCount = remainingLives;
+            updateLivesUI(livesCount);
+            if (livesCount <= 0) { render(); showNoLivesModal(); return; }
+          }
+          render();
+        }
       } catch (e) {
+        if (e.message === "NO_LIVES") {
+          const fEl = app.querySelector('.mg-footer');
+          if (fEl) fEl.innerHTML = `<div class="mg-btn-wrap disabled"><button class="mg-btn" disabled>Sin vidas disponibles</button></div>`;
+          showNoLivesModal();
+          return;
+        }
         console.error("Error al verificar respuesta:", e);
         MG.toast("Error al verificar, intenta de nuevo");
-        render(); // restaurar footer sin cambiar S.result
+        render();
       }
     },
 
@@ -1015,7 +1090,7 @@ export async function initEngine({
       renderPreview();
     },
     previewNav(delta) {
-      const total = worldData.levels[P.levelIdx].challenges.length;
+      const total = (localChallenges[P.levelIdx] ?? worldData.levels[P.levelIdx].challenges).length;
       P.stepIdx = Math.max(0, Math.min(total - 1, P.stepIdx + delta));
       renderPreview();
     },

@@ -73,11 +73,30 @@ public class ExerciseService : IExerciseService
     }
 
     public async Task<AnswerResultDto> CheckAnswerAsync(
-        string exerciseId, string uid, JsonElement userAnswer)
+        string exerciseId, string uid, JsonElement userAnswer, bool isAdmin = false)
     {
         if (!_cache.Answers.TryGetValue(exerciseId, out var entry))
             throw new KeyNotFoundException(
                 $"No existe entrada de respuesta para el ejercicio '{exerciseId}' en answers.json.");
+
+        var progress = await _progressRepository.GetByIdAsync(uid);
+
+        // Aplicar regeneración antes de evaluar el guard, para que las vidas
+        // regeneradas cuenten y no bloqueen innecesariamente al usuario.
+        if (!isAdmin && progress != null)
+        {
+            var (newLives, newTs, changed) = LivesHelper.CalculateRegenerated(
+                progress.Lives, progress.LastLifeLostAt);
+            if (changed)
+            {
+                progress.Lives = newLives;
+                progress.LastLifeLostAt = newTs;
+                await _progressRepository.UpdateAsync(uid, progress);
+            }
+        }
+
+        if (!isAdmin && progress != null && progress.Lives <= 0)
+            throw new InvalidOperationException("Sin vidas disponibles");
 
         string type = entry.GetProperty("type").GetString() ?? "";
         var correct = entry.GetProperty("answer");
@@ -96,14 +115,12 @@ public class ExerciseService : IExerciseService
 
         if (isCorrect)
         {
-            var progress = await _progressRepository.GetByIdAsync(uid);
             if (progress != null)
             {
                 xpAwarded = _gamificationService.CalculateXpEarned(true, false, progress.DailyStreak);
                 progress.TotalXp += xpAwarded;
                 progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
 
-                // Actualizar racha (igual que ProgressService.SubmitAttemptAsync)
                 progress.DailyStreak = await _gamificationService.UpdateDailyStreakAsync(
                     uid, progress.LastActiveDate);
                 progress.LastActiveDate = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
@@ -121,8 +138,24 @@ public class ExerciseService : IExerciseService
                     .ContinueWith(t => Debug.WriteLine($"[AchievementService] EvaluateNewAchievements error: {t.Exception}"), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
+        else if (!isAdmin && progress != null)
+        {
+            bool wasAtMax = progress.Lives >= LivesHelper.MaxLives;
+            progress.Lives = Math.Max(0, progress.Lives - 1);
+            // Iniciar timer si: (a) acaba de bajar del máximo, o (b) timer nunca fue seteado
+            // (b) cubre usuarios existentes que tienen LastLifeLostAt=null por ser campo nuevo
+            if (wasAtMax || progress.LastLifeLostAt == null)
+                progress.LastLifeLostAt = DateTime.UtcNow;
+            // Si ya tenía timer activo: no tocarlo (preserva el countdown existente)
+            await _progressRepository.UpdateAsync(uid, progress);
+        }
 
-        return new AnswerResultDto { Correct = isCorrect, XpAwarded = xpAwarded };
+        return new AnswerResultDto
+        {
+            Correct = isCorrect,
+            XpAwarded = xpAwarded,
+            RemainingLives = progress?.Lives ?? 15,
+        };
     }
 
     // ── Validadores por tipo ───────────────────────────────────────────────────

@@ -39,9 +39,18 @@ public class UserService : IUserService
             TotalXp = 0,
             DailyStreak = 0,
             Gems = 500,
-            Lives = 5,
+            Lives = 15,
             Level = 1
         };
+
+        var (newLives, newTs, changed) = LivesHelper.CalculateRegenerated(
+            progress.Lives, progress.LastLifeLostAt);
+        if (changed)
+        {
+            progress.Lives = newLives;
+            progress.LastLifeLostAt = newTs;
+            await _progressRepository.UpdateAsync(uid, progress);
+        }
 
         return new UserProfileResponse
         {
@@ -134,7 +143,7 @@ public class UserService : IUserService
 
         foreach (var res in results)
         {
-            if (res.User != null)
+            if (res.User != null && res.User.Role != "admin")
             {
                 leaderboard.Add(new LeaderboardEntry
                 {

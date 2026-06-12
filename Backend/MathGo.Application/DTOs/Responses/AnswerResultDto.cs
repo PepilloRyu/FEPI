@@ -5,4 +5,5 @@ public class AnswerResultDto
 {
     public bool Correct { get; set; }
     public int XpAwarded { get; set; }
+    public int RemainingLives { get; set; }
 }

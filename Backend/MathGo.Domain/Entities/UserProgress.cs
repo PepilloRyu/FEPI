@@ -25,7 +25,10 @@ public class UserProgress
     public int Gems { get; set; } = 500;
 
     [FirestoreProperty("lives")]
-    public int Lives { get; set; } = 5;
+    public int Lives { get; set; } = 15;
+
+    [FirestoreProperty("lastLifeLostAt")]
+    public DateTime? LastLifeLostAt { get; set; } = null;
 
     [FirestoreProperty("level")]
     public int Level { get; set; } = 1;

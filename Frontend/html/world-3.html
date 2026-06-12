@@ -22,6 +22,8 @@
     import { initEngine } from '../js/mathgo-engine.js';
     import { WORLD, getVisual } from '../js/worlds/world-3-meta.js';
     import { WORLD as PREREQ_WORLD } from '../js/worlds/world-2-meta.js';
+    import { ANSWERS_W2 } from '../js/worlds/world-2-answers.js';
+    import { ANSWERS_W3 } from '../js/worlds/world-3-answers.js';
     import { initSidebar } from '../js/components/sidebar.js';
 
     onAuthStateChanged(auth, async (user) => {
@@ -37,6 +39,8 @@
         prereqWorldData: PREREQ_WORLD,
         user,
         db,
+        localAnswers: ANSWERS_W3,
+        prereqLocalAnswers: ANSWERS_W2,
         onSignOut: async () => {
           await signOut(auth);
           localStorage.removeItem('mathgo_user');

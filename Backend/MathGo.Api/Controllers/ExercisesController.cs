@@ -52,14 +52,22 @@ public class ExercisesController : ControllerBase
         var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(uid)) return Unauthorized();
 
+        var isAdmin = User.IsInRole("admin") || User.IsInRole("teacher") ||
+                      User.HasClaim("role", "admin") || User.HasClaim(ClaimTypes.Role, "admin") ||
+                      User.HasClaim("role", "teacher") || User.HasClaim(ClaimTypes.Role, "teacher");
+
         try
         {
-            var result = await _exerciseService.CheckAnswerAsync(id, uid, request.UserAnswer);
+            var result = await _exerciseService.CheckAnswerAsync(id, uid, request.UserAnswer, isAdmin);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { Message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(403, new { Message = ex.Message });
         }
         catch (Exception ex)
         {

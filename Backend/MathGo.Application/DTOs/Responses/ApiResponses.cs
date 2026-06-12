@@ -50,6 +50,7 @@ public class ProgressSummary
     public int TotalXp { get; set; }
     public int TotalLevelsCompleted { get; set; }
     public int TotalWorldsCompleted { get; set; }
+    public int Lives { get; set; } = 15;
     public Dictionary<string, WorldProgressSummary> Worlds { get; set; } = new();
 }
 
@@ -112,7 +113,7 @@ public class AchievementSummary
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Icon { get; set; } = "🏅";
+    public string Icon { get; set; } = "fa-solid fa-medal";
     public bool Unlocked { get; set; }
     public DateTime? UnlockedAt { get; set; }
 }
