@@ -13,8 +13,11 @@ Requisitos:
 Coloca serviceAccountKey.json en el directorio raíz del proyecto antes de ejecutar.
 """
 
+import argparse
+from collections import Counter
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -29,6 +32,10 @@ WORLDS_DIR  = Path(__file__).parent / "Frontend/js/worlds"
 ANSWERS_OUT = Path(__file__).parent / "answers.json"
 NUM_WORLDS  = 6
 
+# Commit anterior a la Fase 4.5 (c38e36c), donde world-N-data.js tenían challenges completos
+GIT_COMMIT       = "c38e36c~1"
+GIT_JS_TEMPLATE  = "Frontend/js/worlds/world-{}-data.js"
+
 
 # ─── Parser JS → dict ─────────────────────────────────────────────────────────
 
@@ -38,12 +45,28 @@ def _path_to_file_url(p: Path) -> str:
     return f"file:///{s}" if s[1:2] == ":" else f"file://{s}"
 
 
-def extract_world_data(js_path: Path) -> dict:
+def read_world_js_from_git(world_num: int) -> str:
+    """
+    Obtiene el contenido de world-N-data.js desde el historial de git
+    (GIT_COMMIT = c38e36c~1, anterior a la Fase 4.5 que eliminó los challenges).
+    """
+    git_path = GIT_JS_TEMPLATE.format(world_num)
+    result = subprocess.run(
+        ["git", "show", f"{GIT_COMMIT}:{git_path}"],
+        capture_output=True,
+        text=True,
+        check=True,
+        encoding="utf-8",
+        cwd=Path(__file__).parent,
+    )
+    return result.stdout
+
+
+def extract_world_data(content: str) -> dict:
     """
     Lanza un proceso Node.js temporal que importa el archivo como ES-module
     y serializa el objeto WORLD a stdout como JSON.
     """
-    content = js_path.read_text(encoding="utf-8")
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".mjs", delete=False, encoding="utf-8"
     ) as tmp_data:
@@ -60,9 +83,15 @@ def extract_world_data(js_path: Path) -> dict:
         tmp.write(node_src)
         tmp_path = tmp.name
 
+    node = shutil.which("node")
+    if node is None:
+        raise RuntimeError(
+            "Node.js no encontrado en el PATH. Instálalo desde https://nodejs.org"
+        )
+
     try:
         result = subprocess.run(
-            [r"C:\Program Files\dotnet\packs\Microsoft.NET.Runtime.Emscripten.3.1.56.Node.win-x64\10.0.3\tools\bin\node.exe", tmp_path],
+            [node, tmp_path],
             capture_output=True,
             text=True,
             check=True,
@@ -157,83 +186,116 @@ def extract_answer(ex: dict):
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
-    # Verificar archivo de credenciales
-    sa_path = Path(SERVICE_ACCOUNT_PATH)
-    if not sa_path.exists():
-        print(
-            f"ERROR: credenciales no encontradas en {sa_path.resolve()}\n"
-            "       Descarga serviceAccountKey.json desde Firebase Console "
-            "→ Configuración del proyecto → Cuentas de servicio.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Migra ejercicios a Firestore")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Imprime estadísticas sin escribir a Firestore ni generar answers.json")
+    args = parser.parse_args()
+    dry_run = args.dry_run
 
-    # Inicializar Firebase Admin
-    cred = credentials.Certificate(str(sa_path))
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
+    if dry_run:
+        print("[DRY-RUN] Sin conexión a Firestore — solo estadísticas.\n")
+        db = None
+    else:
+        # Verificar archivo de credenciales
+        sa_path = Path(SERVICE_ACCOUNT_PATH)
+        if not sa_path.exists():
+            print(
+                f"ERROR: credenciales no encontradas en {sa_path.resolve()}\n"
+                "       Descarga serviceAccountKey.json desde Firebase Console "
+                "→ Configuración del proyecto → Cuentas de servicio.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Inicializar Firebase Admin
+        cred = credentials.Certificate(str(sa_path))
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
 
     answers: dict = {}
     total   = 0
     errors  = 0
 
     for world_num in range(1, NUM_WORLDS + 1):
-        js_file = WORLDS_DIR / f"world-{world_num}-data.js"
-
-        if not js_file.exists():
-            print(f"[SKIP] {js_file.name} no encontrado")
-            continue
+        git_path = GIT_JS_TEMPLATE.format(world_num)
 
         print(f"\n── Mundo {world_num} ──────────────────────────────────────")
 
         try:
-            world = extract_world_data(js_file)
-        except RuntimeError as exc:
-            print(f"  [ERROR] no se pudo parsear {js_file.name}:\n  {exc}")
+            content = read_world_js_from_git(world_num)
+        except subprocess.CalledProcessError as exc:
+            print(f"  [ERROR] git show falló para {git_path}:\n  {exc.stderr.strip()}")
             errors += 1
             continue
 
-        # Asegurar que el documento de la unidad (world) existe
-        unit_ref = db.collection("subjects").document("algebra").collection("units").document(str(world_num))
-        unit_ref.set({"title": world.get("title", f"Mundo {world_num}")}, merge=True)
+        try:
+            world = extract_world_data(content)
+        except RuntimeError as exc:
+            print(f"  [ERROR] no se pudo parsear {git_path}:\n  {exc}")
+            errors += 1
+            continue
 
-        for level_idx, level in enumerate(world.get("levels", [])):
+        levels = world.get("levels", [])
+        type_counts: Counter = Counter()
+        world_total = 0
+
+        if not dry_run:
+            unit_ref = db.collection("subjects").document("algebra").collection("units").document(str(world_num))
+            unit_ref.set({"title": world.get("title", f"Mundo {world_num}")}, merge=True)
+
+        for level_idx, level in enumerate(levels):
             level_title = level.get("title", f"nivel-{level_idx}")
-            
-            # Asegurar que el documento del nivel existe
-            level_ref = unit_ref.collection("levels").document(str(level_idx))
-            level_ref.set({"title": level_title, "id": level.get("id", level_idx + 1)}, merge=True)
+
+            if not dry_run:
+                level_ref = unit_ref.collection("levels").document(str(level_idx))
+                level_ref.set({"title": level_title, "id": level.get("id", level_idx + 1)}, merge=True)
 
             for ex_idx, ex in enumerate(level.get("challenges", [])):
                 key = f"{world_num}_{level_idx}_{ex_idx}"
 
-                # ── Subir documento a Firestore (idempotente: set sin merge) ──
-                doc = build_firestore_doc(ex)
-                ref = level_ref.collection("exercises").document(str(ex_idx))
-                try:
-                    ref.set(doc)
-                    tag_str = ex.get("tag", "sin tag")
-                    print(f"  ✔ {key}  [{ex['type']:8s}]  {tag_str}")
+                if dry_run:
+                    type_counts[ex["type"]] += 1
+                    world_total += 1
                     total += 1
-                except Exception as exc:
-                    print(f"  ✘ {key}: {exc}")
-                    errors += 1
-                    continue
+                else:
+                    # ── Subir documento a Firestore (idempotente: set sin merge) ──
+                    doc = build_firestore_doc(ex)
+                    ref = level_ref.collection("exercises").document(str(ex_idx))
+                    try:
+                        ref.set(doc)
+                        tag_str = ex.get("tag", "sin tag")
+                        print(f"  ✔ {key}  [{ex['type']:8s}]  {tag_str}")
+                        total += 1
+                    except Exception as exc:
+                        print(f"  ✘ {key}: {exc}")
+                        errors += 1
+                        continue
 
-                # ── Guardar respuesta localmente (NO a Firestore) ──────────
-                answers[key] = {
-                    "type":   ex["type"],
-                    "answer": extract_answer(ex),
-                }
+                    # ── Guardar respuesta localmente (NO a Firestore) ──────────
+                    answers[key] = {
+                        "type":   ex["type"],
+                        "answer": extract_answer(ex),
+                    }
 
-    # ── Escribir answers.json ──────────────────────────────────────────────
-    with open(ANSWERS_OUT, "w", encoding="utf-8") as f:
-        json.dump(answers, f, ensure_ascii=False, indent=2)
+        if dry_run:
+            print(f"  Niveles    : {len(levels)}")
+            print(f"  Ejercicios : {world_total}")
+            for ex_type, count in sorted(type_counts.items()):
+                print(f"    {ex_type:<10}: {count}")
+
+    if not dry_run:
+        # ── Escribir answers.json ──────────────────────────────────────────
+        with open(ANSWERS_OUT, "w", encoding="utf-8") as f:
+            json.dump(answers, f, ensure_ascii=False, indent=2)
 
     print(f"\n{'═' * 54}")
-    print(f"  Ejercicios migrados : {total}")
-    print(f"  Errores             : {errors}")
-    print(f"  answers.json        → {ANSWERS_OUT.resolve()}")
+    if dry_run:
+        print(f"  [DRY-RUN] Total ejercicios encontrados : {total}")
+        print(f"  [DRY-RUN] Sin escrituras a Firestore ni answers.json")
+    else:
+        print(f"  Ejercicios migrados : {total}")
+        print(f"  Errores             : {errors}")
+        print(f"  answers.json        → {ANSWERS_OUT.resolve()}")
     print(f"{'═' * 54}")
 
     sys.exit(1 if errors else 0)
