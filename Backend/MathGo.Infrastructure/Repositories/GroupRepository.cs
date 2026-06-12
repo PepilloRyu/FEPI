@@ -39,25 +39,15 @@ public class GroupRepository : FirestoreRepository<Group>, IGroupRepository
 
     public async Task<IEnumerable<Group>> GetGroupsByStudentIdAsync(string studentId)
     {
-        // En Firestore, no podemos hacer un query directo "WhereArrayContains" sobre un arreglo de objetos buscando una propiedad específica del objeto.
-        // Dado que el alumno no pertenece a tantos grupos, y esta operación se hace en el GET del alumno, 
-        // podríamos usar una estrategia alternativa o traer todos sus grupos buscando por un arreglo auxiliar de IDs.
-        // Para solucionar esto, buscaremos localmente o asumimos que en el futuro añadiremos un array simple 'memberIds' al documento Group para consultas.
-        // Por ahora, usaremos una solución temporal (traer todos y filtrar en memoria) solo aplicable porque es prototipo.
-        
-        var snapshot = await _firestoreDb.Collection(_collectionName).GetSnapshotAsync();
+        var snapshot = await _firestoreDb.Collection(_collectionName)
+            .WhereArrayContains("studentIds", studentId)
+            .GetSnapshotAsync();
+
         var results = new List<Group>();
-        
         foreach (var doc in snapshot.Documents)
         {
             if (doc.Exists)
-            {
-                var group = doc.ConvertTo<Group>();
-                if (group.Members.Any(m => m.StudentId == studentId))
-                {
-                    results.Add(group);
-                }
-            }
+                results.Add(doc.ConvertTo<Group>());
         }
         return results;
     }

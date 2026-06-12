@@ -29,7 +29,10 @@ public class ExercisesController : ControllerBase
     {
         try
         {
-            var exercises = await _exerciseService.GetExercisesByWorldAsync(worldId);
+            var isAdmin = User.IsInRole("admin") || User.IsInRole("teacher") || 
+                          User.HasClaim("role", "admin") || User.HasClaim(ClaimTypes.Role, "admin") ||
+                          User.HasClaim("role", "teacher") || User.HasClaim(ClaimTypes.Role, "teacher");
+            var exercises = await _exerciseService.GetExercisesByWorldAsync(worldId, isAdmin);
             return Ok(exercises);
         }
         catch (Exception ex)

@@ -15,8 +15,8 @@ public class AnalyticsService : IAnalyticsService
 
     public async Task<StatsResponse> GetPersonalStatsAsync(string uid)
     {
-        var attempts = await _attemptRepository.GetAllAsync(); // Needs specialized query filtering by UID later
-        var userAttempts = attempts.Where(a => a.UserId == uid).ToList();
+        var attempts = await _attemptRepository.GetByUserIdAsync(uid);
+        var userAttempts = attempts.ToList();
         
         if (!userAttempts.Any()) return new StatsResponse();
 

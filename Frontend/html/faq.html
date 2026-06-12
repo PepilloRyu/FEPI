@@ -8,91 +8,6 @@
   <link rel="icon" href="../assets/images/favicon.ico" />
   <link rel="stylesheet" href="../css/design-system.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
-  <style>
-    .faq-wrapper {
-      max-width: 800px;
-      margin: 20px auto;
-    }
-    .faq-title-container {
-      margin-bottom: var(--mg-space-6);
-      text-align: center;
-    }
-    .faq-title-container h1 {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--mg-text);
-      letter-spacing: -0.03em;
-      margin-bottom: 8px;
-    }
-    .faq-title-container p {
-      color: var(--mg-muted);
-      font-size: 16px;
-      font-weight: 700;
-    }
-    .faq-category-card {
-      margin-bottom: var(--mg-space-4);
-    }
-    .faq-category-title {
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--mg-primary);
-      margin-bottom: var(--mg-space-4);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--mg-border-soft);
-    }
-    .faq-item {
-      background: var(--mg-surface);
-      border: 1px solid var(--mg-border);
-      border-radius: var(--mg-radius-md);
-      margin-bottom: var(--mg-space-3);
-      overflow: hidden;
-      transition: all var(--mg-transition);
-    }
-    .faq-item:hover {
-      border-color: var(--mg-primary-light);
-      box-shadow: var(--mg-shadow-sm);
-    }
-    .faq-question-btn {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 16px 20px;
-      text-align: left;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--mg-text);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-    .faq-question-btn i {
-      color: var(--mg-muted);
-      transition: transform var(--mg-transition);
-    }
-    .faq-item.active .faq-question-btn i {
-      transform: rotate(180deg);
-      color: var(--mg-primary);
-    }
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1);
-      background: var(--mg-border-soft);
-    }
-    .faq-answer-inner {
-      padding: 16px 20px;
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--mg-text-2);
-      font-weight: 600;
-    }
-  </style>
 </head>
 <body>
 
@@ -126,6 +41,6 @@
       initSidebar('faq');
     });
   </script>
-  <script src="../js/faq.js"></script>
+  <script type="module" src="../js/faq.js"></script>
 </body>
 </html>

@@ -27,12 +27,12 @@ public static class FirebaseServiceCollectionExtensions
             if (!string.IsNullOrEmpty(credentialsJson))
             {
                 // Credenciales desde variable de entorno (Railway / produccion)
-                options.Credential = GoogleCredential.FromJson(credentialsJson);
+                options.Credential = CredentialFactory.FromJson<ServiceAccountCredential>(credentialsJson).ToGoogleCredential();
             }
             else if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
             {
                 // Credenciales desde archivo local (desarrollo)
-                options.Credential = GoogleCredential.FromFile(credentialsPath);
+                options.Credential = CredentialFactory.FromFile<ServiceAccountCredential>(credentialsPath).ToGoogleCredential();
             }
             else
             {

@@ -42,7 +42,8 @@ public class GroupsController : ControllerBase
             Name = request.Name,
             AccessCode = GenerateAccessCode(),
             CreatedAt = DateTime.UtcNow,
-            Members = new List<GroupMember>()
+            Members = new List<GroupMember>(),
+            StudentIds = new List<string>()
         };
 
         await _groupRepository.AddAsync(newGroup);
@@ -104,6 +105,8 @@ public class GroupsController : ControllerBase
         };
 
         group.Members.Add(newMember);
+        group.StudentIds ??= new List<string>();
+        group.StudentIds.Add(uid);
 
         // Actualizamos el grupo en la base de datos
         await _groupRepository.UpdateAsync(group.Id, group);

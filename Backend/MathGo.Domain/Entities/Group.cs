@@ -22,6 +22,9 @@ public class Group
 
     [FirestoreProperty("members")]
     public List<GroupMember> Members { get; set; } = new();
+
+    [FirestoreProperty("studentIds")]
+    public List<string> StudentIds { get; set; } = new();
 }
 
 [FirestoreData]

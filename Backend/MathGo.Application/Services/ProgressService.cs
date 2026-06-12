@@ -170,8 +170,8 @@ public class ProgressService : IProgressService
 
     public async Task<StatsResponse> GetStatsAsync(string uid)
     {
-        var attempts = await _attemptRepository.GetAllAsync(); // Idealmente filtrar por UID en el repo
-        var userAttempts = attempts.Where(a => a.UserId == uid).ToList();
+        var attempts = await _attemptRepository.GetByUserIdAsync(uid);
+        var userAttempts = attempts.ToList();
         
         if (!userAttempts.Any()) return new StatsResponse();
 

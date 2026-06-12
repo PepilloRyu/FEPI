@@ -8,108 +8,6 @@
   <link rel="icon" href="../assets/images/favicon.ico" />
   <link rel="stylesheet" href="../css/design-system.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
-  <style>
-    /* Cabecera de perfil */
-    .profile-hero {
-      background: linear-gradient(135deg, var(--mg-primary), var(--mg-secondary));
-      border-radius: var(--mg-radius-xl);
-      padding: 36px;
-      color: #fff;
-      margin-bottom: var(--mg-space-6);
-      box-shadow: var(--mg-shadow-primary);
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-      position: relative;
-      overflow: hidden;
-    }
-    .profile-hero::before {
-      content: '';
-      position: absolute;
-      top: -30%;
-      right: -5%;
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      pointer-events: none;
-    }
-    .profile-hero-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      border: 3px solid rgba(255,255,255,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 34px;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
-    .profile-hero-info { flex: 1; }
-    .profile-hero-name { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; }
-    .profile-hero-email { opacity: 0.8; font-size: 15px; margin-top: 2px; }
-    .profile-hero-join { opacity: 0.7; font-size: 13px; margin-top: 6px; }
-    .profile-hero-edit {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all var(--mg-transition);
-      text-decoration: none;
-    }
-    .profile-hero-edit:hover { background: rgba(255,255,255,0.25); }
-
-    /* Stats grid grande */
-    .profile-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-bottom: var(--mg-space-6);
-    }
-    .profile-stat-box {
-      background: var(--mg-surface);
-      border: 1px solid var(--mg-border);
-      border-radius: var(--mg-radius-lg);
-      padding: 22px;
-      text-align: center;
-      box-shadow: var(--mg-shadow-sm);
-      transition: all var(--mg-transition);
-    }
-    .profile-stat-box:hover { transform: translateY(-2px); box-shadow: var(--mg-shadow-md); }
-    .profile-stat-icon { font-size: 32px; margin-bottom: 8px; }
-    .profile-stat-value { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 4px; }
-    .profile-stat-label { font-size: 12px; font-weight: 700; color: var(--mg-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-
-    /* Objetivos */
-    .objetivo-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--mg-border-soft);
-    }
-    .objetivo-item:last-child { border-bottom: none; }
-    .objetivo-text { flex: 1; font-size: 14px; font-weight: 600; color: var(--mg-text-2); }
-    .objetivo-del {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--mg-muted-2);
-      font-size: 20px;
-      line-height: 1;
-      padding: 4px;
-      border-radius: 8px;
-      transition: color var(--mg-transition);
-    }
-    .objetivo-del:hover { color: var(--mg-danger); }
-  </style>
 </head>
 <body>
 
@@ -250,8 +148,8 @@
       document.getElementById('profile-avatar').textContent = getInitials(displayName);
       document.getElementById('profile-name').textContent = displayName;
       document.getElementById('profile-email').textContent = user.email;
-      document.getElementById('profile-join').textContent =
-        `📅 Miembro desde ${userData.joinDate || new Date(user.metadata?.creationTime).toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' }) || 'Fecha desconocida'}`;
+      document.getElementById('profile-join').innerHTML =
+        `<i class="fa-solid fa-calendar-days" style="margin-right: 6px;"></i> Miembro desde ${userData.joinDate || new Date(user.metadata?.creationTime).toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' }) || 'Fecha desconocida'}`;
 
       // Stats top
       document.getElementById('stat-xp').textContent    = xp;

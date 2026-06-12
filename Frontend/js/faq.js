@@ -97,4 +97,8 @@ function loadFAQ() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', loadFAQ);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadFAQ);
+} else {
+    loadFAQ();
+}

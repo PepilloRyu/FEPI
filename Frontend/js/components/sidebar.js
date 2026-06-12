@@ -12,10 +12,11 @@ import { auth, db } from '../firebaseConfig.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
 const NAV_ITEMS = [
-  { id: 'learn',     icon: 'fa-solid fa-graduation-cap', label: 'Aprender',    href: 'learn.html' },
-  { id: 'dashboard', icon: 'fa-solid fa-chart-line',     label: 'Mi progreso', href: 'dashboard.html' },
-  { id: 'profile',   icon: 'fa-solid fa-user',           label: 'Perfil',      href: 'profile-page.html' },
-  { id: 'faq',       icon: 'fa-solid fa-circle-question',label: 'Ayuda',       href: 'faq.html' },
+  { id: 'learn',       icon: 'fa-solid fa-graduation-cap',  label: 'Aprender',      href: 'learn.html' },
+  { id: 'leaderboard', icon: 'fa-solid fa-trophy',          label: 'Clasificación', href: 'leaderboard.html' },
+  { id: 'dashboard',   icon: 'fa-solid fa-chart-line',      label: 'Mi progreso',   href: 'dashboard.html' },
+  { id: 'profile',     icon: 'fa-solid fa-user',            label: 'Perfil',        href: 'profile-page.html' },
+  { id: 'faq',         icon: 'fa-solid fa-circle-question', label: 'Ayuda',         href: 'faq.html' },
 ];
 
 const ADMIN_ITEM = { id: 'admin', icon: 'fa-solid fa-shield-halved', label: 'Admin', href: 'admin.html' };

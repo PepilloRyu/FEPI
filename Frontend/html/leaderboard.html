@@ -8,78 +8,6 @@
   <link rel="icon" href="../assets/images/favicon.ico" />
   <link rel="stylesheet" href="../css/design-system.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
-  <style>
-    /* Podio top 3 */
-    .podium {
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 16px;
-      padding: 32px 0 0;
-      margin-bottom: var(--mg-space-6);
-    }
-    .podium-slot {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .podium-avatar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      font-weight: 900;
-      font-size: 20px;
-      color: #fff;
-    }
-    .podium-slot:nth-child(1) .podium-avatar { /* 2do puesto */
-      width: 60px; height: 60px; font-size: 18px;
-      background: linear-gradient(135deg, #94a3b8, #64748b);
-    }
-    .podium-slot:nth-child(2) .podium-avatar { /* 1er puesto */
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      box-shadow: 0 8px 32px rgba(245,158,11,0.35);
-    }
-    .podium-slot:nth-child(3) .podium-avatar { /* 3er puesto */
-      width: 56px; height: 56px; font-size: 16px;
-      background: linear-gradient(135deg, #f97316, #c2410c);
-    }
-    .podium-block {
-      border-radius: 12px 12px 0 0;
-      width: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-top: 12px;
-      font-size: 24px;
-    }
-    .podium-slot:nth-child(1) .podium-block { height: 70px;  background: linear-gradient(180deg,#c0c9d9,#94a3b8); }
-    .podium-slot:nth-child(2) .podium-block { height: 100px; background: linear-gradient(180deg,#fcd34d,#f59e0b); }
-    .podium-slot:nth-child(3) .podium-block { height: 55px;  background: linear-gradient(180deg,#fdba74,#f97316); }
-    .podium-name { font-size: 13px; font-weight: 900; color: var(--mg-text); text-align: center; max-width: 90px; }
-    .podium-xp { font-size: 12px; font-weight: 700; color: var(--mg-muted); }
-
-    /* Header de liga */
-    .league-header {
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      border-radius: var(--mg-radius-xl);
-      padding: 28px 32px;
-      color: #fff;
-      margin-bottom: var(--mg-space-6);
-      box-shadow: 0 16px 48px rgba(124,58,237,0.25);
-      text-align: center;
-    }
-    .league-header h1 { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
-    .league-header p { opacity: 0.85; font-size: 15px; margin-top: 6px; }
-    .lb-section-title {
-      font-size: 14px; font-weight: 900;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--mg-muted); margin: 20px 0 10px;
-      display: flex; align-items: center; gap: 8px;
-    }
-  </style>
 </head>
 <body>
 
@@ -126,7 +54,11 @@
     import { initSidebar } from '../js/components/sidebar.js';
     import { getLeaderboard } from '../js/services/api.js';
 
-    const MEDALS = ['🥇', '🥈', '🥉'];
+    const MEDALS = [
+      '<i class="fa-solid fa-medal" style="color:#fcd34d; filter: drop-shadow(0 2px 8px rgba(245,158,11,0.5));"></i>',
+      '<i class="fa-solid fa-medal" style="color:#cbd5e1;"></i>',
+      '<i class="fa-solid fa-medal" style="color:#fdba74;"></i>'
+    ];
     const LEAGUES = ['Bronce', 'Plata', 'Oro', 'Diamante', 'Maestro'];
 
     function getLeague(xp) {
@@ -139,14 +71,15 @@
 
     function renderPodium(top3, currentUid) {
       const podium = document.getElementById('podium');
-      if (!top3 || top3.length < 2) { podium.style.display = 'none'; return; }
+      if (!top3 || top3.length === 0) { podium.style.display = 'none'; return; }
+      podium.style.display = 'flex';
 
       // Orden visual: 2do, 1ro, 3ro
       const ordered = [top3[1], top3[0], top3[2]].filter(Boolean);
 
-      podium.innerHTML = ordered.map((u, vi) => {
-        const rank = vi === 1 ? 1 : vi === 0 ? 2 : 3;
-        const heights = [70, 100, 55];
+      podium.innerHTML = ordered.map((u) => {
+        const rank = top3.indexOf(u) + 1;
+        const height = rank === 1 ? 100 : rank === 2 ? 70 : 55;
         const isMe = u.uid === currentUid;
         return `
           <div class="podium-slot">
@@ -154,8 +87,8 @@
               ${getInitials(u.name || u.displayName || u.email || '?')}
             </div>
             <div class="podium-name">${u.name || u.displayName || 'Usuario'} ${isMe ? '(Tú)' : ''}</div>
-            <div class="podium-xp">⚡ ${u.xpTotal ?? u.totalXp ?? 0} XP</div>
-            <div class="podium-block" style="height:${heights[vi]}px;">${MEDALS[rank-1]}</div>
+            <div class="podium-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${u.xpTotal ?? u.totalXp ?? 0} XP</div>
+            <div class="podium-block" style="height:${height}px;">${MEDALS[rank-1]}</div>
           </div>
         `;
       }).join('');
@@ -165,7 +98,7 @@
       const list = document.getElementById('leaderboard-list');
       if (!users?.length) {
         list.innerHTML = `<div class="mg-empty">
-          <div class="mg-empty-icon">🏆</div>
+          <div class="mg-empty-icon"><i class="fa-solid fa-trophy" style="color:var(--mg-muted-2); font-size:48px;"></i></div>
           <div class="mg-empty-title">Sin datos de clasificación</div>
           <div class="mg-empty-text">El leaderboard se irá poblando a medida que los usuarios practiquen.</div>
         </div>`;
@@ -186,7 +119,7 @@
               <div class="mg-lb-name">${u.name || 'Usuario'} ${isMe ? '<span class="mg-badge mg-badge-primary" style="margin-left:6px;">Tú</span>' : ''}</div>
               <div class="mg-lb-league">${getLeague(xp)}</div>
             </div>
-            <div class="mg-lb-xp">⚡ ${xp}</div>
+            <div class="mg-lb-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${xp}</div>
           </div>
         `;
       }).join('');
@@ -200,7 +133,7 @@
       if (error || !leaders) {
         showToast('No se pudo cargar el ranking. Intenta más tarde.', 'error');
         document.getElementById('podium').innerHTML = `<div class="mg-empty" style="padding:24px;">
-          <div class="mg-empty-icon">📡</div>
+          <div class="mg-empty-icon"><i class="fa-solid fa-satellite-dish" style="color:var(--mg-muted-2); font-size:48px;"></i></div>
           <div class="mg-empty-text">Sin conexión con el servidor</div>
         </div>`;
         document.getElementById('leaderboard-list').innerHTML = '';

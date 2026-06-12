@@ -53,11 +53,13 @@ public class AuthController : ControllerBase
         try
         {
             await _authService.ForgotPasswordAsync(request.Email);
-            return Ok(new { Message = "Enlace de recuperación enviado exitosamente." });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { Message = ex.Message });
+            // Evitar enumeración de usuarios: registramos el error y retornamos éxito de todas formas.
+            Console.WriteLine($"ForgotPassword debug info (prevented enumeration): {ex.Message}");
         }
+
+        return Ok(new { Message = "Enlace de recuperación enviado exitosamente." });
     }
 }

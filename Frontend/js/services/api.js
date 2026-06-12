@@ -6,7 +6,7 @@
 
 import { auth } from '../firebaseConfig.js';
 
-const BASE_URL = window.location.hostname === 'localhost'
+const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:5000/api'
   : 'https://mathgo-backend.onrender.com/api';
 

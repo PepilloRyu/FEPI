@@ -122,21 +122,28 @@ public class UserService : IUserService
     {
         var topProgress = await _progressRepository.GetTopByXpAsync(top);
         var leaderboard = new List<LeaderboardEntry>();
-        int rank = 1;
 
-        foreach (var prog in topProgress)
+        var userTasks = topProgress.Select(async prog =>
         {
             var user = await _userRepository.GetByIdAsync(prog.Uid);
-            if (user != null)
+            return new { Prog = prog, User = user };
+        });
+
+        var results = await Task.WhenAll(userTasks);
+        int rank = 1;
+
+        foreach (var res in results)
+        {
+            if (res.User != null)
             {
                 leaderboard.Add(new LeaderboardEntry
                 {
                     Rank = rank++,
-                    Uid = user.Uid,
-                    Name = user.Name,
-                    AvatarUrl = user.AvatarUrl ?? "",
-                    XpTotal = prog.TotalXp,
-                    League = _gamificationService.CalculateLeague(prog.TotalXp)
+                    Uid = res.User.Uid,
+                    Name = res.User.Name,
+                    AvatarUrl = res.User.AvatarUrl ?? "",
+                    XpTotal = res.Prog.TotalXp,
+                    League = _gamificationService.CalculateLeague(res.Prog.TotalXp)
                 });
             }
         }

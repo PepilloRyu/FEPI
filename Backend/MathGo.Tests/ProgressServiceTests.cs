@@ -14,6 +14,8 @@ public class ProgressServiceTests
     private readonly Mock<IUserRepository> _userRepoMock;
     private readonly Mock<IGamificationService> _gamificationServiceMock;
     private readonly Mock<IAttemptRepository> _attemptRepoMock;
+    private readonly Mock<IMissionService> _missionServiceMock;
+    private readonly Mock<IAchievementService> _achievementServiceMock;
     private readonly ProgressService _progressService;
 
     public ProgressServiceTests()
@@ -22,12 +24,16 @@ public class ProgressServiceTests
         _userRepoMock = new Mock<IUserRepository>();
         _gamificationServiceMock = new Mock<IGamificationService>();
         _attemptRepoMock = new Mock<IAttemptRepository>();
+        _missionServiceMock = new Mock<IMissionService>();
+        _achievementServiceMock = new Mock<IAchievementService>();
 
         _progressService = new ProgressService(
             _progressRepoMock.Object,
             _userRepoMock.Object,
             _gamificationServiceMock.Object,
-            _attemptRepoMock.Object);
+            _attemptRepoMock.Object,
+            _missionServiceMock.Object,
+            _achievementServiceMock.Object);
     }
 
     [Fact]

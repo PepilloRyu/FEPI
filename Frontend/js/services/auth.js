@@ -137,7 +137,12 @@ export function showToast(message, type = '', duration = 3500) {
   const toast = document.createElement('div');
   toast.className = `mg-toast${type ? ' ' + type : ''}`;
   
-  const icons = { success: '✅', error: '❌', xp: '⚡', '': '💬' };
+  const icons = {
+    success: '<i class="fa-solid fa-circle-check"></i>',
+    error: '<i class="fa-solid fa-circle-exclamation"></i>',
+    xp: '<i class="fa-solid fa-bolt"></i>',
+    '': '<i class="fa-solid fa-comment"></i>'
+  };
   toast.innerHTML = `<span>${icons[type] || icons['']}</span><span>${message}</span>`;
   
   container.appendChild(toast);

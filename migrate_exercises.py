@@ -40,11 +40,18 @@ def _path_to_file_url(p: Path) -> str:
 
 def extract_world_data(js_path: Path) -> dict:
     """
-    Lanza un proceso Node.js temporal que importa el archivo .js como ES-module
+    Lanza un proceso Node.js temporal que importa el archivo como ES-module
     y serializa el objeto WORLD a stdout como JSON.
     """
+    content = js_path.read_text(encoding="utf-8")
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".mjs", delete=False, encoding="utf-8"
+    ) as tmp_data:
+        tmp_data.write(content)
+        tmp_data_path = tmp_data.name
+
     node_src = (
-        f"import {{ WORLD }} from '{_path_to_file_url(js_path)}';\n"
+        f"import {{ WORLD }} from '{_path_to_file_url(Path(tmp_data_path))}';\n"
         "process.stdout.write(JSON.stringify(WORLD));\n"
     )
     with tempfile.NamedTemporaryFile(
@@ -55,7 +62,7 @@ def extract_world_data(js_path: Path) -> dict:
 
     try:
         result = subprocess.run(
-            ["node", tmp_path],
+            [r"C:\Program Files\dotnet\packs\Microsoft.NET.Runtime.Emscripten.3.1.56.Node.win-x64\10.0.3\tools\bin\node.exe", tmp_path],
             capture_output=True,
             text=True,
             check=True,
@@ -66,6 +73,7 @@ def extract_world_data(js_path: Path) -> dict:
         raise RuntimeError(exc.stderr.strip()) from exc
     finally:
         os.unlink(tmp_path)
+        os.unlink(tmp_data_path)
 
 
 # ─── Construcción del documento Firestore (sin respuestas) ────────────────────
@@ -185,20 +193,23 @@ def main():
             errors += 1
             continue
 
+        # Asegurar que el documento de la unidad (world) existe
+        unit_ref = db.collection("subjects").document("algebra").collection("units").document(str(world_num))
+        unit_ref.set({"title": world.get("title", f"Mundo {world_num}")}, merge=True)
+
         for level_idx, level in enumerate(world.get("levels", [])):
             level_title = level.get("title", f"nivel-{level_idx}")
+            
+            # Asegurar que el documento del nivel existe
+            level_ref = unit_ref.collection("levels").document(str(level_idx))
+            level_ref.set({"title": level_title, "id": level.get("id", level_idx + 1)}, merge=True)
 
             for ex_idx, ex in enumerate(level.get("challenges", [])):
                 key = f"{world_num}_{level_idx}_{ex_idx}"
 
                 # ── Subir documento a Firestore (idempotente: set sin merge) ──
                 doc = build_firestore_doc(ex)
-                ref = (
-                    db.collection("subjects").document("algebra")
-                      .collection("units").document(str(world_num))
-                      .collection("levels").document(str(level_idx))
-                      .collection("exercises").document(str(ex_idx))
-                )
+                ref = level_ref.collection("exercises").document(str(ex_idx))
                 try:
                     ref.set(doc)
                     tag_str = ex.get("tag", "sin tag")

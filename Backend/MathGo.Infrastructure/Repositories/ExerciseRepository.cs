@@ -21,11 +21,20 @@ public class ExerciseRepository : IExerciseRepository
 
         var levelsSnap = await levelsRef.GetSnapshotAsync();
 
-        foreach (var levelDoc in levelsSnap.Documents)
+        var tasks = levelsSnap.Documents.Select(async levelDoc =>
         {
             var exSnap = await levelDoc.Reference.Collection("exercises").GetSnapshotAsync();
-            foreach (var exDoc in exSnap.Documents)
-                exercises.Add(MapToDto(exDoc, worldId, levelDoc.Id, exDoc.Id));
+            return new { LevelDoc = levelDoc, ExerciseDocuments = exSnap.Documents };
+        });
+
+        var results = await Task.WhenAll(tasks);
+
+        foreach (var result in results)
+        {
+            foreach (var exDoc in result.ExerciseDocuments)
+            {
+                exercises.Add(MapToDto(exDoc, worldId, result.LevelDoc.Id, exDoc.Id));
+            }
         }
 
         return exercises;

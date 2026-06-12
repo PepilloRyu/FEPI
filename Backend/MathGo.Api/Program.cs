@@ -82,6 +82,7 @@ builder.Services.AddScoped<IAchievementService, AchievementService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
 builder.Services.AddScoped<IWorldService, WorldService>();
+builder.Services.AddScoped<IPracticeService, PracticeService>();
 
 // Authentication
 var projectId = builder.Configuration["Firebase:ProjectId"];
@@ -95,7 +96,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = $"https://securetoken.google.com/{projectId}",
             ValidateAudience = true,
             ValidAudience = projectId,
-            ValidateLifetime = true
+            ValidateLifetime = true,
+            RoleClaimType = "role"
         };
     });
 
@@ -111,6 +113,10 @@ builder.Services.AddCors(options =>
             "http://localhost:5501",
             "http://127.0.0.1:5500",
             "http://localhost:5500",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:4173",
+            "http://127.0.0.1:4173",
             // Hosting de produccion en GoDaddy
             "https://q8w.562.mytemp.website",
             "http://q8w.562.mytemp.website"
@@ -129,7 +135,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowFrontend");
 

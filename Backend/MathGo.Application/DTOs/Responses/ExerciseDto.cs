@@ -27,11 +27,17 @@ public class ExerciseDto
 
     /// <summary>match — orden visual de los símbolos en la UI.</summary>
     public List<string>? SymOrder { get; set; }
+
+    // Campos adicionales para el modo Vista Previa del Administrador
+    public List<string>? Operands { get; set; }
+    public List<List<string>>? Answers { get; set; }
+    public List<string>? Answer { get; set; }
 }
 
 public class ExerciseOptionDto
 {
     public string Label { get; set; } = string.Empty;
+    public bool? Correct { get; set; }
 }
 
 public class ExercisePairDto

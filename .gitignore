@@ -12,3 +12,7 @@ answers.json
 *.userosscache
 *.sln.docstates
 *.log
+
+# Node / JS ignores
+node_modules/
+dist/

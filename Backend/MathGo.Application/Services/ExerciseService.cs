@@ -31,8 +31,46 @@ public class ExerciseService : IExerciseService
         _achievementService = achievementService;
     }
 
-    public Task<List<ExerciseDto>> GetExercisesByWorldAsync(int worldId)
-        => _exerciseRepository.GetByWorldAsync(worldId);
+    public async Task<List<ExerciseDto>> GetExercisesByWorldAsync(int worldId, bool isAdmin = false)
+    {
+        var exercises = await _exerciseRepository.GetByWorldAsync(worldId);
+        if (isAdmin)
+        {
+            foreach (var ex in exercises)
+            {
+                if (_cache.Answers.TryGetValue(ex.Id, out var entry))
+                {
+                    if (entry.TryGetProperty("answer", out var answer))
+                    {
+                        if (ex.Type == "mc" || ex.Type == "vf")
+                        {
+                            var correctStr = answer.GetString();
+                            if (ex.Options != null)
+                            {
+                                foreach (var opt in ex.Options)
+                                {
+                                    opt.Correct = string.Equals(opt.Label, correctStr, StringComparison.OrdinalIgnoreCase);
+                                }
+                            }
+                        }
+                        else if (ex.Type == "build")
+                        {
+                            ex.Operands = JsonSerializer.Deserialize<List<string>>(answer.GetRawText());
+                        }
+                        else if (ex.Type == "buildSeq")
+                        {
+                            ex.Answers = JsonSerializer.Deserialize<List<List<string>>>(answer.GetRawText());
+                        }
+                        else if (ex.Type == "slots")
+                        {
+                            ex.Answer = JsonSerializer.Deserialize<List<string>>(answer.GetRawText());
+                        }
+                    }
+                }
+            }
+        }
+        return exercises;
+    }
 
     public async Task<AnswerResultDto> CheckAnswerAsync(
         string exerciseId, string uid, JsonElement userAnswer)

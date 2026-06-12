@@ -26,20 +26,20 @@ const validateEntry = (event) => {
     errorPassword.textContent = '';
 
     if (!emailInput.value) {
-        errorEmail.innerHTML = '<img src="../assets/svg/error-message-icon.svg" alt=""> <span>Invalid email address.</span>';
-        emailInput.style.border = '2px solid #ff0000'; // Change border color to red  
+        errorEmail.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:var(--mg-danger); margin-right:6px;"></i> <span>Invalid email address.</span>';
+        emailInput.style.border = '2px solid var(--mg-danger)';
     }
     else {
         errorEmail.innerHTML = '';
-        emailInput.style.border = ''; // Reset to the default border color
+        emailInput.style.border = '';
     }
 
     if (!passwordInput.value) {
-        errorPassword.innerHTML = '<img src="../assets/svg/error-message-icon.svg" alt=""> <span>Password too short.</span>';
-        divPassword.style.border = '2px solid #ff0000'; // Change border color to red  
+        errorPassword.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:var(--mg-danger); margin-right:6px;"></i> <span>Password too short.</span>';
+        divPassword.style.border = '2px solid var(--mg-danger)';
     }
     else {
         errorPassword.innerHTML = '';
-        divPassword.style.border = ''; // Reset to the default border color
+        divPassword.style.border = '';
     }
 }

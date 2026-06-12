@@ -9,4 +9,18 @@ public class AttemptRepository : FirestoreRepository<AttemptLog>, IAttemptReposi
     public AttemptRepository(FirestoreDb firestoreDb) : base(firestoreDb, "attempts")
     {
     }
+
+    public async Task<IEnumerable<AttemptLog>> GetByUserIdAsync(string userId)
+    {
+        var query = _firestoreDb.Collection(_collectionName).WhereEqualTo("userId", userId);
+        var snapshot = await query.GetSnapshotAsync();
+        var results = new List<AttemptLog>();
+
+        foreach (var doc in snapshot.Documents)
+        {
+            if (doc.Exists)
+                results.Add(doc.ConvertTo<AttemptLog>());
+        }
+        return results;
+    }
 }

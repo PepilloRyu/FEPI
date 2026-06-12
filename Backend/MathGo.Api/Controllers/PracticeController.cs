@@ -1,5 +1,5 @@
 using MathGo.Application.DTOs.Requests;
-using MathGo.Application.Interfaces.Repositories;
+using MathGo.Application.Interfaces.Services;
 using MathGo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +12,11 @@ namespace MathGo.Api.Controllers;
 [Authorize]
 public class PracticeController : ControllerBase
 {
-    private readonly IPracticeRepository _practiceRepository;
+    private readonly IPracticeService _practiceService;
 
-    public PracticeController(IPracticeRepository practiceRepository)
+    public PracticeController(IPracticeService practiceService)
     {
-        _practiceRepository = practiceRepository;
+        _practiceService = practiceService;
     }
 
     [HttpGet]
@@ -26,7 +26,7 @@ public class PracticeController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var sessions = await _practiceRepository.GetByUserIdAsync(userId);
+        var sessions = await _practiceService.GetSessionsByUserIdAsync(userId);
         return Ok(sessions);
     }
 
@@ -39,24 +39,7 @@ public class PracticeController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        var session = new PracticeSession
-        {
-            UserId = userId,
-            LessonId = request.LessonId,
-            LessonTitle = request.LessonTitle,
-            Score = request.Score,
-            Questions = request.Questions.Select(q => new PracticeQuestion
-            {
-                QuestionText = q.QuestionText,
-                ExpectedAnswer = q.ExpectedAnswer,
-                UserAnswer = q.UserAnswer,
-                IsCorrect = q.IsCorrect
-            }).ToList(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await _practiceRepository.AddAsync(session);
+        var session = await _practiceService.CreateSessionAsync(userId, request);
         return Created("", session);
     }
 }

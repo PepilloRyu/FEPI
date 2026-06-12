@@ -1,7 +1,6 @@
 // js/mathgo-engine.js — Motor del juego MathGo
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-const API_BASE = "http://localhost:5000";
+import { BASE_URL } from "./services/api.js";
 
 async function getToken(user) {
   return user.getIdToken();
@@ -9,7 +8,7 @@ async function getToken(user) {
 
 export async function fetchWorldExercises(worldId, user) {
   const token = await getToken(user);
-  const res = await fetch(`${API_BASE}/api/Exercises/world/${worldId}`, {
+  const res = await fetch(`${BASE_URL}/Exercises/world/${worldId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -19,7 +18,7 @@ export async function fetchWorldExercises(worldId, user) {
 async function submitAnswer(exerciseId, userAnswer, user) {
   const token = await getToken(user);
   const uid   = user.uid;
-  const res = await fetch(`${API_BASE}/api/Exercises/${exerciseId}/answer`, {
+  const res = await fetch(`${BASE_URL}/Exercises/${exerciseId}/answer`, {
     method:  "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body:    JSON.stringify({ userId: uid, userAnswer }),
@@ -131,7 +130,23 @@ export async function initEngine({
 
   // ---- Cargar ejercicios desde la API y reemplazar retos locales ----
   try {
-    const apiExercises = await fetchWorldExercises(worldId, user);
+    const fetchPromises = [fetchWorldExercises(worldId, user)];
+    if (prereqWorldId) {
+      fetchPromises.push(fetchWorldExercises(prereqWorldId, user));
+    }
+    const results = await Promise.all(
+      fetchPromises.map(p => p.catch(err => {
+        console.warn("Error fetching exercises for a world:", err);
+        return null;
+      }))
+    );
+    const apiExercises = results[0];
+    const prereqExercises = results[1] ?? null;
+
+    if (!apiExercises) {
+      throw new Error("Failed to fetch exercises for current world.");
+    }
+
     // Reagrupar por índice de nivel → índice de ejercicio
     const byLevel = {};
     apiExercises.forEach(ex => {
@@ -141,17 +156,33 @@ export async function initEngine({
       if (!byLevel[li]) byLevel[li] = [];
       byLevel[li][ei] = ex;
     });
-    // Reemplazar challenges en worldData (preview y examen usan localChallenges)
+    // Reemplazar challenges en worldData
     worldData.levels.forEach((lv, li) => {
       const fetched = byLevel[li]?.filter(Boolean);
       if (fetched?.length) lv.challenges = fetched;
     });
+
+    // Reagrupar por índice de nivel → índice de ejercicio (prerrequisito)
+    if (prereqWorldId && prereqExercises && prereqWorldData) {
+      const prereqByLevel = {};
+      prereqExercises.forEach(ex => {
+        const parts = ex.id.split('_');
+        const li = parseInt(parts[1], 10);
+        const ei = parseInt(parts[2], 10);
+        if (!prereqByLevel[li]) prereqByLevel[li] = [];
+        prereqByLevel[li][ei] = ex;
+      });
+      prereqWorldData.levels.forEach((lv, li) => {
+        const fetched = prereqByLevel[li]?.filter(Boolean);
+        if (fetched?.length) lv.challenges = fetched;
+      });
+    }
   } catch (e) {
-    console.warn("API de ejercicios no disponible, usando datos locales:", e);
+    console.warn("API de ejercicios no disponible, usando datos locales o error:", e);
     app.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
                   min-height:60vh;gap:16px;text-align:center;padding:24px">
-        <div style="font-size:48px">⚠️</div>
+        <div style="font-size:48px"><i class="fa-solid fa-triangle-exclamation" style="color:var(--mg-danger);"></i></div>
         <p style="font-size:16px;font-weight:700;color:var(--mg-text)">
           Error al cargar ejercicios, intenta de nuevo
         </p>
@@ -186,6 +217,57 @@ export async function initEngine({
     if (S.completed[li]) return "completed";
     if (isAdmin || li === 0 || S.completed[li - 1]) return "current";
     return "locked";
+  }
+
+  function getIconHTML(iconStr) {
+    if (!iconStr) return '<i class="fa-solid fa-star" style="color:#fcd34d;"></i>';
+    const mapping = {
+      "📐": '<i class="fa-solid fa-ruler-combined" style="color:var(--mg-primary);"></i>',
+      "⚖️": '<i class="fa-solid fa-scale-balanced" style="color:#fcd34d;"></i>',
+      "🔬": '<i class="fa-solid fa-microscope" style="color:#3b82f6;"></i>',
+      "🔢": '<i class="fa-solid fa-arrow-1-9" style="color:var(--mg-primary);"></i>',
+      "🧮": '<i class="fa-solid fa-calculator" style="color:#fcd34d;"></i>',
+      "🧩": '<i class="fa-solid fa-puzzle-piece" style="color:#22c55e;"></i>',
+      "🔗": '<i class="fa-solid fa-link" style="color:#3b82f6;"></i>',
+      "🔍": '<i class="fa-solid fa-magnifying-glass" style="color:#3b82f6;"></i>',
+      "🔀": '<i class="fa-solid fa-shuffle" style="color:#ec4899;"></i>',
+      "🌍": '<i class="fa-solid fa-earth-americas" style="color:#22c55e;"></i>',
+      "🗂️": '<i class="fa-solid fa-folder-open" style="color:#eab308;"></i>',
+      "⚙️": '<i class="fa-solid fa-gear" style="color:#64748b;"></i>',
+      "🏆": '<i class="fa-solid fa-trophy" style="color:#eab308;"></i>',
+      "📍": '<i class="fa-solid fa-location-dot" style="color:#ef4444;"></i>',
+      "🌐": '<i class="fa-solid fa-globe" style="color:#3b82f6;"></i>',
+      "⚡": '<i class="fa-solid fa-bolt" style="color:#eab308;"></i>',
+      "🏹": '<i class="fa-solid fa-location-arrow" style="color:#ef4444;"></i>',
+      "🔤": '<i class="fa-solid fa-font" style="color:var(--mg-primary);"></i>',
+      "✖️": '<i class="fa-solid fa-xmark" style="color:#ef4444;"></i>',
+      "📦": '<i class="fa-solid fa-box" style="color:#8b5cf6;"></i>',
+      "🔧": '<i class="fa-solid fa-wrench" style="color:#64748b;"></i>',
+      "📊": '<i class="fa-solid fa-chart-column" style="color:#3b82f6;"></i>',
+      "👨‍👩‍👧": '<i class="fa-solid fa-users" style="color:#10b981;"></i>',
+      "🔮": '<i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i>',
+      "🗺️": '<i class="fa-solid fa-map" style="color:#22c55e;"></i>',
+      "🎯": '<i class="fa-solid fa-bullseye" style="color:#ef4444;"></i>',
+      "🚀": '<i class="fa-solid fa-rocket" style="color:#3b82f6;"></i>',
+      "🌸": '<i class="fa-solid fa-seedling" style="color:#ec4899;"></i>',
+      "🎭": '<i class="fa-solid fa-masks-theater" style="color:#8b5cf6;"></i>',
+      "➡️": '<i class="fa-solid fa-arrow-right-long" style="color:#3b82f6;"></i>',
+      "🔖": '<i class="fa-solid fa-bookmark" style="color:#ec4899;"></i>',
+      "➕": '<i class="fa-solid fa-plus" style="color:#22c55e;"></i>',
+      "🔄": '<i class="fa-solid fa-arrows-rotate" style="color:#3b82f6;"></i>',
+      "📋": '<i class="fa-solid fa-clipboard-list" style="color:var(--mg-primary);"></i>',
+      "✨": '<i class="fa-solid fa-wand-magic-sparkles" style="color:#fcd34d;"></i>',
+      "📜": '<i class="fa-solid fa-scroll" style="color:#eab308;"></i>',
+      "✏️": '<i class="fa-solid fa-pen" style="color:#64748b;"></i>',
+      "🔺": '<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i>',
+      "📈": '<i class="fa-solid fa-chart-line" style="color:#22c55e;"></i>',
+      "✂️": '<i class="fa-solid fa-scissors" style="color:#ef4444;"></i>',
+      "🔲": '<i class="fa-solid fa-square" style="color:#64748b;"></i>',
+      "🔭": '<i class="fa-solid fa-circle-nodes" style="color:#8b5cf6;"></i>',
+      "🚪": '<i class="fa-solid fa-door-open" style="color:#b45309;"></i>',
+      "🧰": '<i class="fa-solid fa-toolbox" style="color:#b45309;"></i>',
+    };
+    return mapping[iconStr] || iconStr;
   }
 
   // ---- Conector SVG en zigzag ----
@@ -427,20 +509,23 @@ export async function initEngine({
   // ---- Render de un reto en modo preview (respuestas correctas siempre visibles) ----
   function previewChallengeHTML(c) {
     if (c.type === "mc" || c.type === "vf") {
+      if (!c.options) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Opciones no disponibles</div>`;
       const cls = c.type === "vf" ? "mg-vf" : "mg-options";
       return `<div class="${cls}">${c.options.map(o =>
         `<button class="mg-opt${o.correct ? " right" : ""}" disabled>${o.label}${o.correct ? " ✓" : ""}</button>`
       ).join("")}</div>`;
     }
     if (c.type === "build" || c.type === "buildSeq") {
-      const tokens = c.type === "build" ? c.operands : c.answers[0];
+      const tokens = c.type === "build" ? c.operands : (c.answers ? c.answers[0] : null);
+      if (!tokens) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Respuesta correcta no disponible</div>`;
       const chips = tokens.map(t =>
         `<span class="mg-chip" style="border-color:var(--owl-green-shadow);background:var(--correct-bg);color:var(--correct-text)">${t}</span>`
       ).join("");
       return `<div class="mg-answer" style="border-color:var(--owl-green-shadow);background:var(--correct-bg)">${chips}</div>
-        <div class="mg-bank">${c.bank.map(b => `<span class="mg-chip">${b}</span>`).join("")}</div>`;
+        <div class="mg-bank">${(c.bank || []).map(b => `<span class="mg-chip">${b}</span>`).join("")}</div>`;
     }
     if (c.type === "match") {
+      if (!c.pairs) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Pares no disponibles</div>`;
       const rows = c.pairs.map(p => `<div class="mg-match-row">
         <span class="mg-match-desc">${p.desc}</span>
         <div class="dropzone filled" style="border-color:var(--owl-green-shadow)">
@@ -449,6 +534,7 @@ export async function initEngine({
       return `<div class="mg-match">${rows}</div><div class="mg-tilebank" style="display:none"></div>`;
     }
     if (c.type === "slots") {
+      if (!c.answer) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Respuesta no disponible</div>`;
       const parts = [];
       if (c.prefix) parts.push(`<span>${c.prefix}</span>`);
       c.answer.forEach((val, i) => {
@@ -514,7 +600,7 @@ export async function initEngine({
     if (rightEl) { rightEl.innerHTML = rightPanel(); rightEl.style.display = ''; }
     app.innerHTML = `
       <div class="locked-world-screen mg-fade">
-        <div class="locked-world-icon">🔒</div>
+        <div class="locked-world-icon" style="color:var(--mg-muted-2);"><i class="fa-solid fa-lock"></i></div>
         <h1 class="locked-world-title">${worldData.title}</h1>
         <p class="locked-world-desc">Completa el <strong>Mundo ${prevNum}</strong> para desbloquear este mundo.</p>
         ${attemptsLeft > 0 && !E.passed ? `
@@ -522,9 +608,9 @@ export async function initEngine({
           <h2>¿Ya dominas el contenido?</h2>
           <p>Demuestra que conoces el Mundo ${prevNum} y desbloquea este mundo directamente.</p>
           <div class="jump-exam-meta">
-            <span>📝 ${EXAM_SIZE} preguntas</span>
-            <span>🎯 ${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</span>
-            <span>🔁 ${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</span>
+            <span><i class="fa-solid fa-file-pen" style="color:var(--mg-primary); margin-right:4px;"></i>${EXAM_SIZE} preguntas</span>
+            <span><i class="fa-solid fa-bullseye" style="color:var(--mg-xp); margin-right:4px;"></i>${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</span>
+            <span><i class="fa-solid fa-arrows-rotate" style="color:var(--mg-streak); margin-right:4px;"></i>${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</span>
           </div>
           <div class="mg-btn-wrap blue" style="max-width:280px;margin:18px auto 0">
             <button class="mg-btn" onclick="MG.press(this, MG.openExam)">Tomar examen de salto</button>
@@ -543,7 +629,7 @@ export async function initEngine({
     const nodes = worldData.levels.map((lv, li) => {
       const st = levelState(li);
       const offClass = li % 2 === 0 ? "" : (Math.floor(li / 2) % 2 === 0 ? "off2" : "off1");
-      const icon = st === "completed" ? "✓" : st === "current" ? "★" : "🔒";
+      const icon = st === "completed" ? '<i class="fa-solid fa-check"></i>' : st === "current" ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-lock" style="font-size:24px;"></i>';
       const bubble = st === "current" ? `<div class="start-bubble">¡EMPIEZA!</div>` : "";
       const click  = st === "locked" ? "" : `onclick="MG.node(${li})"`;
       return `<div class="lesson ${st} ${offClass}" ${click}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
@@ -574,7 +660,7 @@ export async function initEngine({
     if (rightEl) { rightEl.innerHTML = rightPanel(); rightEl.style.display = ''; }
     app.innerHTML = `
       <div class="mg-node-choice mg-fade">
-        <div style="font-size:52px">${lv.icon ?? "⭐"}</div>
+        <div style="font-size:52px">${getIconHTML(lv.icon)}</div>
         <h2>${lv.title}</h2>
         <p>Nivel ${lv.id} · ${(lv.theory?.length ?? 0) + (lv.challenges?.length ?? 0)} pasos</p>
         <div class="mg-node-choice__btns">
@@ -582,7 +668,7 @@ export async function initEngine({
             <button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${li}))">▶ Iniciar nivel</button>
           </div>
           <div class="mg-btn-wrap" style="box-shadow:0 4px 0 #4338ca">
-            <button class="mg-btn" style="background:#6366f1" onclick="MG.press(this,()=>MG.openPreview(${li}))">👁 Vista Previa</button>
+            <button class="mg-btn" style="background:#6366f1" onclick="MG.press(this,()=>MG.openPreview(${li}))"><i class="fa-solid fa-eye" style="margin-right:4px;"></i> Vista Previa</button>
           </div>
           <div class="mg-btn-wrap">
             <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.home()">← Volver al mapa</button>
@@ -596,13 +682,13 @@ export async function initEngine({
     if (rightEl) rightEl.style.display = 'none';
     document.body.classList.add('mg-player-mode');
     const lv = worldData.levels[P.levelIdx];
-    const challenges = localChallenges[P.levelIdx]; // datos locales: incluyen respuestas correctas
+    const challenges = lv.challenges; // usa las cargadas del API
     const total = challenges.length;
     if (total === 0) {
       app.innerHTML = `<div class="mg-player"><div class="mg-top" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)">
         <button class="mg-close" onclick="MG.exitPreview()" title="Salir" style="color:#fff">✕</button></div>
         <div class="mg-content mg-fade" style="text-align:center;padding:40px 20px">
-          <span class="mg-preview-badge">🔑 Admin · Vista Previa</span>
+          <span class="mg-preview-badge"><i class="fa-solid fa-key" style="margin-right:4px;"></i> Admin · Vista Previa</span>
           <p style="margin-top:24px;color:rgb(var(--wolf))">Vista Previa no disponible — los ejercicios de este nivel se sirven desde el backend.</p>
           <div class="mg-btn-wrap red" style="max-width:200px;margin:24px auto 0">
             <button class="mg-btn" onclick="MG.exitPreview()">Salir</button></div>
@@ -621,11 +707,11 @@ export async function initEngine({
         <span class="mg-xp" style="color:#fff;white-space:nowrap">Ej. ${P.stepIdx + 1}/${total}</span>
       </div>
       <div class="mg-content mg-fade">
-        <span class="mg-preview-badge">🔑 Admin · Vista Previa</span>
+        <span class="mg-preview-badge"><i class="fa-solid fa-key" style="margin-right:4px;"></i> Admin · Vista Previa</span>
         <span class="mg-tag">${c.tag ?? ""}</span>
         <p class="mg-prompt">${c.prompt}</p>
         ${mid}
-        ${c.hint ? `<div class="mg-note hint"><div class="lbl">💡 Pista</div><div class="txt">${c.hint}</div></div>` : ""}
+        ${c.hint ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : ""}
       </div>
       <div class="mg-footer" style="display:flex;gap:12px;justify-content:center;align-items:stretch">
         <div class="mg-btn-wrap" style="flex:1;max-width:180px;${prevDisabled ? "opacity:.4;pointer-events:none" : ""}">
@@ -654,10 +740,10 @@ export async function initEngine({
         ? `<div class="mg-btn-wrap green" style="max-width:280px;width:100%"><button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${nextIdx}))">Siguiente nivel →</button></div>`
         : "";
       app.innerHTML = `<div class="mg-player"><div class="mg-center mg-fade">
-        <div style="font-size:60px">🏆</div>
+        <div style="font-size:60px"><i class="fa-solid fa-trophy" style="color:#fcd34d;"></i></div>
         <h1 style="font-family:'din-round-bold';font-weight:800;font-size:30px;margin:0">¡Nivel ${lv.id} completado!</h1>
         <p class="mg-sub">${lv.title}</p>
-        <div class="mg-card-xp"><div style="font-size:12px;font-weight:800;color:rgb(var(--hare));letter-spacing:1px">XP TOTAL</div><div class="n">⭐ ${S.xp}</div></div>
+        <div class="mg-card-xp"><div style="font-size:12px;font-weight:800;color:rgb(var(--hare));letter-spacing:1px">XP TOTAL</div><div class="n"><i class="fa-solid fa-star" style="color:#fcd34d; margin-right:4px;"></i>${S.xp}</div></div>
         ${nextBtn}
         <div class="mg-btn-wrap blue" style="max-width:280px;width:100%"><button class="mg-btn" onclick="MG.press(this,MG.home)">Volver al mapa</button></div>
       </div></div>`;
@@ -665,19 +751,19 @@ export async function initEngine({
       return;
     }
 
-    const streakHtml = S.streak > 1 ? `<span class="mg-streak">🔥${S.streak}</span>` : "";
+    const streakHtml = S.streak > 1 ? `<span class="mg-streak" style="margin-right:12px;"><i class="fa-solid fa-fire" style="color:var(--mg-streak); margin-right:4px;"></i>${S.streak}</span>` : "";
     const top = `<div class="mg-top">
       <button class="mg-close" onclick="MG.home()" title="Salir">✕</button>
       <div class="mg-progress"><div class="mg-progress-fill" style="width:${(S.step / levelTotal()) * 100}%"></div></div>
-      ${streakHtml}<span class="mg-xp">⭐ ${S.xp}</span></div>`;
+      ${streakHtml}<span class="mg-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${S.xp} XP</span></div>`;
 
     if (S.step < curTheory().length) {
       const t = curTheory()[S.step];
       app.innerHTML = `<div class="mg-player">${top}<div class="mg-content mg-fade">
-        <span class="mg-tag">${t.tag}</span><div class="mg-icon">${t.icon}</div>
+        <span class="mg-tag">${t.tag}</span><div class="mg-icon">${getIconHTML(t.icon)}</div>
         <h2 class="mg-title">${t.title}</h2><p class="mg-body">${t.body}</p>
         ${getVisual(t.visual)}
-        <div class="mg-note key"><div class="lbl">💡 Idea clave</div><div class="txt">${t.key}</div></div>
+        <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary); margin-right:4px;"></i>Idea clave</div><div class="txt">${t.key}</div></div>
       </div><div class="mg-footer"><div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.next)">Continuar</button></div></div></div>`;
       return;
     }
@@ -686,7 +772,7 @@ export async function initEngine({
     const h = { pick: "MG.pick", put: "MG.put", unpick: "MG.unpick", takeOut: "MG.takeOut" };
     const mid  = challengeHTML(c, S, h);
     const hint = (S.showHint && S.result !== "ok")
-      ? `<div class="mg-note hint"><div class="lbl">💡 Pista</div><div class="txt">${c.hint}</div></div>` : "";
+      ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : "";
 
     let footer;
     if (S.result === "ok")
@@ -716,12 +802,12 @@ export async function initEngine({
             <h2 class="exam-title">Examen de salto · Mundo ${prereqWorldId ?? worldId - 1}</h2>
           </div>
           <div class="exam-intro-body">
-            <div style="font-size:52px">📋</div>
+            <div style="font-size:52px; color:var(--mg-primary);"><i class="fa-solid fa-clipboard-list"></i></div>
             <p>Responde correctamente al menos <strong>${PASS_THRESHOLD} de ${EXAM_SIZE} preguntas</strong> para desbloquear este mundo.</p>
             <div class="exam-meta-grid">
-              <div class="exam-meta-item">📝 ${EXAM_SIZE} preguntas</div>
-              <div class="exam-meta-item">🎯 ${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</div>
-              <div class="exam-meta-item">🔁 ${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</div>
+              <div class="exam-meta-item"><i class="fa-solid fa-file-pen" style="color:var(--mg-primary); margin-right:4px;"></i>${EXAM_SIZE} preguntas</div>
+              <div class="exam-meta-item"><i class="fa-solid fa-bullseye" style="color:var(--mg-xp); margin-right:4px;"></i>${PASS_THRESHOLD}/${EXAM_SIZE} para aprobar</div>
+              <div class="exam-meta-item"><i class="fa-solid fa-arrows-rotate" style="color:var(--mg-streak); margin-right:4px;"></i>${attemptsLeft} intento${attemptsLeft !== 1 ? "s" : ""} restante${attemptsLeft !== 1 ? "s" : ""}</div>
             </div>
           </div>
           <div class="exam-modal-footer">
@@ -738,10 +824,10 @@ export async function initEngine({
       examModal.innerHTML = `
         <div class="exam-modal-content mg-fade">
           <div class="exam-modal-header">
-            <h2 class="exam-title">${passed ? "🎉 ¡Aprobaste!" : "😔 No aprobaste"}</h2>
+            <h2 class="exam-title">${passed ? "¡Aprobaste!" : "No aprobaste"}</h2>
           </div>
           <div class="exam-intro-body">
-            <div style="font-size:52px">${passed ? "🏆" : "📚"}</div>
+            <div style="font-size:52px">${passed ? '<i class="fa-solid fa-trophy" style="color:#fcd34d;"></i>' : '<i class="fa-solid fa-book-open" style="color:var(--mg-muted-2);"></i>'}</div>
             <div class="exam-score-display">
               <div class="exam-score-num" style="color:${passed ? "var(--owl-green)" : "var(--cardinal)"}">${E.score}/${EXAM_SIZE}</div>
               <div class="exam-score-pct">${pct}%</div>
@@ -770,7 +856,7 @@ export async function initEngine({
     const h = { pick: "MG.examPick", put: "MG.examPut", unpick: "MG.examUnpick", takeOut: "MG.examTakeOut" };
     const mid  = challengeHTML(c, E, h);
     const hint = (E.showHint && E.result !== "ok")
-      ? `<div class="mg-note hint"><div class="lbl">💡 Pista</div><div class="txt">${c.hint}</div></div>` : "";
+      ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : "";
 
     let footer;
     if (E.result === "ok")
@@ -881,7 +967,7 @@ export async function initEngine({
         examModal.innerHTML = `<div class="exam-modal-content mg-fade">
           <div class="exam-modal-header"><button class="mg-close" onclick="MG.closeExam()">✕</button>
           <h2 class="exam-title">Examen no disponible</h2></div>
-          <div class="exam-intro-body"><div style="font-size:52px">📚</div>
+          <div class="exam-intro-body"><div style="font-size:52px; color:var(--mg-muted-2);"><i class="fa-solid fa-book-open"></i></div>
           <p>Los ejercicios del examen aún no están disponibles localmente.</p></div>
           <div class="exam-modal-footer"><div class="mg-btn-wrap"><button class="mg-btn"
             style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.closeExam()">Cerrar</button></div>
@@ -929,7 +1015,7 @@ export async function initEngine({
       renderPreview();
     },
     previewNav(delta) {
-      const total = localChallenges[P.levelIdx].length;
+      const total = worldData.levels[P.levelIdx].challenges.length;
       P.stepIdx = Math.max(0, Math.min(total - 1, P.stepIdx + delta));
       renderPreview();
     },
