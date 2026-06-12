@@ -227,6 +227,9 @@ export async function initEngine({
   // ---- Estado de Vista Previa (solo admin) ----
   const P = { levelIdx: 0, stepIdx: 0 };
 
+  // ---- Estado del modal de repaso de teoría ----
+  const T = { step: 0, levelIdx: 0 };
+
   // ---- Accesos rápidos ----
   const curLevel    = () => worldData.levels[S.level];
   const curTheory   = () => curLevel().theory;
@@ -766,7 +769,10 @@ export async function initEngine({
       </div>
       <div class="mg-content mg-fade">
         <span class="mg-preview-badge"><i class="fa-solid fa-key" style="margin-right:4px;"></i> Admin · Vista Previa</span>
-        <span class="mg-tag">${c.tag ?? ""}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+          <span class="mg-tag" style="margin-bottom:0;">${c.tag ?? ""}</span>
+          <button onclick="MG.openTheoryModal(${P.levelIdx})" style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px solid var(--mg-border);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--mg-primary);cursor:pointer;font-family:inherit;flex-shrink:0;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i>Ver teoría</button>
+        </div>
         <p class="mg-prompt">${c.prompt}</p>
         ${mid}
         ${c.hint ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : ""}
@@ -818,12 +824,22 @@ export async function initEngine({
 
     if (S.step < curTheory().length) {
       const t = curTheory()[S.step];
+      const theoryFooter = S.step > 0
+        ? `<div class="mg-footer" style="display:flex;gap:12px;">
+            <div class="mg-btn-wrap" style="flex:1;max-width:160px;">
+              <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.press(this,MG.prev)">← Anterior</button>
+            </div>
+            <div class="mg-btn-wrap blue" style="flex:1;">
+              <button class="mg-btn" onclick="MG.press(this,MG.next)">Continuar →</button>
+            </div>
+           </div>`
+        : `<div class="mg-footer"><div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.next)">Continuar</button></div></div>`;
       app.innerHTML = `<div class="mg-player">${top}<div class="mg-content mg-fade">
         <span class="mg-tag">${t.tag}</span><div class="mg-icon">${getIconHTML(t.icon)}</div>
         <h2 class="mg-title">${t.title}</h2><p class="mg-body">${t.body}</p>
         ${getVisual(t.visual)}
         <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary); margin-right:4px;"></i>Idea clave</div><div class="txt">${t.key}</div></div>
-      </div><div class="mg-footer"><div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.next)">Continuar</button></div></div></div>`;
+      </div>${theoryFooter}</div>`;
       return;
     }
 
@@ -843,8 +859,12 @@ export async function initEngine({
         ? `<div class="mg-btn-wrap green"><button class="mg-btn" onclick="MG.press(this,MG.check)">Comprobar</button></div>`
         : `<div class="mg-btn-wrap disabled"><button class="mg-btn" disabled>Comprobar</button></div>`;
 
+    const tagRow = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+      <span class="mg-tag" style="margin-bottom:0;">${c.tag}</span>
+      <button onclick="MG.openTheoryModal()" style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px solid var(--mg-border);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--mg-primary);cursor:pointer;font-family:inherit;flex-shrink:0;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i>Ver teoría</button>
+    </div>`;
     app.innerHTML = `<div class="mg-player">${top}<div class="mg-content mg-fade ${S.result === "no" ? "mg-shake" : ""}">
-      <span class="mg-tag">${c.tag}</span><p class="mg-prompt">${c.prompt}</p>${mid}${hint}</div>
+      ${tagRow}<p class="mg-prompt">${c.prompt}</p>${mid}${hint}</div>
       <div class="mg-footer">${footer}</div></div>`;
     bindDrag();
   }
@@ -944,7 +964,51 @@ export async function initEngine({
     bindDrag();
   }
 
+  function renderTheoryModal() {
+    const theory = worldData.levels[T.levelIdx].theory;
+    const t = theory[T.step];
+    const total = theory.length;
+    const prevDis = T.step === 0;
+    const nextDis  = T.step === total - 1;
+    let overlay = document.getElementById('mg-theory-modal');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'mg-theory-modal';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;display:flex;align-items:center;justify-content:center;padding:16px;';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `
+      <div style="background:var(--mg-surface);border-radius:20px;max-width:540px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.35);">
+        <div class="mg-top" style="border-radius:20px 20px 0 0;flex-shrink:0;">
+          <button onclick="MG.closeTheoryModal()" class="mg-close" title="Cerrar">✕</button>
+          <div class="mg-progress"><div class="mg-progress-fill" style="width:${Math.round(((T.step + 1) / total) * 100)}%"></div></div>
+          <span class="mg-xp">${T.step + 1}/${total}</span>
+        </div>
+        <div class="mg-content" style="overflow-y:auto;flex:1;">
+          <span class="mg-tag">${t.tag}</span>
+          <div class="mg-icon">${getIconHTML(t.icon)}</div>
+          <h2 class="mg-title">${t.title}</h2>
+          <p class="mg-body">${t.body}</p>
+          ${getVisual(t.visual)}
+          <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary);margin-right:4px;"></i>Idea clave</div><div class="txt">${t.key}</div></div>
+        </div>
+        <div class="mg-footer" style="display:flex;gap:12px;border-radius:0 0 20px 20px;flex-shrink:0;">
+          <div class="mg-btn-wrap" style="flex:1;${prevDis ? 'opacity:.4;pointer-events:none;' : ''}">
+            <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.theoryModalNav(-1)" ${prevDis ? 'disabled' : ''}>← Anterior</button>
+          </div>
+          <div class="mg-btn-wrap red" style="flex:0 0 auto;min-width:110px;">
+            <button class="mg-btn" onclick="MG.closeTheoryModal()">Cerrar</button>
+          </div>
+          <div class="mg-btn-wrap blue" style="flex:1;${nextDis ? 'opacity:.4;pointer-events:none;' : ''}">
+            <button class="mg-btn" onclick="MG.theoryModalNav(1)" ${nextDis ? 'disabled' : ''}>Siguiente →</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
   function render() {
+    const tModal = document.getElementById('mg-theory-modal');
+    if (tModal) tModal.remove();
     if (!isUnlocked) { renderLocked(); return; }
     if (S.phase === "home") renderHome();
     else renderPlayer();
@@ -977,6 +1041,11 @@ export async function initEngine({
       } else {
         S.step++;
       }
+      Object.assign(S, { selected: [], chosen: null, placed: {}, result: null, showHint: false });
+      render();
+    },
+    prev() {
+      if (S.step > 0) S.step--;
       Object.assign(S, { selected: [], chosen: null, placed: {}, result: null, showHint: false });
       render();
     },
@@ -1095,6 +1164,22 @@ export async function initEngine({
       renderPreview();
     },
     exitPreview() { MG.home(); },
+
+    // -- Modal de repaso de teoría --
+    openTheoryModal(levelIdx) {
+      T.levelIdx = levelIdx ?? S.level;
+      T.step = 0;
+      renderTheoryModal();
+    },
+    closeTheoryModal() {
+      const overlay = document.getElementById('mg-theory-modal');
+      if (overlay) overlay.remove();
+    },
+    theoryModalNav(delta) {
+      const total = worldData.levels[T.levelIdx].theory.length;
+      T.step = Math.max(0, Math.min(total - 1, T.step + delta));
+      renderTheoryModal();
+    },
 
     // -- Objetivos personales --
     async addObjetivo() {
