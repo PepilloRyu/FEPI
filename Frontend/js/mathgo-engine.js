@@ -2,6 +2,16 @@
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 import { BASE_URL } from "./services/api.js";
 
+// Convierte "[ 1 0 ] / [ 2 3 ]" en HTML de tabla con .mg-matrix-wrap/.mg-matrix-inner/.mg-mc
+function matrixify(text) {
+  const parts = text.split(/\s*\/\s*/);
+  if (!parts.every(p => /^\s*\[[\d\s.,-]+\]\s*$/.test(p))) return text;
+  const rows = parts.map(p => p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim().split(/\s+/));
+  const cols = rows[0].length;
+  const cells = rows.flat().map(n => `<span class="mg-mc">${n}</span>`).join("");
+  return `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${cols}">${cells}</span></span>`;
+}
+
 async function getToken(user) {
   return user.getIdToken();
 }
@@ -534,7 +544,7 @@ export async function initEngine({
       const rows = c.pairs.map((p, i) => {
         const lab = st.placed[i];
         return `<div class="mg-match-row">
-          <span class="mg-match-desc">${p.desc}</span>
+          <span class="mg-match-desc">${matrixify(p.desc)}</span>
           <div class="dropzone ${lab ? "filled" : ""}" data-zone="${i}">
             ${lab ? `<span class="mg-placed" onclick="${h.takeOut}(${i})">${lab}</span>` : ""}
           </div></div>`;
@@ -580,7 +590,7 @@ export async function initEngine({
     if (c.type === "match") {
       if (!c.pairs) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Pares no disponibles</div>`;
       const rows = c.pairs.map(p => `<div class="mg-match-row">
-        <span class="mg-match-desc">${p.desc}</span>
+        <span class="mg-match-desc">${matrixify(p.desc)}</span>
         <div class="dropzone filled" style="border-color:var(--owl-green-shadow)">
           <span class="mg-placed" style="background:var(--correct-bg);border-color:var(--owl-green-shadow);color:var(--correct-text)">${p.sym}</span>
         </div></div>`).join("");
