@@ -346,7 +346,7 @@
         await renderFriends(friendDocs);
 
       } catch (err) {
-        console.error('[amigos] Error al cargar secciones:', err);
+        console.error('Error al cargar secciones:', err);
         showToast('Error al cargar datos. Intenta recargar.', 'error');
         ['received-list', 'sent-list', 'friends-list'].forEach(id => {
           document.getElementById(id).innerHTML = emptyError();
@@ -469,7 +469,7 @@
           progressMap[uid] = result.value.exists() ? result.value.data() : null;
         } else {
           if (result.reason?.code === 'permission-denied') permissionDenied = true;
-          console.warn(`[amigos] No se pudo leer mathgo_progress de ${uid}:`, result.reason);
+          console.warn(`No se pudo leer mathgo_progress de ${uid}:`, result.reason);
         }
       });
 

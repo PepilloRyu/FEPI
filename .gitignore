@@ -17,3 +17,6 @@ answers.json
 # Node / JS ignores
 node_modules/
 dist/
+
+# Firebase / misc config (roadmap, no context)
+cors.json
