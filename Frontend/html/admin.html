@@ -34,6 +34,8 @@
         <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
         <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
         <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
+        <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
+        <div class="admin-stat-card mg-skeleton" style="height:110px;"></div>
       </div>
 
       <!-- 2. Gestión de usuarios -->
@@ -90,14 +92,18 @@
 
       await initSidebar('admin');
 
-      const [usersSnap, progressSnap] = await Promise.all([
+      const [usersSnap, progressSnap, attemptsSnap] = await Promise.all([
         getDocs(collection(db, 'users')),
         getDocs(collection(db, 'mathgo_progress')),
+        getDocs(collection(db, 'attempts')).catch(() => ({ forEach: () => {} })),
       ]);
 
       cachedUsers = [];
       usersSnap.forEach(d => cachedUsers.push({ uid: d.id, ...d.data() }));
       progressSnap.forEach(d => { cachedProgressMap[d.id] = d.data(); });
+
+      const cachedAttempts = [];
+      attemptsSnap.forEach(d => cachedAttempts.push(d.data()));
 
       // Calcular estadísticas globales
       let totalLevels = 0;
@@ -114,15 +120,20 @@
         });
       });
 
-      const avgXp = cachedUsers.length > 0 ? Math.round(totalXpSum / cachedUsers.length) : 0;
+      const avgXp          = cachedUsers.length > 0 ? Math.round(totalXpSum / cachedUsers.length) : 0;
+      const totalAttempts  = cachedAttempts.length;
+      const correctAttempts = cachedAttempts.filter(a => a.isCorrect === true).length;
+      const accuracy       = totalAttempts > 0
+        ? (correctAttempts / totalAttempts * 100).toFixed(1) + '%'
+        : '—';
 
-      renderStats(cachedUsers.length, totalLevels, topUser, avgXp);
+      renderStats(cachedUsers.length, totalLevels, topUser, avgXp, totalAttempts, accuracy);
       renderUsers(cachedUsers, cachedProgressMap);
       renderWorlds(cachedUsers, cachedProgressMap);
     }
 
     // ── Sección 1: Estadísticas generales ─────────────────
-    function renderStats(totalUsers, totalLevels, topUser, avgXp) {
+    function renderStats(totalUsers, totalLevels, topUser, avgXp, totalAttempts, accuracy) {
       const topName = topUser
         ? (topUser.name || topUser.email?.split('@')[0] || '–').replace(/</g, '&lt;')
         : '–';
@@ -147,6 +158,16 @@
           <div class="admin-stat-value mg-text-xp">${avgXp}</div>
           <div class="admin-stat-label">Promedio XP</div>
         </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon"><i class="fa-solid fa-bullseye" style="color:var(--mg-success);"></i></div>
+          <div class="admin-stat-value" style="color:var(--mg-success);">${accuracy}</div>
+          <div class="admin-stat-label">Precisión global</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon"><i class="fa-solid fa-list-check" style="color:var(--mg-primary);"></i></div>
+          <div class="admin-stat-value mg-text-primary">${totalAttempts.toLocaleString('es-ES')}</div>
+          <div class="admin-stat-label">Total de intentos</div>
+        </div>
       `;
     }
 
@@ -166,9 +187,7 @@
         const xp   = p.totalXp ?? 0;
         const racha = p.dailyStreak ?? 0;
         const role  = u.role ?? 'student';
-        let totalCompleted = 0;
-        Object.values(p.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
-        const nivel    = totalCompleted + 1;
+        const nivel    = Math.floor(xp / 100) + 1;
         const initials = getInitials(u.name || u.email);
         const isAdm    = role === 'admin';
         const safeName = (u.name  || '–').replace(/</g,'&lt;');

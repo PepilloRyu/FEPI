@@ -7,18 +7,28 @@ namespace MathGo.Application.Services;
 public class AnalyticsService : IAnalyticsService
 {
     private readonly IAttemptRepository _attemptRepository;
+    private readonly IProgressRepository _progressRepository;
 
-    public AnalyticsService(IAttemptRepository attemptRepository)
+    public AnalyticsService(
+        IAttemptRepository attemptRepository,
+        IProgressRepository progressRepository)
     {
         _attemptRepository = attemptRepository;
+        _progressRepository = progressRepository;
     }
 
     public async Task<StatsResponse> GetPersonalStatsAsync(string uid)
     {
-        var attempts = await _attemptRepository.GetByUserIdAsync(uid);
-        var userAttempts = attempts.ToList();
-        
-        if (!userAttempts.Any()) return new StatsResponse();
+        var attemptsTask = _attemptRepository.GetByUserIdAsync(uid);
+        var progressTask = _progressRepository.GetByIdAsync(uid);
+
+        await Task.WhenAll(attemptsTask, progressTask);
+
+        var userAttempts = (await attemptsTask).ToList();
+        var xpTotal = (await progressTask)?.TotalXp ?? 0;
+
+        if (!userAttempts.Any())
+            return new StatsResponse { XpTotal = xpTotal };
 
         return new StatsResponse
         {
@@ -26,7 +36,7 @@ public class AnalyticsService : IAnalyticsService
             CorrectAttempts = userAttempts.Count(a => a.IsCorrect),
             AccuracyPercent = userAttempts.Count(a => a.IsCorrect) * 100.0 / userAttempts.Count,
             AverageTimeMs = userAttempts.Average(a => a.TimeMs),
-            XpTotal = 0 // Would require getting the user
+            XpTotal = xpTotal
         };
     }
 
