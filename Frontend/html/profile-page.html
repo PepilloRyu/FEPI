@@ -97,6 +97,7 @@
     import { getAnalytics } from '../js/services/api.js';
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+    import { BANNER_CATALOG } from '../js/banner-catalog.js';
 
     function renderObjetivos(objetivos, uid) {
       const lista = document.getElementById('objetivos-lista');
@@ -143,6 +144,15 @@
 
       let totalCompleted = 0;
       Object.values(progress.worlds ?? {}).forEach(w => { totalCompleted += (w.levelsCompleted ?? []).length; });
+
+      // Banner equipado
+      const equippedBanner = userData.equippedBanner ?? null;
+      if (equippedBanner) {
+        const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
+        if (bannerEntry) {
+          document.querySelector('.profile-hero').style.background = bannerEntry.gradient;
+        }
+      }
 
       // Hero
       document.getElementById('profile-avatar').textContent = getInitials(displayName);
