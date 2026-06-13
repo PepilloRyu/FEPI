@@ -2,14 +2,33 @@
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 import { BASE_URL } from "./services/api.js";
 
-// Convierte "[ 1 0 ] / [ 2 3 ]" en HTML de tabla con .mg-matrix-wrap/.mg-matrix-inner/.mg-mc
+// Convierte notación de matriz en HTML de tabla con .mg-matrix-wrap/.mg-matrix-inner/.mg-mc
+// Soporta: "[ 1 0 ] / [ 2 3 ]" y "Prefijo texto: [ 2 1 | 8 ] / [ 1 −1 | 1 ]"
 function matrixify(text) {
-  const parts = text.split(/\s*\/\s*/);
-  if (!parts.every(p => /^\s*\[[\d\s.,-]+\]\s*$/.test(p))) return text;
-  const rows = parts.map(p => p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim().split(/\s+/));
+  const firstBracket = text.indexOf('[');
+  if (firstBracket === -1) return text;
+
+  const prefix = text.slice(0, firstBracket).trim();
+  const matrixText = text.slice(firstBracket);
+
+  const parts = matrixText.split(/\s*\/\s*/);
+  // charset: dígitos, espacios, punto, coma, | (pipe), − (U+2212), - (guion)
+  if (!parts.every(p => /^\s*\[[\d\s.,|−-]+\]\s*$/.test(p))) return text;
+
+  const rows = parts.map(p =>
+    p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim().split(/\s+/)
+  );
   const cols = rows[0].length;
-  const cells = rows.flat().map(n => `<span class="mg-mc">${n}</span>`).join("");
-  return `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${cols}">${cells}</span></span>`;
+  const cells = rows.flat().map(n =>
+    n === "|"
+      ? `<span class="mg-mc mg-mc-sep">|</span>`
+      : `<span class="mg-mc">${n}</span>`
+  ).join("");
+  const tableHTML = `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${cols}">${cells}</span></span>`;
+
+  return prefix
+    ? `<span class="mg-matrix-prefix">${prefix}</span> ${tableHTML}`
+    : tableHTML;
 }
 
 async function getToken(user) {
@@ -533,11 +552,11 @@ export async function initEngine({
     if (c.type === "build" || c.type === "buildSeq") {
       const ans = st.selected.length === 0
         ? `<span class="mg-placeholder">Toca los bloques para construir tu respuesta…</span>`
-        : st.selected.map(s => `<span class="mg-chip in" onclick="${h.unpick}(${s.id})">${s.label}</span>`).join("");
+        : st.selected.map(s => `<span class="mg-chip in" onclick="${h.unpick}(${s.id})">${matrixify(s.label)}</span>`).join("");
       const rem = c.bank.map((label, i) => ({ id: i, label }))
         .filter(b => !st.selected.find(s => s.id === b.id));
       return `<div class="mg-answer">${ans}</div>
-        <div class="mg-bank">${rem.map(b => `<span class="mg-chip" onclick="${h.put}(${b.id},'${b.label}')">${b.label}</span>`).join("")}</div>`;
+        <div class="mg-bank">${rem.map(b => `<span class="mg-chip" onclick="${h.put}(${b.id},'${b.label}')">${matrixify(b.label)}</span>`).join("")}</div>`;
     }
     if (c.type === "match") {
       const used = Object.values(st.placed);
@@ -582,10 +601,10 @@ export async function initEngine({
       const tokens = c.type === "build" ? c.operands : (c.answers ? c.answers[0] : null);
       if (!tokens) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Respuesta correcta no disponible</div>`;
       const chips = tokens.map(t =>
-        `<span class="mg-chip" style="border-color:var(--owl-green-shadow);background:var(--correct-bg);color:var(--correct-text)">${t}</span>`
+        `<span class="mg-chip" style="border-color:var(--owl-green-shadow);background:var(--correct-bg);color:var(--correct-text)">${matrixify(t)}</span>`
       ).join("");
       return `<div class="mg-answer" style="border-color:var(--owl-green-shadow);background:var(--correct-bg)">${chips}</div>
-        <div class="mg-bank">${(c.bank || []).map(b => `<span class="mg-chip">${b}</span>`).join("")}</div>`;
+        <div class="mg-bank">${(c.bank || []).map(b => `<span class="mg-chip">${matrixify(b)}</span>`).join("")}</div>`;
     }
     if (c.type === "match") {
       if (!c.pairs) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Pares no disponibles</div>`;

@@ -1109,6 +1109,9 @@ input, select, textarea { font-family: inherit; }
 }
 .mg-matrix-inner.cols-2 { grid-template-columns: repeat(2, auto); }
 .mg-matrix-inner.cols-3 { grid-template-columns: repeat(3, auto); }
+.mg-matrix-inner.cols-4 { grid-template-columns: repeat(4, auto); }
+.mg-matrix-inner.cols-5 { grid-template-columns: repeat(5, auto); }
+.mg-matrix-inner.cols-6 { grid-template-columns: repeat(6, auto); }
 .mg-mc {
   text-align: right;
   font-size: 13px;
@@ -1119,6 +1122,22 @@ input, select, textarea { font-family: inherit; }
 .mg-mc.mg-aug {
   padding-left: 8px;
   border-left: 1.5px solid currentColor;
+}
+/* Separador "|" en matrices aumentadas (oculta el texto, muestra borde) */
+.mg-mc.mg-mc-sep {
+  font-size: 0;
+  min-width: 0;
+  padding-left: 6px;
+  margin-left: 2px;
+  border-left: 2px solid rgb(var(--wolf));
+}
+/* Prefijo de texto antes de la tabla en chips/match ("F₁ ↔ F₂ →", etc.) */
+.mg-matrix-prefix {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgb(var(--wolf));
+  margin-right: 4px;
+  vertical-align: middle;
 }
 .mg-formula  { text-align: center; font-weight: 800; }
 .mg-anatomy  { display: flex; gap: 12px; justify-content: center; align-items: flex-start; }
