@@ -174,14 +174,14 @@ export function getVisual(kind) {
   if (kind === "gauss-method") return `<div class="mg-vis">
     <div class="mg-formula" style="font-size:15px;padding:4px 0">x + 2y = 5 / 2x + 3y = 8</div>
     <div class="mg-tr"><span class="l">F₂ − 2·F₁ → F₂</span><span class="r">eliminar x en F₂</span></div>
-    <div class="mg-tr"><span class="l">[ 1  2 | 5 ] / [ 0 −1 | −2 ]</span><span class="r">escalonada</span></div>
+    <div class="mg-tr"><span class="l"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-3"><span class="mg-mc">1</span><span class="mg-mc">2</span><span class="mg-mc mg-aug">5</span><span class="mg-mc">0</span><span class="mg-mc">−1</span><span class="mg-mc mg-aug">−2</span></span></span></span><span class="r">escalonada</span></div>
     <div class="mg-tr"><span class="l">−y = −2 → y=2; x=1</span><span class="r" style="color:var(--owl-green)">sustitución ↑</span></div>
   </div>`;
   if (kind === "gauss-jordan-vis") return `<div class="mg-vis">
-    <div class="mg-tr"><span class="l">[ 1  2 | 5 ] / [ 0 −1 | −2 ]</span><span class="r">escalonada</span></div>
+    <div class="mg-tr"><span class="l"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-3"><span class="mg-mc">1</span><span class="mg-mc">2</span><span class="mg-mc mg-aug">5</span><span class="mg-mc">0</span><span class="mg-mc">−1</span><span class="mg-mc mg-aug">−2</span></span></span></span><span class="r">escalonada</span></div>
     <div class="mg-tr"><span class="l">(−1)·F₂ → [ 0  1 | 2 ]</span><span class="r">pivote = 1</span></div>
     <div class="mg-tr"><span class="l">F₁ − 2·F₂ → [ 1  0 | 1 ]</span><span class="r">cero arriba</span></div>
-    <div class="mg-tr"><span class="l">[ 1  0 | 1 ] / [ 0  1 | 2 ]</span><span class="r" style="color:var(--owl-green)">x=1, y=2</span></div>
+    <div class="mg-tr"><span class="l"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-3"><span class="mg-mc">1</span><span class="mg-mc">0</span><span class="mg-mc mg-aug">1</span><span class="mg-mc">0</span><span class="mg-mc">1</span><span class="mg-mc mg-aug">2</span></span></span></span><span class="r" style="color:var(--owl-green)">x=1, y=2</span></div>
   </div>`;
   // ── Nivel 4: Cramer ──────────────────────────────────────────────────────
   if (kind === "cramer-idea") return `<div class="mg-vis">
