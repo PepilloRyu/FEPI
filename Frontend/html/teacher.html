@@ -301,6 +301,9 @@
                 <tr>
                   <th>Alumno</th>
                   <th>Email</th>
+                  <th>Nivel</th>
+                  <th>XP</th>
+                  <th>Racha</th>
                   <th style="width:56px;text-align:center;">Quitar</th>
                 </tr>
               </thead>
@@ -525,16 +528,28 @@
       tableWrap.style.display = '';
       emptyEl.style.display   = 'none';
       tbody.innerHTML = ids.map(() =>
-        `<tr><td colspan="3"><div class="mg-skeleton" style="height:36px;border-radius:6px;"></div></td></tr>`
+        `<tr><td colspan="6"><div class="mg-skeleton" style="height:36px;border-radius:6px;"></div></td></tr>`
       ).join('');
 
-      const userDocs = await Promise.all(ids.map(uid => getDoc(doc(db, 'users', uid))));
+      const [userDocs, progressDocs] = await Promise.all([
+        Promise.all(ids.map(uid => getDoc(doc(db, 'users', uid)))),
+        Promise.all(ids.map(uid => getDoc(doc(db, 'mathgo_progress', uid)))),
+      ]);
 
-      const students = userDocs.map((snap, i) => ({
-        uid:   ids[i],
-        name:  snap.exists() ? (snap.data().name  || '–') : '(usuario no encontrado)',
-        email: snap.exists() ? (snap.data().email || '–') : '–',
-      }));
+      const students = userDocs.map((snap, i) => {
+        const p     = progressDocs[i].exists() ? progressDocs[i].data() : {};
+        const xp    = p.totalXp ?? 0;
+        const racha = p.dailyStreak ?? 0;
+        const nivel = Math.floor(xp / 100) + 1;
+        return {
+          uid:   ids[i],
+          name:  snap.exists() ? (snap.data().name  || '–') : '(usuario no encontrado)',
+          email: snap.exists() ? (snap.data().email || '–') : '–',
+          nivel,
+          xp,
+          racha,
+        };
+      });
 
       tbody.innerHTML = students.map(s => `
         <tr>
@@ -545,6 +560,9 @@
             </div>
           </td>
           <td style="color:var(--mg-muted);font-size:13px;">${escHtml(s.email)}</td>
+          <td style="font-weight:700;">Nv. ${s.nivel}</td>
+          <td><span class="mg-badge mg-badge-xp"><i class="fa-solid fa-bolt"></i> ${s.xp}</span></td>
+          <td><span class="mg-badge mg-badge-streak"><i class="fa-solid fa-fire"></i> ${s.racha}</span></td>
           <td style="text-align:center;">
             <button
               class="btn-remove-student"
