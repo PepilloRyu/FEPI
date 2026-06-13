@@ -189,7 +189,8 @@
         const role  = u.role ?? 'student';
         const nivel    = Math.floor(xp / 100) + 1;
         const initials = getInitials(u.name || u.email);
-        const isAdm    = role === 'admin';
+        const isAdm     = role === 'admin';
+        const isTeacher = role === 'teacher';
         const safeName = (u.name  || '–').replace(/</g,'&lt;');
         const safeMail = (u.email || '–').replace(/</g,'&lt;');
 
@@ -207,7 +208,7 @@
             <td style="font-weight:700;">Nv. ${nivel}</td>
             <td><span class="mg-badge mg-badge-xp"><i class="fa-solid fa-bolt"></i> ${xp}</span></td>
             <td><span class="mg-badge mg-badge-streak"><i class="fa-solid fa-fire"></i> ${racha}</span></td>
-            <td><span class="role-badge ${role}">${isAdm ? '<i class="fa-solid fa-crown"></i> Admin' : '<i class="fa-solid fa-graduation-cap"></i> Estudiante'}</span></td>
+            <td><span class="role-badge ${role}">${isAdm ? '<i class="fa-solid fa-crown"></i> Admin' : isTeacher ? '<i class="fa-solid fa-chalkboard-user"></i> Profesor' : '<i class="fa-solid fa-graduation-cap"></i> Estudiante'}</span></td>
             <td>
               <button
                 class="btn-role ${isAdm ? 'to-student' : 'to-admin'}"
