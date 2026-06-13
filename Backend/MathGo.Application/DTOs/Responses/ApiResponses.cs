@@ -128,6 +128,15 @@ public class BuyLifeResponse
 }
 
 /// <summary>
+/// Resultado de comprar el boost de XP x2 en la tienda.
+/// </summary>
+public class BuyXpBoostResponse
+{
+    public int Gems { get; set; }
+    public DateTime XpBoostUntil { get; set; }
+}
+
+/// <summary>
 /// Resultado de registrar un intento.
 /// </summary>
 public class AttemptResultResponse

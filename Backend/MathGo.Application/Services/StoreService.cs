@@ -35,4 +35,21 @@ public class StoreService : IStoreService
 
         return new BuyLifeResponse { Gems = progress.Gems, Lives = progress.Lives };
     }
+
+    public async Task<BuyXpBoostResponse> BuyXpBoostAsync(string uid)
+    {
+        var progress = await _progressRepository.GetByIdAsync(uid)
+            ?? new UserProgress { Uid = uid };
+
+        if (progress.Gems < 50)
+            throw new InvalidOperationException("Gemas insuficientes");
+
+        progress.Gems -= 50;
+        // Reemplaza cualquier boost activo; no se acumula comprando repetido
+        progress.XpBoostUntil = DateTime.UtcNow.AddMinutes(30);
+
+        await _progressRepository.UpdateAsync(uid, progress);
+
+        return new BuyXpBoostResponse { Gems = progress.Gems, XpBoostUntil = progress.XpBoostUntil.Value };
+    }
 }

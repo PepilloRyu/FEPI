@@ -33,4 +33,21 @@ public class StoreController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpPost("buy-xp-boost")]
+    public async Task<IActionResult> BuyXpBoost()
+    {
+        var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(uid)) return Unauthorized();
+
+        try
+        {
+            var result = await _storeService.BuyXpBoostAsync(uid);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 }

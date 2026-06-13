@@ -89,6 +89,29 @@
     }
     .shop-msg.error  { color: var(--mg-error, #ef4444); }
     .shop-msg.success { color: var(--mg-success, #22c55e); }
+    .shop-item-icon--xp {
+      background: rgba(250,204,21,0.12);
+      color: var(--mg-xp);
+    }
+    .boost-status {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--mg-xp);
+      background: rgba(250,204,21,0.10);
+      border: 1px solid rgba(250,204,21,0.30);
+      border-radius: 8px;
+      padding: 6px 12px;
+      width: 100%;
+      justify-content: center;
+    }
+    .boost-timer {
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body>
@@ -124,6 +147,26 @@
           </button>
         </div>
 
+        <!-- Card: Boost XP x2 -->
+        <div class="mg-card shop-item-card">
+          <div class="shop-item-icon shop-item-icon--xp">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="shop-item-name">Boost XP x2</div>
+          <p class="shop-item-desc">Duplica el XP que ganas por 30 minutos.</p>
+          <div class="shop-item-cost">
+            <i class="fa-solid fa-gem"></i> 50
+          </div>
+          <div class="boost-status" id="boost-status">
+            <i class="fa-solid fa-bolt"></i>
+            Boost activo: <span class="boost-timer" id="boost-timer">--:--</span>
+          </div>
+          <div class="shop-msg" id="buy-boost-msg"></div>
+          <button class="mg-btn mg-btn-primary" id="btn-buy-boost" style="width:100%;">
+            <i class="fa-solid fa-cart-shopping"></i> Comprar
+          </button>
+        </div>
+
       </div>
 
     </main>
@@ -132,9 +175,41 @@
   <script type="module">
     import { requireAuth } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
-    import { getProfile, buyLife } from '../js/services/api.js';
+    import { getProfile, buyLife, buyXpBoost } from '../js/services/api.js';
+    import { auth, db } from '../js/firebaseConfig.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
     const MAX_LIVES = 15;
+    let boostTimer = null;
+
+    function formatCountdown(endDate) {
+      const remaining = Math.max(0, endDate - Date.now());
+      const totalSecs = Math.floor(remaining / 1000);
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function startBoostCountdown(endDate) {
+      const statusEl = document.getElementById('boost-status');
+      const timerEl  = document.getElementById('boost-timer');
+      if (!statusEl || !timerEl) return;
+
+      if (boostTimer) clearInterval(boostTimer);
+
+      function tick() {
+        if (endDate <= Date.now()) {
+          clearInterval(boostTimer);
+          statusEl.style.display = 'none';
+          return;
+        }
+        timerEl.textContent = formatCountdown(endDate);
+      }
+
+      tick();
+      statusEl.style.display = 'flex';
+      boostTimer = setInterval(tick, 1000);
+    }
 
     async function load() {
       await initSidebar('tienda');
@@ -145,8 +220,21 @@
         gemsEl.textContent = profile.gems ?? 0;
       }
 
+      // Leer xpBoostUntil desde Firestore para mostrar countdown si ya hay boost activo
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        const snap = await getDoc(doc(db, 'mathgo_progress', uid));
+        if (snap.exists()) {
+          const boostUntil = snap.data().xpBoostUntil?.toDate?.();
+          if (boostUntil && boostUntil > new Date()) {
+            startBoostCountdown(boostUntil);
+          }
+        }
+      }
+
+      // Botón: +1 Vida
       document.getElementById('btn-buy-life').addEventListener('click', async () => {
-        const btn = document.getElementById('btn-buy-life');
+        const btn   = document.getElementById('btn-buy-life');
         const msgEl = document.getElementById('buy-life-msg');
 
         btn.disabled = true;
@@ -167,9 +255,34 @@
         msgEl.className = 'shop-msg success';
         btn.disabled = false;
 
-        // Refleja el nuevo saldo en el sidebar
         const sbHearts = document.getElementById('sb-hearts');
         if (sbHearts) sbHearts.textContent = data.lives;
+      });
+
+      // Botón: Boost XP x2
+      document.getElementById('btn-buy-boost').addEventListener('click', async () => {
+        const btn   = document.getElementById('btn-buy-boost');
+        const msgEl = document.getElementById('buy-boost-msg');
+
+        btn.disabled = true;
+        msgEl.textContent = '';
+        msgEl.className = 'shop-msg';
+
+        const { data, error } = await buyXpBoost();
+
+        if (error) {
+          msgEl.textContent = error;
+          msgEl.className = 'shop-msg error';
+          btn.disabled = false;
+          return;
+        }
+
+        gemsEl.textContent = data.gems;
+        msgEl.textContent = 'Boost activado por 30 minutos.';
+        msgEl.className = 'shop-msg success';
+        btn.disabled = false;
+
+        startBoostCountdown(new Date(data.xpBoostUntil));
       });
     }
 

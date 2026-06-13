@@ -98,6 +98,8 @@ public class ProgressService : IProgressService
 
         if (request.IsCorrect)
         {
+            if (progress.XpBoostUntil.HasValue && progress.XpBoostUntil.Value > DateTime.UtcNow)
+                xpEarned *= 2;
             progress.TotalXp += xpEarned;
             progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
 

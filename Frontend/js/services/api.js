@@ -145,5 +145,10 @@ export async function buyLife() {
   return request('/Store/buy-life', { method: 'POST' });
 }
 
+/** Compra el boost XP x2 en la tienda (-50 gemas, 30 min activo). */
+export async function buyXpBoost() {
+  return request('/Store/buy-xp-boost', { method: 'POST' });
+}
+
 // Exportar el base URL por si alguna pagina lo necesita
 export { BASE_URL };

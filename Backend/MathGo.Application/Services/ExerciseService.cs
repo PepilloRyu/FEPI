@@ -118,6 +118,8 @@ public class ExerciseService : IExerciseService
             if (progress != null)
             {
                 xpAwarded = _gamificationService.CalculateXpEarned(true, false, progress.DailyStreak);
+                if (progress.XpBoostUntil.HasValue && progress.XpBoostUntil.Value > DateTime.UtcNow)
+                    xpAwarded *= 2;
                 progress.TotalXp += xpAwarded;
                 progress.Level = _gamificationService.CalculateLevel(progress.TotalXp);
 

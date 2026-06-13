@@ -30,6 +30,9 @@ public class UserProgress
     [FirestoreProperty("lastLifeLostAt")]
     public DateTime? LastLifeLostAt { get; set; } = null;
 
+    [FirestoreProperty("xpBoostUntil")]
+    public DateTime? XpBoostUntil { get; set; } = null;
+
     [FirestoreProperty("level")]
     public int Level { get; set; } = 1;
 
