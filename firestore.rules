@@ -4,27 +4,18 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ── users/{uid} ───────────────────────────────────────────────────────────
-    // Lectura: el propio usuario o un admin (para getDocs de colección completa).
+    // Lectura: cualquier usuario autenticado (necesario para búsqueda de amigos por email).
     // Escritura: solo el propio usuario.
     match /users/{uid} {
-      allow read: if request.auth != null && (
-        request.auth.uid == uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' && resource.data.role == 'student')
-      );
+      allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == uid;
     }
 
     // ── mathgo_progress/{uid} ─────────────────────────────────────────────────
-    // Lectura: el propio usuario, un admin, o un teacher leyendo a un student.
+    // Lectura: cualquier usuario autenticado (XP ya es público en el leaderboard).
     // Escritura: solo el propio usuario.
     match /mathgo_progress/{uid} {
-      allow read: if request.auth != null && (
-        request.auth.uid == uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
-         get(/databases/$(database)/documents/users/$(uid)).data.role == 'student')
-      );
+      allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == uid;
     }
 
@@ -142,6 +133,34 @@ service cloud.firestore {
         get(/databases/$(database)/documents/classrooms/$(request.resource.data.classroomId)).data.teacherId == request.auth.uid;
       allow update, delete: if request.auth != null &&
         get(/databases/$(database)/documents/classrooms/$(resource.data.classroomId)).data.teacherId == request.auth.uid;
+    }
+
+    // ── friendRequests/{requestId} ────────────────────────────────────────────
+    // Solo los dos participantes (fromUid / toUid) o un admin ven el doc.
+    // Crear: solo el remitente, status inicial 'pending', sin enviarse a sí mismo.
+    // Aceptar: solo el receptor, transición exacta pending → accepted; campos inmutables.
+    // Eliminar: cualquiera de los dos participantes, en cualquier estado.
+    match /friendRequests/{requestId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.fromUid ||
+        request.auth.uid == resource.data.toUid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.fromUid &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.fromUid != request.resource.data.toUid;
+      allow update: if request.auth != null &&
+        request.auth.uid == resource.data.toUid &&
+        resource.data.status == 'pending' &&
+        request.resource.data.status == 'accepted' &&
+        request.resource.data.fromUid == resource.data.fromUid &&
+        request.resource.data.toUid == resource.data.toUid &&
+        request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.fromUid ||
+        request.auth.uid == resource.data.toUid
+      );
     }
 
     // ── Resto de colecciones ──────────────────────────────────────────────────

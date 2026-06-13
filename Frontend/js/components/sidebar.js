@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { id: 'learn',       icon: 'fa-solid fa-graduation-cap',  label: 'Aprender',      href: 'learn.html' },
   { id: 'assignments', icon: 'fa-solid fa-clipboard-list',  label: 'Asignaciones',  href: 'assignments.html' },
   { id: 'leaderboard', icon: 'fa-solid fa-trophy',          label: 'Clasificación', href: 'leaderboard.html' },
+  { id: 'amigos',      icon: 'fa-solid fa-user-group',      label: 'Amigos',        href: 'amigos.html' },
   { id: 'dashboard',   icon: 'fa-solid fa-chart-line',      label: 'Mi progreso',   href: 'dashboard.html' },
   { id: 'tienda',      icon: 'fa-solid fa-store',           label: 'Tienda',        href: 'tienda.html' },
   { id: 'profile',     icon: 'fa-solid fa-user',            label: 'Perfil',        href: 'profile-page.html' },

@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Amigos</title>
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* ── Hero ── */
+    .friends-hero {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(135deg, var(--mg-surface) 0%, rgba(90,18,54,.06) 100%);
+      border: 1px solid var(--mg-border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+    }
+    .friends-hero-icon {
+      width: 60px; height: 60px;
+      border-radius: 16px;
+      background: rgba(90,18,54,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; color: var(--mg-primary); flex-shrink: 0;
+    }
+    .friends-hero h1 { margin: 0 0 4px; font-size: 22px; }
+    .friends-hero p  { margin: 0; color: var(--mg-muted); font-size: 14px; }
+
+    /* ── Section header ── */
+    .friends-section-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .friends-section-hd h2 { margin: 0; font-size: 17px; }
+    .section-count {
+      margin-left: auto;
+      font-size: 12px; font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(90,18,54,.1);
+      color: var(--mg-primary);
+    }
+
+    /* ── Search ── */
+    .search-wrap { position: relative; }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--mg-muted); font-size: 14px; pointer-events: none;
+    }
+    .friends-search-input {
+      width: 100%; padding: 10px 14px 10px 38px;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      background: var(--mg-bg); color: var(--mg-text);
+      font-size: 15px; outline: none;
+      transition: border-color .15s; box-sizing: border-box;
+    }
+    .friends-search-input:focus { border-color: var(--mg-primary); }
+
+    .search-results {
+      display: none; flex-direction: column;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      overflow: hidden; background: var(--mg-bg); margin-top: 6px;
+    }
+    .search-results.visible { display: flex; }
+    .search-result-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; cursor: pointer;
+      border-bottom: 1px solid var(--mg-border); transition: background .1s;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover,
+    .search-result-item.selected { background: rgba(90,18,54,.07); }
+    .search-result-name  { font-size: 14px; font-weight: 700; color: var(--mg-text); }
+    .search-result-email { font-size: 12px; color: var(--mg-muted); }
+    .search-no-results {
+      padding: 12px 14px; font-size: 14px; color: var(--mg-muted); text-align: center;
+    }
+
+    /* ── Selected user card ── */
+    .selected-user-card {
+      display: none; align-items: center; gap: 14px;
+      padding: 12px 16px;
+      background: rgba(90,18,54,.05);
+      border: 1.5px solid var(--mg-primary); border-radius: 12px;
+      margin-top: 10px;
+    }
+    .selected-user-card.visible { display: flex; }
+    .selected-user-info { flex: 1; min-width: 0; }
+    .selected-user-name  { font-size: 14px; font-weight: 700; color: var(--mg-text); }
+    .selected-user-email { font-size: 12px; color: var(--mg-muted); }
+
+    /* ── Friend / request rows ── */
+    .friend-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--mg-border);
+    }
+    .friend-item:last-child { border-bottom: none; }
+    .friend-item-info { flex: 1; min-width: 0; }
+    .friend-item-name {
+      font-size: 14px; font-weight: 700; color: var(--mg-text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .friend-item-email {
+      font-size: 12px; color: var(--mg-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .friend-item-meta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .friend-item-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+
+    /* ── Action buttons ── */
+    .btn-accept {
+      padding: 7px 14px; border: none; border-radius: 8px;
+      background: var(--mg-success); color: #fff;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .btn-accept:hover { opacity: .88; }
+    .btn-accept:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-send {
+      padding: 7px 14px; border: none; border-radius: 8px;
+      background: var(--mg-primary); color: #fff;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: opacity .15s; white-space: nowrap;
+    }
+    .btn-send:hover { opacity: .88; }
+    .btn-send:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-outline {
+      padding: 7px 12px;
+      border: 1.5px solid var(--mg-border); border-radius: 8px;
+      background: transparent; color: var(--mg-muted);
+      font-size: 13px; cursor: pointer;
+      transition: border-color .15s, color .15s; white-space: nowrap;
+    }
+    .btn-outline:hover { border-color: var(--mg-text); color: var(--mg-text); }
+    .btn-outline:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-remove {
+      padding: 6px 10px; border: none; border-radius: 8px;
+      background: rgba(239,68,68,.1); color: var(--mg-error, #ef4444);
+      font-size: 13px; cursor: pointer; transition: background .15s;
+    }
+    .btn-remove:hover { background: rgba(239,68,68,.2); }
+    .btn-remove:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Comparison table ── */
+    .cmp-table {
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .cmp-table thead th {
+      font-size: 11px; font-weight: 700;
+      color: var(--mg-muted);
+      text-transform: uppercase; letter-spacing: .04em;
+      padding: 0 12px 4px; text-align: center;
+    }
+    .cmp-table thead th:first-child { text-align: left; padding-left: 0; }
+    .cmp-table tbody td {
+      padding: 4px 12px; text-align: center;
+      font-weight: 700; font-size: 13px; border-radius: 6px;
+    }
+    .cmp-table tbody td.cmp-label {
+      font-size: 12px; font-weight: 500;
+      color: var(--mg-muted); text-align: left;
+      padding-left: 0; white-space: nowrap;
+    }
+    .cmp-table tbody td.winner {
+      color: var(--mg-success);
+      background: rgba(34,197,94,.1);
+    }
+    .friend-item.has-cmp { align-items: flex-start; }
+    .friend-item.has-cmp > .mg-avatar { margin-top: 2px; }
+    .friend-item.has-cmp > .friend-item-actions { margin-top: 2px; }
+
+    /* ── Permission denied banner ── */
+    .perm-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 14px;
+      background: rgba(239,68,68,.07);
+      border: 1.5px solid rgba(239,68,68,.25);
+      border-radius: 10px; margin-bottom: 14px;
+      font-size: 13px; color: var(--mg-error, #ef4444); line-height: 1.5;
+    }
+    .perm-banner i { flex-shrink: 0; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="mg-layout-2col" id="mg-layout">
+    <main class="mg-main" id="mg-main">
+
+      <!-- Hero -->
+      <div class="friends-hero">
+        <div class="friends-hero-icon"><i class="fa-solid fa-user-group"></i></div>
+        <div>
+          <h1>Amigos</h1>
+          <p>Conecta con otros estudiantes de MathGo</p>
+        </div>
+      </div>
+
+      <!-- ── Sección 1: Agregar amigo ─────────────────────────── -->
+      <div class="mg-card" style="margin-bottom:24px;">
+        <div class="friends-section-hd">
+          <i class="fa-solid fa-user-plus" style="color:var(--mg-primary);font-size:18px;"></i>
+          <h2>Agregar amigo</h2>
+        </div>
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            id="friend-search-input"
+            class="friends-search-input"
+            placeholder="Busca a alguien por correo..."
+            maxlength="120"
+            autocomplete="off"
+          />
+        </div>
+        <div class="search-results" id="friend-search-results"></div>
+        <div class="selected-user-card" id="selected-user-card">
+          <div class="mg-avatar" id="sel-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;"></div>
+          <div class="selected-user-info">
+            <div class="selected-user-name"  id="sel-name"></div>
+            <div class="selected-user-email" id="sel-email"></div>
+          </div>
+          <button class="btn-send" id="btn-send-request">
+            <i class="fa-solid fa-paper-plane"></i> Enviar solicitud
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Sección 2: Solicitudes recibidas ─────────────────── -->
+      <div class="mg-card" style="margin-bottom:24px;">
+        <div class="friends-section-hd">
+          <i class="fa-solid fa-inbox" style="color:var(--mg-primary);font-size:18px;"></i>
+          <h2>Solicitudes recibidas</h2>
+          <span class="section-count" id="received-count" style="display:none;"></span>
+        </div>
+        <div id="received-list">
+          <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
+          <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
+        </div>
+      </div>
+
+      <!-- ── Sección 3: Solicitudes enviadas ──────────────────── -->
+      <div class="mg-card" style="margin-bottom:24px;">
+        <div class="friends-section-hd">
+          <i class="fa-solid fa-paper-plane" style="color:var(--mg-primary);font-size:18px;"></i>
+          <h2>Solicitudes enviadas</h2>
+          <span class="section-count" id="sent-count" style="display:none;"></span>
+        </div>
+        <div id="sent-list">
+          <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
+          <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
+        </div>
+      </div>
+
+      <!-- ── Sección 4: Mis amigos ─────────────────────────────── -->
+      <div class="mg-card" style="margin-bottom:24px;">
+        <div class="friends-section-hd">
+          <i class="fa-solid fa-user-group" style="color:var(--mg-primary);font-size:18px;"></i>
+          <h2>Mis amigos</h2>
+          <span class="section-count" id="friends-count" style="display:none;"></span>
+        </div>
+        <div id="friends-list">
+          <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
+          <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="mg-toast-container" id="mg-toast-container"></div>
+
+  <script type="module">
+    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { db } from '../js/firebaseConfig.js';
+    import {
+      doc, getDoc, getDocs, collection, query, where, limit,
+      addDoc, updateDoc, deleteDoc, serverTimestamp,
+    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    let currentUid           = null;
+    let currentUserProfile   = null;  // { name, email } del usuario actual
+    let currentUserProgress  = null;  // mathgo_progress del usuario actual
+    let selectedUser        = null;
+    let searchDebounceTimer = null;
+    let allSentRequests     = [];  // docs where fromUid == me (any status)
+    let allReceivedRequests = [];  // docs where toUid   == me (any status)
+
+    // ── Init ──────────────────────────────────────────────
+    async function loadPage(user) {
+      currentUid = user.uid;
+      await initSidebar('amigos');
+      const [selfSnap, selfProgSnap] = await Promise.all([
+        getDoc(doc(db, 'users', currentUid)),
+        getDoc(doc(db, 'mathgo_progress', currentUid)),
+      ]);
+      currentUserProfile  = selfSnap.exists()    ? selfSnap.data()    : { name: '', email: user.email || '' };
+      currentUserProgress = selfProgSnap.exists() ? selfProgSnap.data() : null;
+      bindSearch();
+      await loadAllSections();
+    }
+
+    // ── Cargar datos de las 4 secciones ───────────────────
+    async function loadAllSections() {
+      try {
+        const [sentSnap, receivedSnap] = await Promise.all([
+          getDocs(query(collection(db, 'friendRequests'), where('fromUid', '==', currentUid))),
+          getDocs(query(collection(db, 'friendRequests'), where('toUid',   '==', currentUid))),
+        ]);
+
+        allSentRequests     = [];
+        allReceivedRequests = [];
+        sentSnap.forEach(d     => allSentRequests.push({ id: d.id, ...d.data() }));
+        receivedSnap.forEach(d => allReceivedRequests.push({ id: d.id, ...d.data() }));
+
+        const pendingReceived = allReceivedRequests.filter(r => r.status === 'pending');
+        const pendingSent     = allSentRequests.filter(r => r.status === 'pending');
+
+        // Incluir nombre/email del amigo según quién inició la relación
+        const friendDocs = [
+          ...allSentRequests.filter(r => r.status === 'accepted')
+            .map(r => ({ ...r, friendUid: r.toUid, friendName: r.toName || '', friendEmail: r.toEmail || '' })),
+          ...allReceivedRequests.filter(r => r.status === 'accepted')
+            .map(r => ({ ...r, friendUid: r.fromUid, friendName: r.fromName || '', friendEmail: r.fromEmail || '' })),
+        ];
+
+        renderReceivedRequests(pendingReceived);
+        renderSentRequests(pendingSent);
+        await renderFriends(friendDocs);
+
+      } catch (err) {
+        console.error('[amigos] Error al cargar secciones:', err);
+        showToast('Error al cargar datos. Intenta recargar.', 'error');
+        ['received-list', 'sent-list', 'friends-list'].forEach(id => {
+          document.getElementById(id).innerHTML = emptyError();
+        });
+      }
+    }
+
+    // ── Sección 2: Solicitudes recibidas ──────────────────
+    function renderReceivedRequests(requests) {
+      const listEl  = document.getElementById('received-list');
+      const countEl = document.getElementById('received-count');
+
+      if (!requests.length) {
+        countEl.style.display = 'none';
+        listEl.innerHTML = emptyState('fa-inbox', 'Sin solicitudes pendientes',
+          'Cuando alguien te envíe una solicitud aparecerá aquí');
+        return;
+      }
+
+      countEl.textContent   = requests.length;
+      countEl.style.display = '';
+
+      listEl.innerHTML = requests.map(r => {
+        const name = r.fromName  || '(usuario desconocido)';
+        const mail = r.fromEmail || r.fromUid;
+        return `
+          <div class="friend-item">
+            <div class="mg-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;">
+              ${escHtml(getInitials(name))}
+            </div>
+            <div class="friend-item-info">
+              <div class="friend-item-name">${escHtml(name)}</div>
+              <div class="friend-item-email">${escHtml(mail)}</div>
+            </div>
+            <div class="friend-item-actions">
+              <button class="btn-accept" data-id="${r.id}" data-name="${escHtml(name)}">
+                <i class="fa-solid fa-check"></i> Aceptar
+              </button>
+              <button class="btn-outline" data-id="${r.id}" data-name="${escHtml(name)}">
+                Rechazar
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('.btn-accept').forEach(btn =>
+        btn.addEventListener('click', () => acceptRequest(btn.dataset.id, btn.dataset.name, btn)));
+      listEl.querySelectorAll('.btn-outline').forEach(btn =>
+        btn.addEventListener('click', () => rejectRequest(btn.dataset.id, btn.dataset.name, btn)));
+    }
+
+    // ── Sección 3: Solicitudes enviadas ───────────────────
+    function renderSentRequests(requests) {
+      const listEl  = document.getElementById('sent-list');
+      const countEl = document.getElementById('sent-count');
+
+      if (!requests.length) {
+        countEl.style.display = 'none';
+        listEl.innerHTML = emptyState('fa-paper-plane', 'Sin solicitudes enviadas',
+          'Cuando envíes una solicitud podrás cancelarla desde aquí');
+        return;
+      }
+
+      countEl.textContent   = requests.length;
+      countEl.style.display = '';
+
+      listEl.innerHTML = requests.map(r => {
+        const name = r.toName  || '(usuario desconocido)';
+        const mail = r.toEmail || r.toUid;
+        return `
+          <div class="friend-item">
+            <div class="mg-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;">
+              ${escHtml(getInitials(name))}
+            </div>
+            <div class="friend-item-info">
+              <div class="friend-item-name">${escHtml(name)}</div>
+              <div class="friend-item-email">${escHtml(mail)}</div>
+            </div>
+            <div class="friend-item-actions">
+              <span class="mg-badge" style="gap:5px;white-space:nowrap;">
+                <i class="fa-solid fa-clock" style="font-size:11px;"></i> Pendiente
+              </span>
+              <button class="btn-outline" data-id="${r.id}" data-name="${escHtml(name)}" title="Cancelar solicitud">
+                Cancelar
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('.btn-outline').forEach(btn =>
+        btn.addEventListener('click', () => cancelRequest(btn.dataset.id, btn.dataset.name, btn)));
+    }
+
+    // ── Sección 4: Mis amigos ─────────────────────────────
+    async function renderFriends(friendDocs) {
+      const listEl  = document.getElementById('friends-list');
+      const countEl = document.getElementById('friends-count');
+
+      if (!friendDocs.length) {
+        countEl.style.display = 'none';
+        listEl.innerHTML = emptyState('fa-user-group', 'Aún no tienes amigos',
+          'Envía solicitudes a otros estudiantes y aparecerán aquí');
+        return;
+      }
+
+      countEl.textContent   = friendDocs.length;
+      countEl.style.display = '';
+
+      // Leer mathgo_progress de cada amigo
+      let progressMap      = {};
+      let permissionDenied = false;
+
+      const progressResults = await Promise.allSettled(
+        friendDocs.map(f => getDoc(doc(db, 'mathgo_progress', f.friendUid)))
+      );
+
+      progressResults.forEach((result, i) => {
+        const uid = friendDocs[i].friendUid;
+        if (result.status === 'fulfilled') {
+          progressMap[uid] = result.value.exists() ? result.value.data() : null;
+        } else {
+          if (result.reason?.code === 'permission-denied') permissionDenied = true;
+          console.warn(`[amigos] No se pudo leer mathgo_progress de ${uid}:`, result.reason);
+        }
+      });
+
+      if (permissionDenied) {
+        console.warn(
+          '[amigos] PERMISO DENEGADO al leer mathgo_progress de un amigo. ' +
+          'Las reglas de mathgo_progress deben revisarse. NO se modificarán sin revisión.'
+        );
+      }
+
+      let html = '';
+
+      if (permissionDenied) {
+        html += `
+          <div class="perm-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>
+              <strong>Progreso de amigos no disponible.</strong><br>
+              Las reglas de Firestore no permiten leer <code>mathgo_progress</code> de otro usuario.
+              Las reglas deben revisarse antes de continuar.
+            </div>
+          </div>`;
+      }
+
+      html += friendDocs.map(f => {
+        const name       = f.friendName  || '(usuario desconocido)';
+        const mail       = f.friendEmail || f.friendUid;
+        const friendProg = progressMap[f.friendUid] ?? null;
+        const hasCmp     = !permissionDenied;
+        const cmpHtml    = hasCmp ? buildCompareTable(currentUserProgress, friendProg, name) : '';
+
+        return `
+          <div class="friend-item${hasCmp ? ' has-cmp' : ''}">
+            <div class="mg-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;">
+              ${escHtml(getInitials(name))}
+            </div>
+            <div class="friend-item-info">
+              <div class="friend-item-name">${escHtml(name)}</div>
+              <div class="friend-item-email">${escHtml(mail)}</div>
+              ${cmpHtml}
+            </div>
+            <div class="friend-item-actions">
+              <button class="btn-remove"
+                data-id="${f.id}"
+                data-name="${escHtml(name)}"
+                title="Eliminar amigo">
+                <i class="fa-solid fa-user-minus"></i>
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+
+      listEl.innerHTML = html;
+
+      listEl.querySelectorAll('.btn-remove').forEach(btn =>
+        btn.addEventListener('click', () => removeFriend(btn.dataset.id, btn.dataset.name, btn)));
+    }
+
+    // ── Tabla comparativa Tú vs Amigo ─────────────────────
+    function buildCompareTable(myProg, friendProg, friendName) {
+      const myXp    = myProg?.totalXp     ?? 0;
+      const myNivel = Math.floor(myXp / 100) + 1;
+      const myRacha = myProg?.dailyStreak ?? 0;
+      const fXp     = friendProg?.totalXp     ?? 0;
+      const fNivel  = Math.floor(fXp / 100) + 1;
+      const fRacha  = friendProg?.dailyStreak ?? 0;
+
+      const w = (a, b) => a > b ? ' winner' : '';
+
+      const rows = [
+        { icon: 'fa-star', label: 'Nivel', myVal: myNivel, fVal: fNivel },
+        { icon: 'fa-bolt', label: 'XP',    myVal: myXp,    fVal: fXp   },
+        { icon: 'fa-fire', label: 'Racha', myVal: myRacha, fVal: fRacha },
+      ];
+
+      const firstName = escHtml(friendName.trim().split(' ')[0]) || 'Amigo';
+
+      const trs = rows.map(r => `
+        <tr>
+          <td class="cmp-label">
+            <i class="fa-solid ${r.icon}" style="font-size:10px;margin-right:4px;opacity:.7;"></i>${r.label}
+          </td>
+          <td class="${'cmp-my' + w(r.myVal, r.fVal)}">${r.myVal}</td>
+          <td class="${'cmp-friend' + w(r.fVal, r.myVal)}">${r.fVal}</td>
+        </tr>`).join('');
+
+      return `
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Tú</th>
+              <th>${firstName}</th>
+            </tr>
+          </thead>
+          <tbody>${trs}</tbody>
+        </table>`;
+    }
+
+    // ── Acciones ──────────────────────────────────────────
+    async function acceptRequest(reqId, name, btn) {
+      const sibling = btn.nextElementSibling;
+      btn.disabled = true;
+      if (sibling) sibling.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      try {
+        await updateDoc(doc(db, 'friendRequests', reqId), { status: 'accepted' });
+        showToast(`Ahora eres amigo de ${name}`, 'success');
+        await loadAllSections();
+      } catch (err) {
+        console.error('Error al aceptar solicitud:', err);
+        showToast('Error al aceptar la solicitud', 'error');
+        btn.disabled = false;
+        if (sibling) sibling.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Aceptar';
+      }
+    }
+
+    async function rejectRequest(reqId, name, btn) {
+      const sibling = btn.previousElementSibling;
+      btn.disabled = true;
+      if (sibling) sibling.disabled = true;
+      btn.textContent = '...';
+      try {
+        await deleteDoc(doc(db, 'friendRequests', reqId));
+        showToast(`Solicitud de ${name} rechazada`, 'success');
+        await loadAllSections();
+      } catch (err) {
+        console.error('Error al rechazar solicitud:', err);
+        showToast('Error al rechazar la solicitud', 'error');
+        btn.disabled = false;
+        if (sibling) sibling.disabled = false;
+        btn.textContent = 'Rechazar';
+      }
+    }
+
+    async function cancelRequest(reqId, name, btn) {
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        await deleteDoc(doc(db, 'friendRequests', reqId));
+        showToast(`Solicitud a ${name} cancelada`, 'success');
+        await loadAllSections();
+      } catch (err) {
+        console.error('Error al cancelar solicitud:', err);
+        showToast('Error al cancelar la solicitud', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Cancelar';
+      }
+    }
+
+    async function removeFriend(reqId, name, btn) {
+      if (!confirm(`¿Eliminar a "${name}" de tu lista de amigos?`)) return;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      try {
+        await deleteDoc(doc(db, 'friendRequests', reqId));
+        showToast(`${name} eliminado de amigos`, 'success');
+        await loadAllSections();
+      } catch (err) {
+        console.error('Error al eliminar amigo:', err);
+        showToast('Error al eliminar al amigo', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-user-minus"></i>';
+      }
+    }
+
+    // ── Búsqueda ──────────────────────────────────────────
+    function bindSearch() {
+      document.getElementById('friend-search-input')
+        .addEventListener('input', onSearchInput);
+
+      document.getElementById('btn-send-request')
+        .addEventListener('click', sendRequest);
+    }
+
+    function onSearchInput() {
+      clearTimeout(searchDebounceTimer);
+      const term = document.getElementById('friend-search-input').value.trim().toLowerCase();
+
+      selectedUser = null;
+      document.getElementById('selected-user-card').classList.remove('visible');
+
+      const resultsEl = document.getElementById('friend-search-results');
+      if (term.length < 2) {
+        resultsEl.classList.remove('visible');
+        resultsEl.innerHTML = '';
+        return;
+      }
+
+      searchDebounceTimer = setTimeout(() => runSearch(term), 300);
+    }
+
+    async function runSearch(term) {
+      const resultsEl = document.getElementById('friend-search-results');
+      resultsEl.innerHTML = '<div class="search-no-results"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</div>';
+      resultsEl.classList.add('visible');
+
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'users'),
+          where('email', '>=', term),
+          where('email', '<=', term + ''),
+          limit(8)
+        ));
+
+        const results = [];
+        snap.forEach(d => {
+          if (d.id !== currentUid) results.push({ uid: d.id, ...d.data() });
+        });
+
+        if (!results.length) {
+          resultsEl.innerHTML = '<div class="search-no-results">No se encontraron usuarios con ese correo</div>';
+          return;
+        }
+
+        resultsEl.innerHTML = results.map(u => `
+          <div class="search-result-item"
+               data-uid="${u.uid}"
+               data-name="${escHtml(u.name || '')}"
+               data-email="${escHtml(u.email || '')}">
+            <div class="mg-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0;">
+              ${escHtml(getInitials(u.name || u.email))}
+            </div>
+            <div>
+              <div class="search-result-name">${escHtml(u.name || '(sin nombre)')}</div>
+              <div class="search-result-email">${escHtml(u.email || '')}</div>
+            </div>
+          </div>`).join('');
+
+        resultsEl.querySelectorAll('.search-result-item').forEach(item =>
+          item.addEventListener('click', () => selectUser(item)));
+
+      } catch (err) {
+        console.error('Error en búsqueda de usuarios:', err);
+        resultsEl.innerHTML = '<div class="search-no-results">Error al buscar. Intenta de nuevo.</div>';
+      }
+    }
+
+    function selectUser(item) {
+      document.querySelectorAll('.search-result-item.selected')
+        .forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+
+      selectedUser = {
+        uid:   item.dataset.uid,
+        name:  item.dataset.name,
+        email: item.dataset.email,
+      };
+
+      document.getElementById('friend-search-input').value = selectedUser.email;
+      document.getElementById('friend-search-results').classList.remove('visible');
+
+      document.getElementById('sel-name').textContent   = selectedUser.name || selectedUser.email;
+      document.getElementById('sel-email').textContent  = selectedUser.email;
+      document.getElementById('sel-avatar').textContent = getInitials(selectedUser.name || selectedUser.email);
+      document.getElementById('selected-user-card').classList.add('visible');
+    }
+
+    // ── Enviar solicitud ──────────────────────────────────
+    async function sendRequest() {
+      if (!selectedUser) return;
+
+      const btn = document.getElementById('btn-send-request');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+      const existing = checkExistingRequest(selectedUser.uid);
+      if (existing === 'friends') {
+        showToast('Ya son amigos', 'error');
+        resetSendBtn(btn);
+        return;
+      }
+      if (existing === 'sent') {
+        showToast(`Ya tienes una solicitud pendiente con ${selectedUser.name}`, 'error');
+        resetSendBtn(btn);
+        return;
+      }
+      if (existing === 'received') {
+        showToast(`${selectedUser.name} ya te envió una solicitud — acéptala primero`, 'error');
+        resetSendBtn(btn);
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, 'friendRequests'), {
+          fromUid:   currentUid,
+          fromName:  currentUserProfile.name  || '',
+          fromEmail: currentUserProfile.email || '',
+          toUid:     selectedUser.uid,
+          toName:    selectedUser.name  || '',
+          toEmail:   selectedUser.email || '',
+          status:    'pending',
+          createdAt: serverTimestamp(),
+        });
+        showToast(`Solicitud enviada a ${selectedUser.name}`, 'success');
+        selectedUser = null;
+        document.getElementById('friend-search-input').value = '';
+        document.getElementById('friend-search-results').classList.remove('visible');
+        document.getElementById('selected-user-card').classList.remove('visible');
+        resetSendBtn(btn);
+        await loadAllSections();
+      } catch (err) {
+        console.error('Error al enviar solicitud:', err);
+        showToast('Error al enviar la solicitud', 'error');
+        resetSendBtn(btn);
+      }
+    }
+
+    function resetSendBtn(btn) {
+      btn.disabled  = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar solicitud';
+    }
+
+    function checkExistingRequest(otherUid) {
+      const sent = allSentRequests.find(r => r.toUid === otherUid);
+      if (sent) return sent.status === 'accepted' ? 'friends' : 'sent';
+      const recv = allReceivedRequests.find(r => r.fromUid === otherUid);
+      if (recv) return recv.status === 'accepted' ? 'friends' : 'received';
+      return null;
+    }
+
+    // ── Helpers ───────────────────────────────────────────
+    function emptyState(icon, title, text) {
+      return `
+        <div class="mg-empty" style="padding:16px 0;">
+          <div class="mg-empty-icon" style="font-size:40px;"><i class="fa-solid ${icon}"></i></div>
+          <div class="mg-empty-title">${title}</div>
+          <div class="mg-empty-text">${text}</div>
+        </div>`;
+    }
+
+    function emptyError() {
+      return `
+        <div class="mg-empty" style="padding:16px 0;">
+          <div class="mg-empty-icon" style="font-size:40px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="mg-empty-title">Error al cargar</div>
+          <div class="mg-empty-text">Intenta recargar la página</div>
+        </div>`;
+    }
+
+    requireAuth(false).then(user => loadPage(user));
+  </script>
+</body>
+</html>
