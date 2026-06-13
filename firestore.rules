@@ -115,6 +115,7 @@ service cloud.firestore {
     match /classrooms/{classroomId} {
       allow read: if request.auth != null && (
         request.auth.uid == resource.data.teacherId ||
+        request.auth.uid in resource.data.studentIds ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
       );
       allow create: if request.auth != null &&

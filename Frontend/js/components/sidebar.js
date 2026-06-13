@@ -13,6 +13,7 @@ import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase
 
 const NAV_ITEMS = [
   { id: 'learn',       icon: 'fa-solid fa-graduation-cap',  label: 'Aprender',      href: 'learn.html' },
+  { id: 'assignments', icon: 'fa-solid fa-clipboard-list',  label: 'Asignaciones',  href: 'assignments.html' },
   { id: 'leaderboard', icon: 'fa-solid fa-trophy',          label: 'Clasificación', href: 'leaderboard.html' },
   { id: 'dashboard',   icon: 'fa-solid fa-chart-line',      label: 'Mi progreso',   href: 'dashboard.html' },
   { id: 'profile',     icon: 'fa-solid fa-user',            label: 'Perfil',        href: 'profile-page.html' },
