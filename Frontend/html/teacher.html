@@ -191,6 +191,32 @@
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 16px;
     }
+
+    /* ── Date input (assignment form) ── */
+    .inline-form-panel input[type="date"] {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      background: var(--mg-bg); color: var(--mg-text);
+      font-size: 15px; outline: none;
+      transition: border-color .15s; box-sizing: border-box;
+    }
+    .inline-form-panel input[type="date"]:focus { border-color: var(--mg-primary); }
+
+    /* ── Assignment action buttons ── */
+    .btn-del-assignment, .btn-edit-assignment {
+      padding: 6px 10px; border: none; border-radius: 8px;
+      font-size: 13px; cursor: pointer; transition: background .15s;
+    }
+    .btn-del-assignment {
+      background: rgba(239,68,68,.1); color: var(--mg-error, #ef4444);
+    }
+    .btn-del-assignment:hover { background: rgba(239,68,68,.2); }
+    .btn-edit-assignment {
+      background: rgba(79,70,229,.1); color: var(--mg-primary);
+    }
+    .btn-edit-assignment:hover { background: rgba(79,70,229,.2); }
+    .btn-del-assignment:disabled,
+    .btn-edit-assignment:disabled { opacity: .5; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -320,6 +346,42 @@
         <!-- Progreso por mundo -->
         <div class="mg-card" id="detail-worlds-card" style="display:none"></div>
 
+        <!-- Asignaciones -->
+        <div class="mg-card" id="assignments-card" style="display:none">
+          <div class="teacher-section-hd" style="margin-bottom:12px;">
+            <div class="teacher-section-hd-left">
+              <i class="fa-solid fa-clipboard-list" style="color:var(--mg-primary);font-size:18px;"></i>
+              <span style="font-size:16px;font-weight:700;">Asignaciones</span>
+            </div>
+            <button class="btn-create" id="btn-open-assignment" style="font-size:13px;padding:7px 14px;">
+              <i class="fa-solid fa-plus"></i> Nueva asignación
+            </button>
+          </div>
+
+          <div class="inline-form-panel" id="assignment-form">
+            <label for="assign-world">Mundo</label>
+            <select id="assign-world">
+              <option value="">— Selecciona un mundo —</option>
+            </select>
+            <label for="assign-level">Nivel</label>
+            <select id="assign-level" disabled>
+              <option value="">— Selecciona primero un mundo —</option>
+            </select>
+            <label for="assign-due">Fecha límite</label>
+            <input type="date" id="assign-due" />
+            <label for="assign-title">Título</label>
+            <input type="text" id="assign-title" maxlength="120" placeholder="Se autogenera al elegir mundo/nivel" />
+            <div class="form-actions">
+              <button class="btn-form-primary" id="btn-save-assignment" disabled>
+                <i class="fa-solid fa-floppy-disk"></i> Crear
+              </button>
+              <button class="btn-form-cancel" id="btn-cancel-assignment">Cancelar</button>
+            </div>
+          </div>
+
+          <div id="assignments-list"></div>
+        </div>
+
       </div><!-- /view-detail -->
 
     </main>
@@ -334,7 +396,7 @@
     import {
       doc, getDoc, getDocs,
       collection, query, where, limit,
-      addDoc, updateDoc, serverTimestamp,
+      addDoc, updateDoc, deleteDoc, serverTimestamp,
       arrayUnion, arrayRemove,
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
@@ -348,9 +410,52 @@
       { id: '6', title: 'Números Complejos y Vectores',    icon: 'fa-solid fa-atom' },
     ];
 
+    // ── Niveles por mundo — ids base-0 para coincidir con levelsCompleted ─
+    const WORLD_LEVELS = {
+      1: [
+        { id: 0, title: 'El nuevo lenguaje' },
+        { id: 1, title: 'Signos y Fórmulas' },
+        { id: 2, title: 'Nomenclatura' },
+      ],
+      2: [
+        { id: 0, title: 'Conjuntos Numéricos' },
+        { id: 1, title: 'Propiedades de los Reales' },
+        { id: 2, title: 'Jerarquía de Operaciones' },
+        { id: 3, title: 'Razones y Proporciones' },
+        { id: 4, title: 'MCM y MCD' },
+      ],
+      3: [
+        { id: 0, title: 'Funciones y Ecuaciones' },
+        { id: 1, title: 'Ecuaciones de Primer Grado' },
+        { id: 2, title: 'Sistemas 2×2' },
+        { id: 3, title: 'Sistemas 3×3 y Aplicaciones' },
+      ],
+      4: [
+        { id: 0, title: 'La Función Cuadrática y la Parábola' },
+        { id: 1, title: 'Resolución por Factorización' },
+        { id: 2, title: 'Fórmula General y Discriminante' },
+        { id: 3, title: 'Problemas de Aplicación' },
+      ],
+      5: [
+        { id: 0, title: 'Matrices: Definición y Tipos' },
+        { id: 1, title: 'Determinantes y Matriz Inversa' },
+        { id: 2, title: 'Eliminación de Gauss y Gauss-Jordan' },
+        { id: 3, title: 'Regla de Cramer' },
+      ],
+      6: [
+        { id: 0, title: 'Forma Cartesiana y el Plano de Gauss' },
+        { id: 1, title: 'Forma Polar y Exponencial' },
+        { id: 2, title: 'De Moivre y Raíces de Complejos' },
+        { id: 3, title: 'Vectores en R²' },
+      ],
+    };
+
     // ── Estado ────────────────────────────────────────────
-    let currentUid       = null;
+    let currentUid          = null;
     let currentClassroom    = null;  // { id, name, studentIds[] }
+    let currentStudents     = [];    // alumnos cargados por renderDetailStudents
+    let currentAssignments  = null;  // null = pendiente; array = ya cargadas
+    let editingAssignmentId = null;  // null = crear; string = editar ese doc
     let selectedStudent     = null;  // { uid, name, email } elegido en el buscador
     let searchDebounceTimer = null;
 
@@ -519,11 +624,15 @@
     }
 
     function openDetail(classroom) {
-      currentClassroom = { ...classroom, studentIds: [...(classroom.studentIds || [])] };
+      currentClassroom   = { ...classroom, studentIds: [...(classroom.studentIds || [])] };
+      currentStudents    = [];
+      currentAssignments = null;
       document.getElementById('detail-name').textContent = classroom.name;
       closeAddStudentPanel();
+      closeAssignmentPanel();
       showDetailView();
       renderDetailStudents();
+      loadAssignments();
     }
 
     async function renderDetailStudents() {
@@ -541,6 +650,8 @@
       if (!ids.length) {
         tableWrap.style.display = 'none';
         emptyEl.style.display   = '';
+        currentStudents = [];
+        if (currentAssignments !== null) renderAssignments(currentAssignments);
         return;
       }
 
@@ -599,6 +710,8 @@
       });
 
       renderDetailWorlds(students);
+      currentStudents = students;
+      if (currentAssignments !== null) renderAssignments(currentAssignments);
     }
 
     function renderDetailWorlds(students) {
@@ -675,6 +788,332 @@
       }
     }
 
+    // ════════════════════════════════════════════════════
+    // ASIGNACIONES
+    // ════════════════════════════════════════════════════
+
+    function formatDueDate(dateStr) {
+      if (!dateStr) return '—';
+      const [y, m, d] = dateStr.split('-');
+      const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
+    }
+
+    function assignmentScope(worldId, levelId) {
+      const w = WORLDS.find(w => parseInt(w.id) === worldId);
+      const wtitle = w ? w.title : `Mundo ${worldId}`;
+      return levelId === null
+        ? `Mundo ${worldId} — ${wtitle}`
+        : `Mundo ${worldId} — Nivel ${levelId + 1}`;
+    }
+
+    async function loadAssignments() {
+      if (!currentClassroom) return;
+      const card   = document.getElementById('assignments-card');
+      const listEl = document.getElementById('assignments-list');
+      card.style.display = '';
+      listEl.innerHTML = '<div style="padding:8px 0;color:var(--mg-muted);font-size:14px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando asignaciones...</div>';
+
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'assignments'),
+          where('classroomId', '==', currentClassroom.id)
+        ));
+        const assignments = [];
+        snap.forEach(d => assignments.push({ id: d.id, ...d.data() }));
+        assignments.sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
+        renderAssignments(assignments);
+      } catch (err) {
+        console.error('Error al cargar asignaciones:', err);
+        listEl.innerHTML = '<div style="padding:8px 0;color:var(--mg-error,#ef4444);font-size:14px;">Error al cargar asignaciones. Intenta recargar.</div>';
+      }
+    }
+
+    function renderAssignments(assignments) {
+      currentAssignments = assignments;
+      const listEl = document.getElementById('assignments-list');
+      if (!listEl) return;
+
+      if (!assignments.length) {
+        listEl.innerHTML = `
+          <div class="mg-empty" style="padding:20px 0 8px;">
+            <div class="mg-empty-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+            <div class="mg-empty-title">Sin asignaciones todavía</div>
+            <div class="mg-empty-sub">Crea la primera con el botón de arriba</div>
+          </div>`;
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const total = currentClassroom ? currentClassroom.studentIds.length : 0;
+
+      const rows = assignments.map(a => {
+        const wId      = a.worldId;
+        // Normaliza a Number para compatibilidad con docs viejos (levelId guardado como string)
+        const lId      = a.levelId == null ? null : Number(a.levelId);
+        const w        = WORLDS.find(w => parseInt(w.id) === wId);
+        const wIcon    = w ? w.icon : 'fa-solid fa-earth-americas';
+        const scope    = assignmentScope(wId, lId);
+        const due      = formatDueDate(a.dueDate);
+        const isOverdue = a.dueDate && a.dueDate < today;
+
+        // Cumplimiento: usa currentStudents (ya en memoria, sin lecturas extra)
+        const worldKey  = String(wId);
+        const compliant = currentStudents.filter(s => {
+          const wp = s.worlds?.[worldKey] ?? {};
+          return lId === null
+            ? wp.allComplete === true
+            : (wp.levelsCompleted ?? []).includes(lId);
+        }).length;
+
+        const allDone    = total > 0 && compliant === total;
+        const compLabel  = total === 0 ? '—' : `${compliant} / ${total} completado`;
+        const compColor  = allDone
+          ? 'color:var(--mg-success,#22c55e);border-color:var(--mg-success,#22c55e);'
+          : 'color:var(--mg-primary);border-color:var(--mg-primary);';
+        const compIcon   = allDone ? 'fa-circle-check' : 'fa-users';
+
+        const overdueBadge = (isOverdue && total > 0 && compliant < total)
+          ? `<span class="mg-badge" style="gap:4px;color:var(--mg-error,#ef4444);border-color:var(--mg-error,#ef4444);margin-top:4px;">
+               <i class="fa-solid fa-triangle-exclamation" style="font-size:11px;"></i> Vencida
+             </span>`
+          : '';
+
+        return `
+          <tr>
+            <td style="font-weight:700;">${escHtml(a.title)}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <i class="${wIcon}" style="color:var(--mg-primary);font-size:14px;"></i>
+                <span style="font-size:13px;color:var(--mg-muted);">${escHtml(scope)}</span>
+              </div>
+            </td>
+            <td>
+              <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+                <span class="mg-badge" style="${compColor}gap:5px;">
+                  <i class="fa-solid ${compIcon}" style="font-size:11px;"></i> ${compLabel}
+                </span>
+                ${overdueBadge}
+              </div>
+            </td>
+            <td>
+              <span class="mg-badge" style="gap:5px;">
+                <i class="fa-solid fa-calendar" style="font-size:11px;"></i> ${escHtml(due)}
+              </span>
+            </td>
+            <td style="text-align:center;width:88px;">
+              <div style="display:flex;gap:6px;justify-content:center;">
+                <button class="btn-edit-assignment"
+                  data-id="${a.id}"
+                  title="Editar asignación">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn-del-assignment"
+                  data-id="${a.id}"
+                  data-title="${escHtml(a.title)}"
+                  title="Eliminar asignación">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+
+      listEl.innerHTML = `
+        <div class="admin-table-wrap" style="margin-top:4px;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Alcance</th>
+                <th>Cumplimiento</th>
+                <th>Fecha límite</th>
+                <th style="text-align:center;width:88px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+
+      listEl.querySelectorAll('.btn-edit-assignment').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const assignment = currentAssignments.find(a => a.id === btn.dataset.id);
+          if (assignment) openEditPanel(assignment);
+        });
+      });
+      listEl.querySelectorAll('.btn-del-assignment').forEach(btn => {
+        btn.addEventListener('click', () => deleteAssignment(btn.dataset.id, btn.dataset.title, btn));
+      });
+    }
+
+    function openAssignmentPanel() {
+      editingAssignmentId = null;
+      const panel    = document.getElementById('assignment-form');
+      const openBtn  = document.getElementById('btn-open-assignment');
+      const worldSel = document.getElementById('assign-world');
+      const levelSel = document.getElementById('assign-level');
+      const dueInput = document.getElementById('assign-due');
+      const titleInp = document.getElementById('assign-title');
+      const saveBtn  = document.getElementById('btn-save-assignment');
+
+      worldSel.innerHTML = '<option value="">— Selecciona un mundo —</option>' +
+        WORLDS.map(w => `<option value="${w.id}">${w.id}. ${escHtml(w.title)}</option>`).join('');
+      levelSel.innerHTML = '<option value="">— Selecciona primero un mundo —</option>';
+      levelSel.disabled  = true;
+      dueInput.value     = '';
+      dueInput.min       = new Date().toISOString().split('T')[0];
+      titleInp.value     = '';
+      saveBtn.disabled   = true;
+      saveBtn.innerHTML  = '<i class="fa-solid fa-floppy-disk"></i> Crear';
+
+      panel.classList.add('visible');
+      openBtn.disabled = true;
+      worldSel.focus();
+    }
+
+    function closeAssignmentPanel() {
+      editingAssignmentId = null;
+      const panel   = document.getElementById('assignment-form');
+      const openBtn = document.getElementById('btn-open-assignment');
+      const saveBtn = document.getElementById('btn-save-assignment');
+      if (!panel || !openBtn) return;
+      panel.classList.remove('visible');
+      openBtn.disabled = false;
+      if (saveBtn) saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Crear';
+    }
+
+    function openEditPanel(a) {
+      editingAssignmentId = a.id;
+
+      const panel    = document.getElementById('assignment-form');
+      const openBtn  = document.getElementById('btn-open-assignment');
+      const worldSel = document.getElementById('assign-world');
+      const levelSel = document.getElementById('assign-level');
+      const dueInput = document.getElementById('assign-due');
+      const titleInp = document.getElementById('assign-title');
+      const saveBtn  = document.getElementById('btn-save-assignment');
+
+      worldSel.innerHTML = '<option value="">— Selecciona un mundo —</option>' +
+        WORLDS.map(w => `<option value="${w.id}">${w.id}. ${escHtml(w.title)}</option>`).join('');
+      worldSel.value = String(a.worldId);
+
+      const levels = WORLD_LEVELS[a.worldId] || [];
+      levelSel.innerHTML =
+        '<option value="null">Mundo completo</option>' +
+        levels.map(l => `<option value="${l.id}">${l.id + 1}. ${escHtml(l.title)}</option>`).join('');
+      levelSel.disabled = false;
+      levelSel.value    = a.levelId == null ? 'null' : String(Number(a.levelId));
+
+      dueInput.value    = a.dueDate || '';
+      dueInput.min      = '';
+      titleInp.value    = a.title || '';
+      saveBtn.disabled  = false;
+      saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar cambios';
+
+      panel.classList.add('visible');
+      openBtn.disabled = true;
+      titleInp.focus();
+    }
+
+    function onWorldSelectChange() {
+      const worldSel = document.getElementById('assign-world');
+      const levelSel = document.getElementById('assign-level');
+      const wId      = parseInt(worldSel.value);
+
+      if (!worldSel.value) {
+        levelSel.innerHTML = '<option value="">— Selecciona primero un mundo —</option>';
+        levelSel.disabled  = true;
+      } else {
+        const levels = WORLD_LEVELS[wId] || [];
+        levelSel.innerHTML =
+          '<option value="null">Mundo completo</option>' +
+          levels.map(l => `<option value="${l.id}">${l.id + 1}. ${escHtml(l.title)}</option>`).join('');
+        levelSel.disabled = false;
+      }
+
+      updateAssignmentTitle();
+      checkAssignmentSaveBtn();
+    }
+
+    function updateAssignmentTitle() {
+      const worldSel = document.getElementById('assign-world');
+      const levelSel = document.getElementById('assign-level');
+      const titleInp = document.getElementById('assign-title');
+      const wId      = parseInt(worldSel.value);
+
+      if (!worldSel.value) { titleInp.value = ''; return; }
+
+      const isWhole = levelSel.value === 'null' || !levelSel.value;
+      titleInp.value = isWhole
+        ? `Completar Mundo ${wId}`
+        : `Completar Mundo ${wId} — Nivel ${parseInt(levelSel.value) + 1}`;
+    }
+
+    function checkAssignmentSaveBtn() {
+      const worldSel = document.getElementById('assign-world');
+      const dueInput = document.getElementById('assign-due');
+      const saveBtn  = document.getElementById('btn-save-assignment');
+      saveBtn.disabled = !worldSel.value || !dueInput.value;
+    }
+
+    async function saveAssignment() {
+      const worldSel = document.getElementById('assign-world');
+      const levelSel = document.getElementById('assign-level');
+      const dueInput = document.getElementById('assign-due');
+      const titleInp = document.getElementById('assign-title');
+      const saveBtn  = document.getElementById('btn-save-assignment');
+
+      const worldId  = parseInt(worldSel.value);
+      const levelId  = (levelSel.value === 'null' || !levelSel.value) ? null : parseInt(levelSel.value);
+      const dueDate  = dueInput.value;
+      const title    = titleInp.value.trim() || `Completar Mundo ${worldId}`;
+      const isEdit   = editingAssignmentId !== null;
+
+      saveBtn.disabled  = true;
+      saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${isEdit ? 'Guardando...' : 'Creando...'}`;
+
+      try {
+        if (isEdit) {
+          await updateDoc(doc(db, 'assignments', editingAssignmentId), {
+            worldId, levelId, title, dueDate,
+          });
+          showToast('Asignación actualizada', 'success');
+        } else {
+          await addDoc(collection(db, 'assignments'), {
+            classroomId: currentClassroom.id,
+            worldId, levelId, title, dueDate,
+            createdAt: serverTimestamp(),
+          });
+          showToast('Asignación creada', 'success');
+        }
+        closeAssignmentPanel();
+        await loadAssignments();
+      } catch (err) {
+        console.error('Error al guardar asignación:', err);
+        showToast('Error al guardar la asignación', 'error');
+        saveBtn.disabled  = false;
+        saveBtn.innerHTML = isEdit
+          ? '<i class="fa-solid fa-floppy-disk"></i> Guardar cambios'
+          : '<i class="fa-solid fa-floppy-disk"></i> Crear';
+      }
+    }
+
+    async function deleteAssignment(id, title, btn) {
+      if (!confirm(`¿Eliminar la asignación "${title}"?`)) return;
+      btn.disabled  = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      try {
+        await deleteDoc(doc(db, 'assignments', id));
+        showToast('Asignación eliminada', 'success');
+        await loadAssignments();
+      } catch (err) {
+        console.error('Error al eliminar asignación:', err);
+        showToast('Error al eliminar la asignación', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      }
+    }
+
     // ── Panel agregar alumno ──────────────────────────────
     function bindDetailControls() {
       document.getElementById('btn-back').addEventListener('click', () => {
@@ -691,6 +1130,13 @@
       document.getElementById('btn-confirm-add').addEventListener('click', () => {
         if (selectedStudent) addStudent(selectedStudent.uid, selectedStudent.name);
       });
+
+      document.getElementById('btn-open-assignment').addEventListener('click', openAssignmentPanel);
+      document.getElementById('btn-cancel-assignment').addEventListener('click', closeAssignmentPanel);
+      document.getElementById('assign-world').addEventListener('change', onWorldSelectChange);
+      document.getElementById('assign-level').addEventListener('change', () => { updateAssignmentTitle(); checkAssignmentSaveBtn(); });
+      document.getElementById('assign-due').addEventListener('input', checkAssignmentSaveBtn);
+      document.getElementById('btn-save-assignment').addEventListener('click', saveAssignment);
     }
 
     function openAddStudentPanel() {

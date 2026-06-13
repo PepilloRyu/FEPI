@@ -126,6 +126,23 @@ service cloud.firestore {
         request.auth.uid == resource.data.teacherId;
     }
 
+    // ── assignments/{assignmentId} ────────────────────────────────────────────
+    // Lectura:   el teacher dueño del classroom, alumnos del classroom, o admin.
+    // Creación:  solo el teacher dueño del classroom referenciado.
+    // Actualiz./Borrado: solo el teacher dueño del classroom.
+    match /assignments/{assignmentId} {
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/classrooms/$(resource.data.classroomId)).data.teacherId == request.auth.uid ||
+        request.auth.uid in get(/databases/$(database)/documents/classrooms/$(resource.data.classroomId)).data.studentIds ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      allow create: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' &&
+        get(/databases/$(database)/documents/classrooms/$(request.resource.data.classroomId)).data.teacherId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        get(/databases/$(database)/documents/classrooms/$(resource.data.classroomId)).data.teacherId == request.auth.uid;
+    }
+
     // ── Resto de colecciones ──────────────────────────────────────────────────
     // Denegar acceso a todo lo no definido explícitamente.
     match /{document=**} {
