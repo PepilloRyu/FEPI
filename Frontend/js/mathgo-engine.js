@@ -16,7 +16,8 @@ function matrixify(text) {
   if (!parts.every(p => /^\s*\[[\d\s.,|−-]+\]\s*$/.test(p))) return text;
 
   const rows = parts.map(p =>
-    p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim().split(/\s+/)
+    p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim()
+     .split(/\s+/).map(t => t.replace(/,+$/, ""))
   );
   const cols = rows[0].length;
   const cells = rows.flat().map(n =>
@@ -545,7 +546,8 @@ export async function initEngine({
         }
         const disabled = isPreview || st.result === "ok";
         const clickHtml = isPreview ? "" : ` onclick="${h.pick}(${i})"`;
-        const label = (isPreview && o.correct) ? `${o.label} ✓` : o.label;
+        const displayLabel = matrixify(o.label);
+        const label = (isPreview && o.correct) ? `${displayLabel} ✓` : displayLabel;
         return `<button class="mg-opt ${btnCls}" ${disabled ? "disabled" : ""}${clickHtml}>${label}</button>`;
       }).join("") + `</div>`;
     }
