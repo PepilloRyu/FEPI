@@ -454,7 +454,7 @@ export const ANSWERS_W4 = [
     {
       "type": "mc",
       "tag": "Reto 2 · Área de rectángulo",
-      "prompt": "Un rectángulo tiene ancho x y largo (x + 5). Si su área es 84 cm², ¿cuánto mide el ancho?",
+      "prompt": "Un rectángulo tiene ancho <i>x</i> y largo (<i>x</i> + 5). Si su área es 84 cm², ¿cuánto mide el ancho?",
       "options": [
         {
           "label": "7 cm",

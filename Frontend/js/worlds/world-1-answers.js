@@ -24,7 +24,7 @@ export const ANSWERS_W1 = [
     {
       "type": "build",
       "tag": "Reto 2 · Traducción (toca)",
-      "prompt": "Traduce al lenguaje algebraico: la suma de a, b y m.",
+      "prompt": "Traduce al lenguaje algebraico: la suma de <i>a</i>, <i>b</i> y <i>m</i>.",
       "bank": [
         "a",
         "b",
@@ -73,7 +73,7 @@ export const ANSWERS_W1 = [
     {
       "type": "slots",
       "tag": "Reto 4 · Completa (arrastra)",
-      "prompt": "Arrastra los bloques a los huecos para escribir: el cuadrado de a más el cubo de b.",
+      "prompt": "Arrastra los bloques a los huecos para escribir: el cuadrado de <i>a</i> más el cubo de <i>b</i>.",
       "slots": 2,
       "bank": [
         "b³",
@@ -90,7 +90,7 @@ export const ANSWERS_W1 = [
     {
       "type": "mc",
       "tag": "Reto 5 · Razonamiento",
-      "prompt": "Si a es un número entero, ¿cuáles son los dos enteros consecutivos que vienen después de a?",
+      "prompt": "Si <i>a</i> es un número entero, ¿cuáles son los dos enteros consecutivos que vienen después de <i>a</i>?",
       "options": [
         {
           "label": "a, b",
@@ -110,7 +110,7 @@ export const ANSWERS_W1 = [
     {
       "type": "build",
       "tag": "Reto 6 · Problema aplicado <i class='fa-solid fa-trophy' style='color:#eab308;'></i>",
-      "prompt": "El precio de un libro es a pesos, el de un cuaderno es b pesos y el de una mochila es x pesos. Si compraste 3 libros, 6 cuadernos y m mochilas, ¿cuál expresión representa el total gastado?",
+      "prompt": "El precio de un libro es <i>a</i> pesos, el de un cuaderno es <i>b</i> pesos y el de una mochila es <i>x</i> pesos. Si compraste 3 libros, 6 cuadernos y <i>m</i> mochilas, ¿cuál expresión representa el total gastado?",
       "bank": [
         "3a",
         "6b",
@@ -152,7 +152,7 @@ export const ANSWERS_W1 = [
     {
       "type": "vf",
       "tag": "Reto 2 · Verdadero o Falso",
-      "prompt": "La expresión  a < b + c  se lee \"a es mayor que b + c\".",
+      "prompt": "La expresión <i>a</i> < <i>b</i> + <i>c</i> se lee \"<i>a</i> es mayor que <i>b</i> + <i>c</i>\".",
       "options": [
         {
           "label": "Verdadero",
@@ -192,7 +192,7 @@ export const ANSWERS_W1 = [
     {
       "type": "buildSeq",
       "tag": "Reto 4 · Traducción (toca)",
-      "prompt": "Traduce usando signos de relación: \"La suma de x y y es mayor que m\".",
+      "prompt": "Traduce usando signos de relación: \"La suma de <i>x</i> y <i>y</i> es mayor que <i>m</i>\".",
       "bank": [
         "x",
         "y",
@@ -222,7 +222,7 @@ export const ANSWERS_W1 = [
     {
       "type": "mc",
       "tag": "Reto 5 · Evaluar una fórmula <i class='fa-solid fa-trophy' style='color:#eab308;'></i>",
-      "prompt": "El área de un rectángulo es A = b × h. Si la base b = 3 y la altura h = 2, ¿cuánto vale A?",
+      "prompt": "El área de un rectángulo es A = b × h. Si la base <i>b</i> = 3 y la altura <i>h</i> = 2, ¿cuánto vale <i>A</i>?",
       "options": [
         {
           "label": "5",
@@ -272,7 +272,7 @@ export const ANSWERS_W1 = [
     {
       "type": "vf",
       "tag": "Reto 2 · Reglas ninja",
-      "prompt": "El término  x  no tiene coeficiente ni signo, por lo tanto equivale a  0x.",
+      "prompt": "El término <i>x</i> no tiene coeficiente ni signo, por lo tanto equivale a 0<i>x</i>.",
       "options": [
         {
           "label": "Verdadero",
@@ -321,7 +321,7 @@ export const ANSWERS_W1 = [
     {
       "type": "mc",
       "tag": "Reto 5 · Análisis completo <i class='fa-solid fa-trophy' style='color:#eab308;'></i>",
-      "prompt": "Observa el polinomio  a + x − y.  ¿Cuántos términos tiene y de qué grado absoluto es cada uno?",
+      "prompt": "Observa el polinomio <i>a</i> + <i>x</i> − <i>y</i>. ¿Cuántos términos tiene y de qué grado absoluto es cada uno?",
       "options": [
         {
           "label": "3 términos, cada uno de grado 1",
