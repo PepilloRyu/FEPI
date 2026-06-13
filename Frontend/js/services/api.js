@@ -140,5 +140,10 @@ export async function forgotPassword(email) {
   });
 }
 
+/** Compra una vida en la tienda (-100 gemas, +1 vida). */
+export async function buyLife() {
+  return request('/Store/buy-life', { method: 'POST' });
+}
+
 // Exportar el base URL por si alguna pagina lo necesita
 export { BASE_URL };

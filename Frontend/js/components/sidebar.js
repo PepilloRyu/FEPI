@@ -1,7 +1,6 @@
 /**
- * MathGo Sidebar Component v2.2
- * - Sin tienda (shop)
- * - Sin logros (achievements)
+ * MathGo Sidebar Component v2.3
+ * - Tienda visible para todos los usuarios
  * - Iconos FontAwesome 6
  * - Enlace Admin visible solo para usuarios con role: "admin"
  */
@@ -16,6 +15,7 @@ const NAV_ITEMS = [
   { id: 'assignments', icon: 'fa-solid fa-clipboard-list',  label: 'Asignaciones',  href: 'assignments.html' },
   { id: 'leaderboard', icon: 'fa-solid fa-trophy',          label: 'Clasificación', href: 'leaderboard.html' },
   { id: 'dashboard',   icon: 'fa-solid fa-chart-line',      label: 'Mi progreso',   href: 'dashboard.html' },
+  { id: 'tienda',      icon: 'fa-solid fa-store',           label: 'Tienda',        href: 'tienda.html' },
   { id: 'profile',     icon: 'fa-solid fa-user',            label: 'Perfil',        href: 'profile-page.html' },
   { id: 'faq',         icon: 'fa-solid fa-circle-question', label: 'Ayuda',         href: 'faq.html' },
 ];

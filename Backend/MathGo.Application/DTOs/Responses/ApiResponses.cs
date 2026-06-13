@@ -119,6 +119,15 @@ public class AchievementSummary
 }
 
 /// <summary>
+/// Resultado de comprar una vida en la tienda.
+/// </summary>
+public class BuyLifeResponse
+{
+    public int Gems { get; set; }
+    public int Lives { get; set; }
+}
+
+/// <summary>
 /// Resultado de registrar un intento.
 /// </summary>
 public class AttemptResultResponse
