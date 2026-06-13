@@ -19,7 +19,8 @@ const NAV_ITEMS = [
   { id: 'faq',         icon: 'fa-solid fa-circle-question', label: 'Ayuda',         href: 'faq.html' },
 ];
 
-const ADMIN_ITEM = { id: 'admin', icon: 'fa-solid fa-shield-halved', label: 'Admin', href: 'admin.html' };
+const ADMIN_ITEM   = { id: 'admin',   icon: 'fa-solid fa-shield-halved',    label: 'Admin',   href: 'admin.html' };
+const TEACHER_ITEM = { id: 'teacher', icon: 'fa-solid fa-chalkboard-user', label: 'Profesor', href: 'teacher.html' };
 
 function buildNavItem(item, activeId, basePath) {
   const isActive = item.id === activeId;
@@ -143,9 +144,11 @@ export async function initSidebar(activeId = 'learn') {
     if (avatarEl) avatarEl.textContent = getInitials(profile.name || profile.email);
   }
 
-  // Inyectar enlace Admin si el usuario es administrador
+  // Inyectar enlace Admin/Profesor según rol
   const roleSnap = roleResult.status === 'fulfilled' ? roleResult.value : null;
-  const isAdminUser = roleSnap?.exists?.() && roleSnap.data().role === 'admin';
+  const userRole = roleSnap?.exists?.() ? roleSnap.data().role : null;
+  const isAdminUser   = userRole === 'admin';
+  const isTeacherUser = userRole === 'teacher';
 
   const heartsEl = document.getElementById('sb-hearts');
   if (heartsEl) heartsEl.textContent = isAdminUser ? '∞' : (profile?.hearts ?? 15);
@@ -175,5 +178,32 @@ export async function initSidebar(activeId = 'learn') {
     adminBottom.title = ADMIN_ITEM.label;
     adminBottom.innerHTML = `<i class="${ADMIN_ITEM.icon}"></i><span class="nav-label">${ADMIN_ITEM.label}</span>`;
     bottomNavEl.appendChild(adminBottom);
+  }
+
+  if (isTeacherUser) {
+    const isActive = activeId === TEACHER_ITEM.id;
+
+    // Enlace en sidebar desktop
+    const nav = sidebarEl.querySelector('.mg-nav');
+    if (nav) {
+      const teacherEl = document.createElement('a');
+      teacherEl.href = `${basePath}${TEACHER_ITEM.href}`;
+      if (isActive) { teacherEl.className = 'active'; teacherEl.setAttribute('aria-current', 'page'); }
+      teacherEl.title = TEACHER_ITEM.label;
+      teacherEl.style.cssText = isActive ? '' : 'color:var(--mg-primary);';
+      teacherEl.innerHTML = `
+        <span class="mg-nav-icon" style="background:rgba(79,70,229,0.1);color:var(--mg-primary);">
+          <i class="${TEACHER_ITEM.icon}"></i>
+        </span>${TEACHER_ITEM.label}`;
+      nav.appendChild(teacherEl);
+    }
+
+    // Enlace en bottom nav móvil
+    const teacherBottom = document.createElement('a');
+    teacherBottom.href = `${basePath}${TEACHER_ITEM.href}`;
+    if (isActive) { teacherBottom.className = 'active'; teacherBottom.setAttribute('aria-current', 'page'); }
+    teacherBottom.title = TEACHER_ITEM.label;
+    teacherBottom.innerHTML = `<i class="${TEACHER_ITEM.icon}"></i><span class="nav-label">${TEACHER_ITEM.label}</span>`;
+    bottomNavEl.appendChild(teacherBottom);
   }
 }

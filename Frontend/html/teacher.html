@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathGo — Panel Profesor</title>
+  <link rel="icon" href="../assets/images/favicon.ico" />
+  <link rel="stylesheet" href="../css/design-system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* ── Hero ── */
+    .teacher-hero {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(135deg, var(--mg-surface) 0%, rgba(79,70,229,.06) 100%);
+      border: 1px solid var(--mg-border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+    }
+    .teacher-hero-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: rgba(79,70,229,.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: var(--mg-primary);
+      flex-shrink: 0;
+    }
+    .teacher-hero h1 { margin: 0 0 4px; font-size: 22px; }
+    .teacher-hero p  { margin: 0; color: var(--mg-muted); font-size: 14px; }
+
+    /* ── Section header ── */
+    .teacher-section-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .teacher-section-hd-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .teacher-section-hd h2 { margin: 0; font-size: 18px; }
+
+    /* ── Classroom grid ── */
+    .classrooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .classroom-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px;
+      border-radius: 14px;
+      background: var(--mg-surface);
+      border: 1px solid var(--mg-border);
+      transition: box-shadow .15s, border-color .15s;
+    }
+    .classroom-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      border-color: var(--mg-primary);
+    }
+    .classroom-card-header { display: flex; align-items: flex-start; gap: 14px; }
+    .classroom-card-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(79,70,229,.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--mg-primary); flex-shrink: 0;
+    }
+    .classroom-card-name { font-size: 16px; font-weight: 700; color: var(--mg-text); line-height: 1.3; word-break: break-word; }
+    .classroom-card-meta { font-size: 13px; color: var(--mg-muted); display: flex; align-items: center; gap: 6px; }
+    .classroom-card-footer { margin-top: auto; }
+
+    .btn-manage {
+      width: 100%; padding: 9px 16px; border: none; border-radius: 10px;
+      background: var(--mg-primary); color: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .15s;
+    }
+    .btn-manage:hover { opacity: .88; }
+
+    /* ── Shared: outline buttons ── */
+    .btn-create, .btn-back {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 18px;
+      border: 1.5px solid var(--mg-primary); border-radius: 10px;
+      background: transparent; color: var(--mg-primary);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .btn-create:hover, .btn-back:hover { background: var(--mg-primary); color: #fff; }
+
+    /* ── Create / add-student form panel ── */
+    .inline-form-panel {
+      background: var(--mg-surface);
+      border: 2px dashed var(--mg-primary);
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .inline-form-panel.visible { display: flex; }
+    .inline-form-panel label {
+      font-size: 13px; font-weight: 600; color: var(--mg-muted);
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .inline-form-panel input[type="text"],
+    .inline-form-panel select {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      background: var(--mg-bg); color: var(--mg-text);
+      font-size: 15px; outline: none;
+      transition: border-color .15s; box-sizing: border-box;
+      appearance: auto;
+    }
+    .inline-form-panel input[type="text"]:focus,
+    .inline-form-panel select:focus { border-color: var(--mg-primary); }
+    .inline-form-panel select option { background: var(--mg-bg); color: var(--mg-text); }
+
+    .form-actions { display: flex; gap: 10px; }
+    .btn-form-primary {
+      flex: 1; padding: 10px 0; border: none; border-radius: 10px;
+      background: var(--mg-primary); color: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .15s;
+    }
+    .btn-form-primary:hover { opacity: .88; }
+    .btn-form-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-form-cancel {
+      padding: 10px 18px;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      background: transparent; color: var(--mg-muted);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-form-cancel:hover { border-color: var(--mg-text); color: var(--mg-text); }
+
+    /* ── Remove student button (table) ── */
+    .btn-remove-student {
+      padding: 6px 10px; border: none; border-radius: 8px;
+      background: rgba(239,68,68,.1); color: var(--mg-error, #ef4444);
+      font-size: 13px; cursor: pointer; transition: background .15s;
+    }
+    .btn-remove-student:hover { background: rgba(239,68,68,.2); }
+    .btn-remove-student:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Search (add-student panel) ── */
+    .search-wrap { position: relative; }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--mg-muted); font-size: 14px; pointer-events: none;
+    }
+    .search-wrap input[type="text"] { padding-left: 38px !important; }
+    .search-results {
+      display: none; flex-direction: column;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      overflow: hidden; background: var(--mg-bg);
+    }
+    .search-results.visible { display: flex; }
+    .search-result-item {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 10px 14px; cursor: pointer;
+      border-bottom: 1px solid var(--mg-border); transition: background .1s;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover,
+    .search-result-item.selected { background: rgba(79,70,229,.08); }
+    .search-result-name  { font-size: 14px; font-weight: 700; color: var(--mg-text); }
+    .search-result-email { font-size: 12px; color: var(--mg-muted); }
+    .search-no-results {
+      padding: 12px 14px; font-size: 14px; color: var(--mg-muted); text-align: center;
+    }
+
+    /* ── Skeleton ── */
+    .classrooms-skeleton {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mg-layout-2col" id="mg-layout">
+    <!-- Sidebar inyectado por JS -->
+
+    <main class="mg-main" id="mg-main">
+
+      <!-- Hero (siempre visible) -->
+      <div class="teacher-hero">
+        <div class="teacher-hero-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <div>
+          <h1>Panel del Profesor</h1>
+          <p>Gestiona tus salones y realiza el seguimiento de tus alumnos</p>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════
+           VISTA 1: Listado de salones
+           ════════════════════════════════════════ -->
+      <div id="view-list">
+
+        <div class="teacher-section-hd">
+          <div class="teacher-section-hd-left">
+            <i class="fa-solid fa-chalkboard" style="color:var(--mg-primary);font-size:20px;"></i>
+            <h2>Mis salones</h2>
+          </div>
+          <button class="btn-create" id="btn-open-create">
+            <i class="fa-solid fa-plus"></i> Crear salón
+          </button>
+        </div>
+
+        <!-- Formulario inline: crear salón -->
+        <div class="inline-form-panel" id="create-form">
+          <label for="classroom-name-input">Nombre del salón</label>
+          <input
+            type="text"
+            id="classroom-name-input"
+            placeholder="Ej: Álgebra — Grupo A"
+            maxlength="80"
+            autocomplete="off"
+          />
+          <div class="form-actions">
+            <button class="btn-form-primary" id="btn-save-classroom" disabled>
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+            <button class="btn-form-cancel" id="btn-cancel-classroom">Cancelar</button>
+          </div>
+        </div>
+
+        <!-- Lista de salones -->
+        <div id="classrooms-container">
+          <div class="classrooms-skeleton">
+            <div class="mg-skeleton" style="height:140px;border-radius:14px;"></div>
+            <div class="mg-skeleton" style="height:140px;border-radius:14px;"></div>
+            <div class="mg-skeleton" style="height:140px;border-radius:14px;"></div>
+          </div>
+        </div>
+
+      </div><!-- /view-list -->
+
+      <!-- ════════════════════════════════════════
+           VISTA 2: Gestionar salón
+           ════════════════════════════════════════ -->
+      <div id="view-detail" style="display:none">
+
+        <div class="teacher-section-hd">
+          <div class="teacher-section-hd-left">
+            <button class="btn-back" id="btn-back">
+              <i class="fa-solid fa-arrow-left"></i> Volver
+            </button>
+            <i class="fa-solid fa-chalkboard" style="color:var(--mg-primary);font-size:20px;"></i>
+            <h2 id="detail-name"></h2>
+          </div>
+          <button class="btn-create" id="btn-open-add-student">
+            <i class="fa-solid fa-user-plus"></i> Agregar alumno
+          </button>
+        </div>
+
+        <!-- Panel inline: agregar alumno -->
+        <div class="inline-form-panel" id="add-student-panel">
+          <label for="add-student-search">Buscar alumno por correo</label>
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+              type="text"
+              id="add-student-search"
+              placeholder="Escribe el correo del alumno..."
+              maxlength="120"
+              autocomplete="off"
+            />
+          </div>
+          <div class="search-results" id="search-results"></div>
+          <div class="form-actions">
+            <button class="btn-form-primary" id="btn-confirm-add" disabled>
+              <i class="fa-solid fa-user-plus"></i> Agregar
+            </button>
+            <button class="btn-form-cancel" id="btn-cancel-add">Cancelar</button>
+          </div>
+        </div>
+
+        <!-- Tabla de alumnos -->
+        <div class="mg-card" style="padding:0;overflow:hidden;">
+          <div id="detail-table-wrap" class="admin-table-wrap" style="display:none">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Email</th>
+                  <th style="width:56px;text-align:center;">Quitar</th>
+                </tr>
+              </thead>
+              <tbody id="detail-tbody"></tbody>
+            </table>
+          </div>
+          <div id="detail-empty" style="display:none" class="mg-empty">
+            <div class="mg-empty-icon"><i class="fa-solid fa-user-slash"></i></div>
+            <div class="mg-empty-title">Sin alumnos todavía</div>
+            <div class="mg-empty-sub">Aún no has agregado alumnos a este salón</div>
+          </div>
+        </div>
+
+      </div><!-- /view-detail -->
+
+    </main>
+  </div>
+
+  <div class="mg-toast-container" id="mg-toast-container"></div>
+
+  <script type="module">
+    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { initSidebar } from '../js/components/sidebar.js';
+    import { db } from '../js/firebaseConfig.js';
+    import {
+      doc, getDoc, getDocs,
+      collection, query, where, limit,
+      addDoc, updateDoc, serverTimestamp,
+      arrayUnion, arrayRemove,
+    } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    // ── Estado ────────────────────────────────────────────
+    let currentUid       = null;
+    let currentClassroom    = null;  // { id, name, studentIds[] }
+    let selectedStudent     = null;  // { uid, name, email } elegido en el buscador
+    let searchDebounceTimer = null;
+
+    const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    // ── Guard + carga ─────────────────────────────────────
+    async function loadTeacher(user) {
+      currentUid = user.uid;
+
+      const selfSnap = await getDoc(doc(db, 'users', user.uid));
+      if (!selfSnap.exists() || selfSnap.data().role !== 'teacher') {
+        window.location.replace('learn.html');
+        return;
+      }
+
+      await initSidebar('teacher');
+      await loadClassrooms();
+      bindCreateForm();
+      bindDetailControls();
+    }
+
+    // ════════════════════════════════════════════════════
+    // VISTA 1: Listado de salones
+    // ════════════════════════════════════════════════════
+
+    function showListView() {
+      document.getElementById('view-list').style.display   = '';
+      document.getElementById('view-detail').style.display = 'none';
+      currentClassroom = null;
+    }
+
+    async function loadClassrooms() {
+      const container = document.getElementById('classrooms-container');
+      container.innerHTML = `
+        <div class="classrooms-skeleton">
+          <div class="mg-skeleton" style="height:140px;border-radius:14px;"></div>
+          <div class="mg-skeleton" style="height:140px;border-radius:14px;"></div>
+          <div class="mg-skeleton" style="height:140px;border-radius:14px;"></div>
+        </div>`;
+
+      try {
+        const q = query(collection(db, 'classrooms'), where('teacherId', '==', currentUid));
+        const snap = await getDocs(q);
+        const classrooms = [];
+        snap.forEach(d => classrooms.push({ id: d.id, ...d.data() }));
+        renderClassrooms(classrooms);
+      } catch (err) {
+        console.error('Error al cargar salones:', err);
+        container.innerHTML = `
+          <div class="mg-empty">
+            <div class="mg-empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="mg-empty-title">Error al cargar salones</div>
+            <div class="mg-empty-sub">Intenta recargar la página</div>
+          </div>`;
+      }
+    }
+
+    function renderClassrooms(classrooms) {
+      const container = document.getElementById('classrooms-container');
+
+      if (!classrooms.length) {
+        container.innerHTML = `
+          <div class="mg-empty">
+            <div class="mg-empty-icon"><i class="fa-solid fa-chalkboard"></i></div>
+            <div class="mg-empty-title">Sin salones todavía</div>
+            <div class="mg-empty-sub">Crea tu primer salón con el botón de arriba</div>
+          </div>`;
+        return;
+      }
+
+      const cards = classrooms.map(c => {
+        const count   = Array.isArray(c.studentIds) ? c.studentIds.length : 0;
+        const plural  = count === 1 ? 'alumno' : 'alumnos';
+        const safeName = escHtml(c.name || 'Sin nombre');
+        return `
+          <div class="classroom-card">
+            <div class="classroom-card-header">
+              <div class="classroom-card-icon"><i class="fa-solid fa-chalkboard"></i></div>
+              <div>
+                <div class="classroom-card-name">${safeName}</div>
+                <div class="classroom-card-meta">
+                  <i class="fa-solid fa-users"></i> ${count} ${plural}
+                </div>
+              </div>
+            </div>
+            <div class="classroom-card-footer">
+              <button class="btn-manage" data-id="${c.id}" data-name="${safeName}" data-students='${JSON.stringify(c.studentIds || [])}'>
+                <i class="fa-solid fa-gear"></i> Gestionar
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+
+      container.innerHTML = `<div class="classrooms-grid">${cards}</div>`;
+
+      container.querySelectorAll('.btn-manage').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openDetail({
+            id:         btn.dataset.id,
+            name:       btn.dataset.name,
+            studentIds: JSON.parse(btn.dataset.students),
+          });
+        });
+      });
+    }
+
+    // ── Formulario crear salón ────────────────────────────
+    function bindCreateForm() {
+      const form      = document.getElementById('create-form');
+      const nameInput = document.getElementById('classroom-name-input');
+      const saveBtn   = document.getElementById('btn-save-classroom');
+      const cancelBtn = document.getElementById('btn-cancel-classroom');
+      const openBtn   = document.getElementById('btn-open-create');
+
+      openBtn.addEventListener('click', () => {
+        form.classList.add('visible');
+        nameInput.focus();
+        openBtn.disabled = true;
+      });
+
+      const closeForm = () => {
+        form.classList.remove('visible');
+        nameInput.value  = '';
+        saveBtn.disabled = true;
+        openBtn.disabled = false;
+      };
+
+      cancelBtn.addEventListener('click', closeForm);
+      nameInput.addEventListener('input', () => {
+        saveBtn.disabled = nameInput.value.trim().length === 0;
+      });
+      saveBtn.addEventListener('click', () => createClassroom(nameInput.value.trim(), closeForm));
+      nameInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !saveBtn.disabled) createClassroom(nameInput.value.trim(), closeForm);
+        if (e.key === 'Escape') closeForm();
+      });
+    }
+
+    async function createClassroom(name, onSuccess) {
+      if (!name) return;
+      const saveBtn = document.getElementById('btn-save-classroom');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+      try {
+        await addDoc(collection(db, 'classrooms'), {
+          name, teacherId: currentUid, studentIds: [], createdAt: serverTimestamp(),
+        });
+        showToast(`Salón "${name}" creado`, 'success');
+        onSuccess();
+        await loadClassrooms();
+      } catch (err) {
+        console.error('Error al crear salón:', err);
+        showToast('Error al crear el salón', 'error');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+      }
+    }
+
+    // ════════════════════════════════════════════════════
+    // VISTA 2: Gestionar salón
+    // ════════════════════════════════════════════════════
+
+    function showDetailView() {
+      document.getElementById('view-list').style.display   = 'none';
+      document.getElementById('view-detail').style.display = '';
+    }
+
+    function openDetail(classroom) {
+      currentClassroom = { ...classroom, studentIds: [...(classroom.studentIds || [])] };
+      document.getElementById('detail-name').textContent = classroom.name;
+      closeAddStudentPanel();
+      showDetailView();
+      renderDetailStudents();
+    }
+
+    async function renderDetailStudents() {
+      const tbody     = document.getElementById('detail-tbody');
+      const tableWrap = document.getElementById('detail-table-wrap');
+      const emptyEl   = document.getElementById('detail-empty');
+      const ids       = currentClassroom.studentIds;
+
+      if (!ids.length) {
+        tableWrap.style.display = 'none';
+        emptyEl.style.display   = '';
+        return;
+      }
+
+      tableWrap.style.display = '';
+      emptyEl.style.display   = 'none';
+      tbody.innerHTML = ids.map(() =>
+        `<tr><td colspan="3"><div class="mg-skeleton" style="height:36px;border-radius:6px;"></div></td></tr>`
+      ).join('');
+
+      const userDocs = await Promise.all(ids.map(uid => getDoc(doc(db, 'users', uid))));
+
+      const students = userDocs.map((snap, i) => ({
+        uid:   ids[i],
+        name:  snap.exists() ? (snap.data().name  || '–') : '(usuario no encontrado)',
+        email: snap.exists() ? (snap.data().email || '–') : '–',
+      }));
+
+      tbody.innerHTML = students.map(s => `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="mg-avatar" style="width:32px;height:32px;font-size:12px;">${escHtml(getInitials(s.name))}</div>
+              <span style="font-weight:700;">${escHtml(s.name)}</span>
+            </div>
+          </td>
+          <td style="color:var(--mg-muted);font-size:13px;">${escHtml(s.email)}</td>
+          <td style="text-align:center;">
+            <button
+              class="btn-remove-student"
+              data-uid="${s.uid}"
+              data-name="${escHtml(s.name)}"
+              title="Quitar del salón">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>`).join('');
+
+      tbody.querySelectorAll('.btn-remove-student').forEach(btn => {
+        btn.addEventListener('click', () => removeStudent(btn.dataset.uid, btn.dataset.name, btn));
+      });
+    }
+
+    async function removeStudent(uid, name, btn) {
+      if (!confirm(`¿Quitar a "${name}" del salón "${currentClassroom.name}"?`)) return;
+
+      btn.disabled    = true;
+      btn.innerHTML   = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+      try {
+        await updateDoc(doc(db, 'classrooms', currentClassroom.id), {
+          studentIds: arrayRemove(uid),
+        });
+        currentClassroom.studentIds = currentClassroom.studentIds.filter(id => id !== uid);
+        showToast(`"${name}" quitado del salón`, 'success');
+        closeAddStudentPanel();
+        await renderDetailStudents();
+      } catch (err) {
+        console.error('Error al quitar alumno:', err);
+        showToast('Error al quitar al alumno', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      }
+    }
+
+    // ── Panel agregar alumno ──────────────────────────────
+    function bindDetailControls() {
+      document.getElementById('btn-back').addEventListener('click', () => {
+        showListView();
+        loadClassrooms(); // refresca el conteo de alumnos en las cards
+      });
+
+      document.getElementById('btn-open-add-student').addEventListener('click', () => {
+        openAddStudentPanel();
+      });
+
+      document.getElementById('btn-cancel-add').addEventListener('click', closeAddStudentPanel);
+
+      document.getElementById('btn-confirm-add').addEventListener('click', () => {
+        if (selectedStudent) addStudent(selectedStudent.uid, selectedStudent.name);
+      });
+    }
+
+    function openAddStudentPanel() {
+      const panel      = document.getElementById('add-student-panel');
+      const searchInput = document.getElementById('add-student-search');
+      const resultsEl   = document.getElementById('search-results');
+
+      selectedStudent = null;
+      panel.classList.add('visible');
+      document.getElementById('btn-open-add-student').disabled = true;
+      document.getElementById('btn-confirm-add').disabled = true;
+      searchInput.value = '';
+      resultsEl.classList.remove('visible');
+      resultsEl.innerHTML = '';
+
+      searchInput.addEventListener('input', onSearchInput);
+      searchInput.focus();
+    }
+
+    function closeAddStudentPanel() {
+      const panel      = document.getElementById('add-student-panel');
+      if (!panel) return;
+      clearTimeout(searchDebounceTimer);
+      panel.classList.remove('visible');
+
+      const searchInput = document.getElementById('add-student-search');
+      const resultsEl   = document.getElementById('search-results');
+      searchInput.removeEventListener('input', onSearchInput);
+      searchInput.value = '';
+      resultsEl.classList.remove('visible');
+      resultsEl.innerHTML = '';
+
+      selectedStudent = null;
+      document.getElementById('btn-open-add-student').disabled = false;
+      document.getElementById('btn-confirm-add').disabled = true;
+    }
+
+    function onSearchInput() {
+      clearTimeout(searchDebounceTimer);
+      const term = document.getElementById('add-student-search').value.trim().toLowerCase();
+
+      // Cualquier cambio en el input limpia la selección previa
+      selectedStudent = null;
+      document.getElementById('btn-confirm-add').disabled = true;
+
+      const resultsEl = document.getElementById('search-results');
+      if (term.length < 2) {
+        resultsEl.classList.remove('visible');
+        resultsEl.innerHTML = '';
+        return;
+      }
+
+      searchDebounceTimer = setTimeout(() => runSearch(term), 300);
+    }
+
+    async function runSearch(term) {
+      const resultsEl = document.getElementById('search-results');
+      resultsEl.innerHTML = '<div class="search-no-results"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</div>';
+      resultsEl.classList.add('visible');
+
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'users'),
+          where('role', '==', 'student'),
+          where('email', '>=', term),
+          where('email', '<=', term + ''),
+          limit(10)
+        ));
+
+        const results = [];
+        snap.forEach(d => {
+          if (!currentClassroom.studentIds.includes(d.id))
+            results.push({ uid: d.id, ...d.data() });
+        });
+
+        const shown = results.slice(0, 5);
+
+        if (!shown.length) {
+          resultsEl.innerHTML = '<div class="search-no-results">No se encontraron alumnos con ese correo</div>';
+          return;
+        }
+
+        resultsEl.innerHTML = shown.map(s => `
+          <div class="search-result-item"
+               data-uid="${s.uid}"
+               data-name="${escHtml(s.name || s.email)}"
+               data-email="${escHtml(s.email || '')}">
+            <span class="search-result-name">${escHtml(s.name || '(sin nombre)')}</span>
+            <span class="search-result-email">${escHtml(s.email || '')}</span>
+          </div>`).join('');
+
+        resultsEl.querySelectorAll('.search-result-item').forEach(item => {
+          item.addEventListener('click', () => selectSearchResult(item));
+        });
+
+      } catch (err) {
+        console.error('Error en búsqueda de alumnos:', err);
+        resultsEl.innerHTML = '<div class="search-no-results">Error al buscar. Intenta de nuevo.</div>';
+      }
+    }
+
+    function selectSearchResult(item) {
+      document.querySelectorAll('.search-result-item.selected')
+        .forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+
+      selectedStudent = {
+        uid:   item.dataset.uid,
+        name:  item.dataset.name,
+        email: item.dataset.email,
+      };
+
+      document.getElementById('add-student-search').value = item.dataset.email;
+      document.getElementById('search-results').classList.remove('visible');
+      document.getElementById('btn-confirm-add').disabled = false;
+    }
+
+    async function addStudent(uid, displayName) {
+      const confirmBtn = document.getElementById('btn-confirm-add');
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agregando...';
+
+      try {
+        await updateDoc(doc(db, 'classrooms', currentClassroom.id), {
+          studentIds: arrayUnion(uid),
+        });
+        currentClassroom.studentIds = [...currentClassroom.studentIds, uid];
+        showToast(`Alumno agregado al salón`, 'success');
+        closeAddStudentPanel();
+        await renderDetailStudents();
+      } catch (err) {
+        console.error('Error al agregar alumno:', err);
+        showToast('Error al agregar al alumno', 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Agregar';
+      }
+    }
+
+    requireAuth(false).then(user => loadTeacher(user));
+  </script>
+</body>
+</html>
