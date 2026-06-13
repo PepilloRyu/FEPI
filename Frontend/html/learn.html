@@ -141,8 +141,6 @@
     async function loadLearnPage(user) {
       await initSidebar('learn');
 
-      const todayStr = new Date().toLocaleDateString('en-CA');
-
       const [progressSnap, userSnap] = await Promise.allSettled([
         getDoc(doc(db, 'mathgo_progress', user.uid)),
         getDoc(doc(db, 'users', user.uid)),
@@ -154,16 +152,8 @@
       const isAdmin = userData.role === 'admin';
       const displayName = userData.name || user.email?.split('@')[0] || 'Usuario';
 
-      // Racha diaria
-      const lastDate = progress.lastActiveDate ?? null;
-      let streak = progress.dailyStreak ?? 0;
-      if (lastDate !== todayStr) {
-        const gap = lastDate
-          ? Math.round((new Date(todayStr + 'T12:00:00') - new Date(lastDate + 'T12:00:00')) / 86400000)
-          : null;
-        streak = gap === 1 ? streak + 1 : 1;
-        setDoc(doc(db, 'mathgo_progress', user.uid), { dailyStreak: streak, lastActiveDate: todayStr }, { merge: true }).catch(() => {});
-      }
+      // Racha diaria (solo lectura — el backend la actualiza al completar ejercicios)
+      const streak = progress.dailyStreak ?? 0;
 
       const xp = progress.totalXp ?? 0;
       document.getElementById('stat-streak').textContent = streak;

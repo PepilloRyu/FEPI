@@ -102,20 +102,8 @@ export async function initEngine({
     }
   }
 
-  // ---- Racha diaria ----
-  const todayStr = new Date().toLocaleDateString('en-CA'); // "YYYY-MM-DD" en hora local
-  const lastDate = raw.lastActiveDate ?? null;
-  let dailyStreak = raw.dailyStreak ?? 0;
-  if (lastDate !== todayStr) {
-    const dayGap = lastDate
-      ? Math.round((new Date(todayStr + 'T12:00:00') - new Date(lastDate + 'T12:00:00')) / 86400000)
-      : null;
-    dailyStreak = dayGap === 1 ? dailyStreak + 1 : 1;
-    try {
-      await setDoc(doc(db, "mathgo_progress", uid),
-        { dailyStreak, lastActiveDate: todayStr }, { merge: true });
-    } catch (e) { console.warn("Error guardando racha diaria:", e); }
-  }
+  // ---- Racha diaria (solo lectura — el backend la actualiza al completar ejercicios) ----
+  const dailyStreak = raw.dailyStreak ?? 0;
 
   const worldProg = () => raw?.worlds?.[worldId] ?? {};
 
