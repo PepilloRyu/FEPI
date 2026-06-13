@@ -472,7 +472,12 @@ export async function initEngine({
 
   // ---- Validación de respuesta ----
   function canCheck(c, st) {
-    if (c.type === "build" || c.type === "buildSeq") return st.selected.length > 0;
+    if (c.type === "build") {
+      const plusInBank = (c.bank ?? []).filter(t => t === "+").length;
+      return st.selected.filter(s => s.label !== "+").length === plusInBank + 1
+          && st.selected.filter(s => s.label === "+").length === plusInBank;
+    }
+    if (c.type === "buildSeq") return st.selected.length > 0;
     if (c.type === "mc"    || c.type === "vf")       return st.chosen !== null;
     if (c.type === "match")  return Object.keys(st.placed).length === c.pairs.length;
     if (c.type === "slots")  return Object.keys(st.placed).length === c.slots;

@@ -101,11 +101,16 @@ public class ExerciseService : IExerciseService
         string type = entry.GetProperty("type").GetString() ?? "";
         var correct = entry.GetProperty("answer");
 
+        bool commutative = entry.TryGetProperty("commutative", out var commProp) &&
+                           commProp.ValueKind == JsonValueKind.True;
+
         bool isCorrect = type switch
         {
             "mc" or "vf" => ValidateMcVf(userAnswer, correct),
             "build"      => ValidateOrderedList(userAnswer, correct),
-            "slots"      => ValidateOrderedList(userAnswer, correct),
+            "slots"      => commutative
+                                ? ValidateUnorderedList(userAnswer, correct)
+                                : ValidateOrderedList(userAnswer, correct),
             "buildSeq"   => ValidateBuildSeq(userAnswer, correct),
             "match"      => ValidateMatch(userAnswer, correct),
             _            => false
@@ -169,6 +174,17 @@ public class ExerciseService : IExerciseService
             user.GetString()?.Trim(),
             correct.GetString()?.Trim(),
             StringComparison.OrdinalIgnoreCase);
+    }
+
+    // slots con commutative:true — mismos elementos en cualquier orden
+    private static bool ValidateUnorderedList(JsonElement user, JsonElement correct)
+    {
+        if (user.ValueKind != JsonValueKind.Array) return false;
+        var ua = user.EnumerateArray().Select(e => e.GetString()?.Trim() ?? "").OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
+        var ca = correct.EnumerateArray().Select(e => e.GetString()?.Trim() ?? "").OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
+        return ua.Count == ca.Count &&
+               ua.Zip(ca, (u, c) => string.Equals(u, c, StringComparison.OrdinalIgnoreCase))
+                 .All(x => x);
     }
 
     // build y slots: arrays con orden exacto

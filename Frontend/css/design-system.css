@@ -1126,6 +1126,7 @@ input, select, textarea { font-family: inherit; }
 .mg-chip:hover   { background: #f7f7f7; }
 .mg-chip:active  { transform: translateY(2px); border-bottom-width: 2px; }
 .mg-chip.in { background: #ddf4ff; border-color: var(--macaw-blue); color: var(--macaw-blue); }
+.mg-chip.in:hover  { background: #b9e8ff; }
 
 /* ── Emparejamiento ── */
 .mg-match     { display: grid; gap: 12px; }
@@ -1159,6 +1160,7 @@ input, select, textarea { font-family: inherit; }
 .mg-drag          { cursor: grab; touch-action: none; transition: transform .08s; }
 .mg-drag:active   { cursor: grabbing; }
 .mg-placed        { cursor: pointer; background: #ddf4ff; border-color: var(--macaw-blue); color: var(--macaw-blue); }
+.mg-placed:hover  { background: #b9e8ff; }
 .mg-drag.lifted   { opacity: .28; }
 .dragging-ghost   { position: fixed; z-index: 9999; pointer-events: none; box-shadow: 0 10px 26px rgba(0,0,0,.22); cursor: grabbing; }
 
