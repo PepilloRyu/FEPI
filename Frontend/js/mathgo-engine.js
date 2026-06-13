@@ -399,7 +399,7 @@ export async function initEngine({
 
   // ---- Confeti ----
   function confetti() {
-    const cols = ["#4A6CF7", "#58cc02", "#ffc800", "#1cb0f6", "#ff4b4b"];
+    const cols = ["#8B2952", "#58cc02", "#ffc800", "#1cb0f6", "#ff4b4b"];
     let html = "";
     for (let i = 0; i < 18; i++) {
       const l = 10 + Math.random() * 80, t = 45 + Math.random() * 15, d = Math.random() * .15;
@@ -759,8 +759,8 @@ export async function initEngine({
           <div class="mg-btn-wrap green">
             <button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${li}))">▶ Iniciar nivel</button>
           </div>
-          <div class="mg-btn-wrap" style="box-shadow:0 4px 0 #4338ca">
-            <button class="mg-btn" style="background:#6366f1" onclick="MG.press(this,()=>MG.openPreview(${li}))"><i class="fa-solid fa-eye" style="margin-right:4px;"></i> Vista Previa</button>
+          <div class="mg-btn-wrap" style="box-shadow:0 4px 0 #3D0C24">
+            <button class="mg-btn" style="background:#5A1236" onclick="MG.press(this,()=>MG.openPreview(${li}))"><i class="fa-solid fa-eye" style="margin-right:4px;"></i> Vista Previa</button>
           </div>
           <div class="mg-btn-wrap">
             <button class="mg-btn" style="background:rgb(var(--swan));color:rgb(var(--eel))" onclick="MG.home()">← Volver al mapa</button>
@@ -777,7 +777,7 @@ export async function initEngine({
     const challenges = localChallenges[P.levelIdx] ?? worldData.levels[P.levelIdx].challenges;
     const total = challenges.length;
     if (total === 0) {
-      app.innerHTML = `<div class="mg-player"><div class="mg-top" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)">
+      app.innerHTML = `<div class="mg-player"><div class="mg-top" style="background:linear-gradient(90deg,#5A1236,#8B2952)">
         <button class="mg-close" onclick="MG.exitPreview()" title="Salir" style="color:#fff">✕</button></div>
         <div class="mg-content mg-fade" style="text-align:center;padding:40px 20px">
           <span class="mg-preview-badge"><i class="fa-solid fa-key" style="margin-right:4px;"></i> Admin · Vista Previa</span>
@@ -793,7 +793,7 @@ export async function initEngine({
     const nextDisabled = P.stepIdx === total - 1;
 
     app.innerHTML = `<div class="mg-player">
-      <div class="mg-top" style="background:linear-gradient(90deg,#6366f1,#8b5cf6)">
+      <div class="mg-top" style="background:linear-gradient(90deg,#5A1236,#8B2952)">
         <button class="mg-close" onclick="MG.exitPreview()" title="Salir" style="color:#fff">✕</button>
         <div class="mg-progress"><div class="mg-progress-fill" style="width:${Math.round(((P.stepIdx + 1) / total) * 100)}%"></div></div>
         <span class="mg-xp" style="color:#fff;white-space:nowrap">Ej. ${P.stepIdx + 1}/${total}</span>
@@ -817,7 +817,7 @@ export async function initEngine({
           <button class="mg-btn" onclick="MG.exitPreview()">Salir de Vista Previa</button>
         </div>
         <div class="mg-btn-wrap" style="flex:1;max-width:180px;${nextDisabled ? "opacity:.4;pointer-events:none" : ""}">
-          <button class="mg-btn" style="background:${nextDisabled ? "rgb(var(--swan));color:rgb(var(--eel))" : "#6366f1;color:#fff"}"
+          <button class="mg-btn" style="background:${nextDisabled ? "rgb(var(--swan));color:rgb(var(--eel))" : "#5A1236;color:#fff"}"
             onclick="MG.previewNav(1)" ${nextDisabled ? "disabled" : ""}>Siguiente →</button>
         </div>
       </div>

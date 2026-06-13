@@ -166,7 +166,7 @@ export async function initSidebar(activeId = 'learn') {
       adminEl.title = ADMIN_ITEM.label;
       adminEl.style.cssText = isActive ? '' : 'color:var(--mg-primary);';
       adminEl.innerHTML = `
-        <span class="mg-nav-icon" style="background:rgba(79,70,229,0.1);color:var(--mg-primary);">
+        <span class="mg-nav-icon" style="background:rgba(90,18,54,0.1);color:var(--mg-primary);">
           <i class="${ADMIN_ITEM.icon}"></i>
         </span>${ADMIN_ITEM.label}`;
       nav.appendChild(adminEl);
@@ -193,7 +193,7 @@ export async function initSidebar(activeId = 'learn') {
       teacherEl.title = TEACHER_ITEM.label;
       teacherEl.style.cssText = isActive ? '' : 'color:var(--mg-primary);';
       teacherEl.innerHTML = `
-        <span class="mg-nav-icon" style="background:rgba(79,70,229,0.1);color:var(--mg-primary);">
+        <span class="mg-nav-icon" style="background:rgba(90,18,54,0.1);color:var(--mg-primary);">
           <i class="${TEACHER_ITEM.icon}"></i>
         </span>${TEACHER_ITEM.label}`;
       nav.appendChild(teacherEl);
