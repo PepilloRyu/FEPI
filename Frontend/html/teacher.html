@@ -317,6 +317,9 @@
           </div>
         </div>
 
+        <!-- Progreso por mundo -->
+        <div class="mg-card" id="detail-worlds-card" style="display:none"></div>
+
       </div><!-- /view-detail -->
 
     </main>
@@ -334,6 +337,16 @@
       addDoc, updateDoc, serverTimestamp,
       arrayUnion, arrayRemove,
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+
+    // ── Catálogo de mundos ────────────────────────────────
+    const WORLDS = [
+      { id: '1', title: 'Las Bases del Álgebra',           icon: 'fa-solid fa-drafting-compass' },
+      { id: '2', title: 'Números Reales',                  icon: 'fa-solid fa-infinity' },
+      { id: '3', title: 'Funciones y Ecuaciones Lineales', icon: 'fa-solid fa-chart-simple' },
+      { id: '4', title: 'Funciones Cuadráticas',           icon: 'fa-solid fa-wave-square' },
+      { id: '5', title: 'Matrices y Sistemas Avanzados',   icon: 'fa-solid fa-table-cells' },
+      { id: '6', title: 'Números Complejos y Vectores',    icon: 'fa-solid fa-atom' },
+    ];
 
     // ── Estado ────────────────────────────────────────────
     let currentUid       = null;
@@ -514,10 +527,16 @@
     }
 
     async function renderDetailStudents() {
-      const tbody     = document.getElementById('detail-tbody');
-      const tableWrap = document.getElementById('detail-table-wrap');
-      const emptyEl   = document.getElementById('detail-empty');
-      const ids       = currentClassroom.studentIds;
+      const tbody      = document.getElementById('detail-tbody');
+      const tableWrap  = document.getElementById('detail-table-wrap');
+      const emptyEl    = document.getElementById('detail-empty');
+      const worldsCard = document.getElementById('detail-worlds-card');
+      const ids        = currentClassroom.studentIds;
+
+      // Reset full state so stale data from a previous classroom never leaks through
+      tbody.innerHTML       = '';
+      worldsCard.style.display = 'none';
+      worldsCard.innerHTML     = '';
 
       if (!ids.length) {
         tableWrap.style.display = 'none';
@@ -548,6 +567,7 @@
           nivel,
           xp,
           racha,
+          worlds: p.worlds ?? {},
         };
       });
 
@@ -577,6 +597,60 @@
       tbody.querySelectorAll('.btn-remove-student').forEach(btn => {
         btn.addEventListener('click', () => removeStudent(btn.dataset.uid, btn.dataset.name, btn));
       });
+
+      renderDetailWorlds(students);
+    }
+
+    function renderDetailWorlds(students) {
+      const card  = document.getElementById('detail-worlds-card');
+      const total = students.length;
+
+      if (total === 0) {
+        card.style.display = 'none';
+        return;
+      }
+
+      const rows = WORLDS.map(w => {
+        const completed = students.filter(s => s.worlds?.[w.id]?.allComplete === true).length;
+        const pct = Math.round((completed / total) * 100);
+        return `
+          <tr>
+            <td style="width:36px;text-align:center;">
+              <i class="${w.icon}" style="color:var(--mg-primary);font-size:18px;"></i>
+            </td>
+            <td style="font-weight:700;color:var(--mg-text);">Mundo ${w.id} — ${w.title}</td>
+            <td style="text-align:center;width:80px;">
+              <span class="mg-badge mg-badge-primary">${completed} / ${total}</span>
+            </td>
+            <td style="width:180px;">
+              <div class="world-bar">
+                <div class="world-bar-fill" style="width:${pct}%;"></div>
+              </div>
+            </td>
+            <td style="font-weight:800;color:var(--mg-primary);text-align:right;width:48px;">${pct}%</td>
+          </tr>`;
+      }).join('');
+
+      card.style.display = '';
+      card.innerHTML = `
+        <div class="mg-card-title">
+          <i class="fa-solid fa-map" style="color:var(--mg-primary);"></i>
+          Progreso por mundo
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Mundo</th>
+                <th style="text-align:center;">Completaron</th>
+                <th>Progreso</th>
+                <th style="text-align:right;">%</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
     }
 
     async function removeStudent(uid, name, btn) {
