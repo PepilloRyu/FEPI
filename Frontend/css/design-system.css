@@ -218,14 +218,14 @@ input, select, textarea { font-family: inherit; }
 }
 .mg-nav a.active,
 .mg-nav a[aria-current="page"] {
-  background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.07));
+  background: linear-gradient(135deg, rgba(90,18,54,0.12), rgba(90,18,54,0.07));
   color: var(--mg-primary);
-  border-color: rgba(79,70,229,0.2);
+  border-color: rgba(90,18,54,0.2);
   box-shadow: 0 4px 12px var(--mg-primary-glow);
 }
 .mg-nav a.active .mg-nav-icon,
 .mg-nav a[aria-current="page"] .mg-nav-icon {
-  background: rgba(79,70,229,0.12);
+  background: rgba(90,18,54,0.12);
 }
 
 /* Footer sidebar */
@@ -377,7 +377,7 @@ input, select, textarea { font-family: inherit; }
   color: var(--mg-primary);
   border: 2px solid var(--mg-primary);
 }
-.mg-btn-secondary:hover { background: rgba(79,70,229,0.06); }
+.mg-btn-secondary:hover { background: rgba(90,18,54,0.06); }
 .mg-btn-success {
   background: var(--mg-success);
   color: #fff;
@@ -485,7 +485,7 @@ input, select, textarea { font-family: inherit; }
   border-radius: var(--mg-radius);
   transition: all var(--mg-transition);
 }
-.mg-mission-item:hover { border-color: rgba(79,70,229,0.25); background: rgba(79,70,229,0.03); }
+.mg-mission-item:hover { border-color: rgba(90,18,54,0.25); background: rgba(90,18,54,0.03); }
 .mg-mission-header {
   display: flex;
   align-items: center;
@@ -582,7 +582,7 @@ input, select, textarea { font-family: inherit; }
   transition: all var(--mg-transition);
 }
 .mg-achievement.unlocked {
-  border-color: rgba(79,70,229,0.3);
+  border-color: rgba(90,18,54,0.3);
   box-shadow: 0 4px 16px var(--mg-primary-glow);
 }
 .mg-achievement.locked { opacity: 0.5; filter: grayscale(1); }
@@ -610,7 +610,7 @@ input, select, textarea { font-family: inherit; }
 .mg-lb-row.top-1 { border-color: rgba(234,179,8,0.5); background: linear-gradient(135deg, #fffbeb, #fff); }
 .mg-lb-row.top-2 { border-color: rgba(148,163,184,0.5); background: linear-gradient(135deg, #f8fafc, #fff); }
 .mg-lb-row.top-3 { border-color: rgba(180,83,9,0.4); background: linear-gradient(135deg, #fff7ed, #fff); }
-.mg-lb-row.me { border-color: rgba(79,70,229,0.4); background: linear-gradient(135deg, rgba(79,70,229,0.05), #fff); }
+.mg-lb-row.me { border-color: rgba(90,18,54,0.4); background: linear-gradient(135deg, rgba(90,18,54,0.05), #fff); }
 .mg-lb-rank { font-weight: 900; font-size: 16px; color: var(--mg-muted); text-align: center; }
 .mg-lb-name { font-weight: 800; font-size: 15px; color: var(--mg-text); }
 .mg-lb-league { font-size: 12px; color: var(--mg-muted); font-weight: 600; }
@@ -702,7 +702,7 @@ input, select, textarea { font-family: inherit; }
 }
 .mg-bottom-nav a.active,
 .mg-bottom-nav a[aria-current="page"] {
-  background: rgba(79,70,229,0.10);
+  background: rgba(90,18,54,0.10);
   color: var(--mg-primary);
 }
 .mg-bottom-nav a span.nav-label {
@@ -836,13 +836,13 @@ input, select, textarea { font-family: inherit; }
   box-shadow: var(--mg-shadow-sm);
 }
 .mg-world-card.unlocked {
-  border-color: rgba(79,70,229,0.3);
-  background: linear-gradient(135deg, rgba(79,70,229,0.03) 0%, #fff 100%);
-  box-shadow: 0 4px 0 rgba(79,70,229,0.15), var(--mg-shadow);
+  border-color: rgba(90,18,54,0.3);
+  background: linear-gradient(135deg, rgba(90,18,54,0.03) 0%, #fff 100%);
+  box-shadow: 0 4px 0 rgba(90,18,54,0.15), var(--mg-shadow);
 }
 .mg-world-card.unlocked:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 rgba(79,70,229,0.2), var(--mg-shadow-md);
+  box-shadow: 0 6px 0 rgba(90,18,54,0.2), var(--mg-shadow-md);
 }
 .mg-world-card.locked {
   opacity: 0.6;
@@ -1523,7 +1523,7 @@ body.mg-player-mode #app .mg-content {
   padding: 28px 32px;
   color: #fff;
   margin-bottom: var(--mg-space-6);
-  box-shadow: 0 16px 48px rgba(124,58,237,0.25);
+  box-shadow: 0 16px 48px rgba(90,18,54,0.25);
   text-align: center;
 }
 .league-header h1 { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
@@ -1649,7 +1649,7 @@ body.mg-player-mode #app .mg-content {
   padding: 32px 36px;
   color: #fff;
   margin-bottom: var(--mg-space-8);
-  box-shadow: 0 16px 48px rgba(79,70,229,0.35);
+  box-shadow: 0 16px 48px rgba(90,18,54,0.35);
   display: flex;
   align-items: center;
   gap: 20px;
