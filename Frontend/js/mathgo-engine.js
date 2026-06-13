@@ -46,6 +46,8 @@ function buildUserAnswer(c, st) {
 
 const EXAM_SIZE = 12;
 const PASS_THRESHOLD = Math.ceil(EXAM_SIZE * 0.83); // 10 de 12
+// TEMPORAL: bajar a 10 después de la expo
+const GEMS_PER_LEVEL = 20;
 
 export async function initEngine({
   worldData, getVisual,
@@ -121,7 +123,9 @@ export async function initEngine({
     phase: "home",
     level: 0, step: 0,
     xp: raw.totalXp ?? 0,
+    gems: raw.gems ?? 0,
     streak: raw.dailyStreak ?? 0,
+    firstCompletion: false,
     selected: [], chosen: null, placed: {}, result: null, showHint: false,
     completed: buildCompleted(),
   };
@@ -598,20 +602,25 @@ export async function initEngine({
   }
 
   // ---- Firestore: guardar progreso ----
-  async function saveProgress() {
+  async function saveProgress(isFirstCompletion = false) {
     const completedArr = Object.keys(S.completed).map(Number).filter(li => S.completed[li]);
     const allComplete  = completedArr.length >= totalLevels;
-    try {
-      await setDoc(doc(db, "mathgo_progress", uid), {
-        totalXp: S.xp,
-        worlds: {
-          [worldId]: {
-            levelsCompleted: completedArr,
-            allComplete,
-            jumpExam: { attempts: E.attempts, passed: E.passed },
-          },
+    const update = {
+      totalXp: S.xp,
+      worlds: {
+        [worldId]: {
+          levelsCompleted: completedArr,
+          allComplete,
+          jumpExam: { attempts: E.attempts, passed: E.passed },
         },
-      }, { merge: true });
+      },
+    };
+    if (isFirstCompletion) {
+      S.gems += GEMS_PER_LEVEL;
+      update.gems = S.gems;
+    }
+    try {
+      await setDoc(doc(db, "mathgo_progress", uid), update, { merge: true });
     } catch (e) { console.warn("Error guardando progreso:", e); }
   }
 
@@ -726,7 +735,7 @@ export async function initEngine({
       <div class="mg-fade">
         <div class="mg-stats-bar mg-mb-6">
           <div class="mg-stat-chip str"><i class="fa-solid fa-fire"></i><strong>${dailyStreak}</strong> días</div>
-          <div class="mg-stat-chip gem"><i class="fa-solid fa-gem"></i><strong>${raw.gems ?? 0}</strong></div>
+          <div class="mg-stat-chip gem"><i class="fa-solid fa-gem"></i><strong>${S.gems}</strong></div>
           <div class="mg-stat-chip xp"><i class="fa-solid fa-bolt"></i><strong>${S.xp}</strong> XP</div>
         </div>
         <div class="mg-hero-banner mg-mb-6">
@@ -832,6 +841,7 @@ export async function initEngine({
         <h1 style="font-family:'din-round-bold';font-weight:800;font-size:30px;margin:0">¡Nivel ${lv.id} completado!</h1>
         <p class="mg-sub">${lv.title}</p>
         <div class="mg-card-xp"><div style="font-size:12px;font-weight:800;color:rgb(var(--hare));letter-spacing:1px">XP TOTAL</div><div class="n"><i class="fa-solid fa-star" style="color:#fcd34d; margin-right:4px;"></i>${S.xp}</div></div>
+        ${S.firstCompletion ? `<div style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:14px;border:2px solid rgba(6,182,212,0.35);background:rgba(6,182,212,0.08);font-weight:800;font-size:16px;color:var(--mg-gems);"><i class="fa-solid fa-gem"></i>+${GEMS_PER_LEVEL} GEMAS</div>` : ""}
         ${nextBtn}
         <div class="mg-btn-wrap blue" style="max-width:280px;width:100%"><button class="mg-btn" onclick="MG.press(this,MG.home)">Volver al mapa</button></div>
       </div></div>`;
@@ -1087,9 +1097,11 @@ export async function initEngine({
     // -- Player --
     async next() {
       if (S.step + 1 >= levelTotal()) {
+        const isFirstCompletion = !S.completed[S.level];
         S.completed[S.level] = true;
+        S.firstCompletion = isFirstCompletion;
         S.phase = "leveldone";
-        await saveProgress();
+        await saveProgress(isFirstCompletion);
       } else {
         S.step++;
       }

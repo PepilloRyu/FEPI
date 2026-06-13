@@ -9,6 +9,9 @@ namespace MathGo.Application.Services;
 
 public class ProgressService : IProgressService
 {
+    // TEMPORAL: bajar a 10 después de la expo
+    private const int GEMS_PER_LEVEL = 20;
+
     private readonly IProgressRepository _progressRepository;
     private readonly IUserRepository _userRepository;
     private readonly IGamificationService _gamificationService;
@@ -157,6 +160,7 @@ public class ProgressService : IProgressService
         if (!levelAlreadyDone)
         {
             worldProgress.LevelsCompleted.Add(request.LevelId);
+            progress.Gems += GEMS_PER_LEVEL;
         }
 
         bool worldJustCompleted = false;
