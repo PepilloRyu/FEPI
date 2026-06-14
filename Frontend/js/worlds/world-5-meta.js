@@ -115,10 +115,10 @@ export function getVisual(kind) {
     <div style="text-align:center;color:rgb(var(--wolf));font-size:13px;margin-top:8px">aᵢⱼ = fila i, columna j &nbsp;·&nbsp; A tiene 2 filas y 3 columnas</div>
   </div>`;
   if (kind === "matrix-types") return `<div class="mg-vis">
-    <div class="mg-tr"><span class="l">Identidad I₃ — 1s en diagonal</span><span class="r">[1 0 0; 0 1 0; 0 0 1]</span></div>
-    <div class="mg-tr"><span class="l">Triangular superior — 0s debajo</span><span class="r">[2 5; 0 3]</span></div>
-    <div class="mg-tr"><span class="l">Simétrica — a₁₂ = a₂₁</span><span class="r">[3 7; 7 5]</span></div>
-    <div class="mg-tr"><span class="l">Nula — todo ceros</span><span class="r">[0 0; 0 0]</span></div>
+    <div class="mg-tr"><span class="l">Identidad I₃ — 1s en diagonal</span><span class="r"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-3"><span class="mg-mc">1</span><span class="mg-mc">0</span><span class="mg-mc">0</span><span class="mg-mc">0</span><span class="mg-mc">1</span><span class="mg-mc">0</span><span class="mg-mc">0</span><span class="mg-mc">0</span><span class="mg-mc">1</span></span></span></span></div>
+    <div class="mg-tr"><span class="l">Triangular superior — 0s debajo</span><span class="r"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">2</span><span class="mg-mc">5</span><span class="mg-mc">0</span><span class="mg-mc">3</span></span></span></span></div>
+    <div class="mg-tr"><span class="l">Simétrica — a₁₂ = a₂₁</span><span class="r"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">3</span><span class="mg-mc">7</span><span class="mg-mc">7</span><span class="mg-mc">5</span></span></span></span></div>
+    <div class="mg-tr"><span class="l">Nula — todo ceros</span><span class="r"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">0</span><span class="mg-mc">0</span><span class="mg-mc">0</span><span class="mg-mc">0</span></span></span></span></div>
   </div>`;
   if (kind === "matrix-ops") return `<div class="mg-vis">
     <div class="mg-band cat"><div class="h">A + B  (mismo orden)</div></div>
@@ -136,9 +136,9 @@ export function getVisual(kind) {
   // ── Nivel 2: Determinantes ───────────────────────────────────────────────
   if (kind === "det2x2") return `<div class="mg-vis">
     <div class="mg-band cat"><div class="h">det(A) = ad − bc</div></div>
-    <div class="mg-formula" style="font-size:18px;padding:6px 0">A = [3  5; 2  4]</div>
+    <div class="mg-formula" style="font-size:18px;padding:6px 0">A = <span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">3</span><span class="mg-mc">5</span><span class="mg-mc">2</span><span class="mg-mc">4</span></span></span></div>
     <div class="mg-tr"><span class="l">det = 3·4 − 5·2 = 12 − 10</span><span class="r" style="color:var(--mathgo-blue)">= 2</span></div>
-    <div class="mg-tr"><span class="l">B = [6  3; 4  2] → det = 12−12</span><span class="r" style="color:var(--cardinal)">= 0 (singular)</span></div>
+    <div class="mg-tr"><span class="l">B = <span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">6</span><span class="mg-mc">3</span><span class="mg-mc">4</span><span class="mg-mc">2</span></span></span> → det = 12−12</span><span class="r" style="color:var(--cardinal)">= 0 (singular)</span></div>
   </div>`;
   if (kind === "det3x3-sarrus") return `<div class="mg-vis">
     <div class="mg-band cat"><div class="h">Regla de Sarrus — copia columnas 1 y 2</div></div>
@@ -154,8 +154,8 @@ export function getVisual(kind) {
   </div>`;
   if (kind === "matrix-inverse") return `<div class="mg-vis">
     <div class="mg-band cat"><div class="h">A⁻¹ = (1/det) · [d −b; −c a]</div></div>
-    <div class="mg-formula" style="font-size:16px;padding:4px 0">A = [3  5; 1  2] → det = 1</div>
-    <div class="mg-tr"><span class="l">A⁻¹ = (1/1)·[2 −5; −1 3]</span><span class="r" style="color:var(--owl-green)">[2 −5; −1 3]</span></div>
+    <div class="mg-formula" style="font-size:16px;padding:4px 0">A = <span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">3</span><span class="mg-mc">5</span><span class="mg-mc">1</span><span class="mg-mc">2</span></span></span> → det = 1</div>
+    <div class="mg-tr"><span class="l">A⁻¹ = (1/1)·<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">2</span><span class="mg-mc">−5</span><span class="mg-mc">−1</span><span class="mg-mc">3</span></span></span></span><span class="r" style="color:var(--owl-green)"><span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-2"><span class="mg-mc">2</span><span class="mg-mc">−5</span><span class="mg-mc">−1</span><span class="mg-mc">3</span></span></span></span></div>
     <div style="text-align:center;color:rgb(var(--wolf));font-size:13px;margin-top:8px">Verificar: A·A⁻¹ = I ✓</div>
   </div>`;
   // ── Nivel 3: Gauss / Gauss-Jordan ────────────────────────────────────────
