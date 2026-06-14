@@ -71,6 +71,18 @@
         </div>
       </div>
 
+      <!-- Mis Logros -->
+      <div class="mg-card mg-mb-6">
+        <h2 class="mg-card-title">
+          <i class="fa-solid fa-trophy" style="color:var(--mg-xp);"></i> Mis Logros
+        </h2>
+        <div class="mg-achievement-grid" id="achievements-grid">
+          <div class="mg-skeleton mg-skeleton-text" style="height: 120px; width: 100%;"></div>
+          <div class="mg-skeleton mg-skeleton-text" style="height: 120px; width: 100%;"></div>
+          <div class="mg-skeleton mg-skeleton-text" style="height: 120px; width: 100%;"></div>
+        </div>
+      </div>
+
       <!-- Mis objetivos -->
       <div class="mg-card">
         <h2 class="mg-card-title">
@@ -95,6 +107,7 @@
   <script type="module">
     import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
+    import { getAchievements } from '../js/services/api.js';
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
     import { BANNER_CATALOG, getBannerStyle } from '../js/banner-catalog.js';
@@ -189,6 +202,49 @@
       document.getElementById('stat-level').textContent        = totalCompleted + 1;
       document.getElementById('stat-completed').textContent    = totalCompleted;
       document.getElementById('stat-best-streak').textContent  = userData.bestStreak ?? streak;
+
+      // Cargar y Renderizar Logros
+      const grid = document.getElementById('achievements-grid');
+      try {
+        const res = await getAchievements();
+        const achievements = res?.data || res || [];
+        
+        if (achievements && achievements.length > 0) {
+          grid.innerHTML = achievements.map(ach => {
+            const statusClass = ach.unlocked ? 'unlocked' : 'locked';
+            const unlockInfo = ach.unlocked 
+              ? `<div class="mg-badge mg-badge-success" style="font-size: 10px; padding: 2px 8px; margin-top: 6px;">Desbloqueado</div>` 
+              : `<div class="mg-badge mg-badge-locked" style="font-size: 10px; padding: 2px 8px; margin-top: 6px;"><i class="fa-solid fa-lock"></i> Bloqueado</div>`;
+            
+            return `
+              <div class="mg-achievement ${statusClass}">
+                <div class="mg-achievement-icon" style="margin-bottom: var(--mg-space-2);">
+                  <img src="../assets/images/achievements/${ach.icon}.png" alt="${ach.name}" 
+                       style="width: 56px; height: 56px; object-fit: contain; display: block; margin: 0 auto; transition: transform var(--mg-transition);" />
+                </div>
+                <div class="mg-achievement-name" style="font-weight: 800; font-size: 14px; margin-bottom: 2px;">${ach.name}</div>
+                <div class="mg-achievement-desc" style="font-size: 11px; color: var(--mg-muted); line-height: 1.3;">${ach.description}</div>
+                ${unlockInfo}
+              </div>
+            `;
+          }).join('');
+        } else {
+          grid.innerHTML = `
+            <div class="mg-empty" style="grid-column: 1 / -1; padding: 24px 0;">
+              <div class="mg-empty-icon" style="font-size: 36px; color: var(--mg-muted-2);"><i class="fa-solid fa-trophy"></i></div>
+              <div class="mg-empty-text">No se encontraron logros disponibles.</div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error al cargar logros:', err);
+        grid.innerHTML = `
+          <div class="mg-empty" style="grid-column: 1 / -1; padding: 24px 0; color: var(--mg-danger);">
+            <div class="mg-empty-icon" style="font-size: 36px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="mg-empty-text">Error al cargar los logros. Por favor, intenta de nuevo.</div>
+          </div>
+        `;
+      }
 
       // Objetivos
       const objetivos = userData.objetivos ?? [];

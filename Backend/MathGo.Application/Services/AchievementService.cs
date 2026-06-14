@@ -83,10 +83,16 @@ public class AchievementService : IAchievementService
 
             int userValue = a.Condition.Type switch
             {
-                "xp_total"         => progress.TotalXp,
-                "levels_completed" => progress.Worlds?.Values.Sum(w => w.LevelsCompleted?.Count ?? 0) ?? 0,
-                "streak_days"      => progress.DailyStreak,
-                "worlds_completed" => progress.Worlds?.Values.Count(w => w.AllComplete) ?? 0,
+                "xp_total"          => progress.TotalXp,
+                "levels_completed"  => progress.Worlds?.Values.Sum(w => w.LevelsCompleted?.Count ?? 0) ?? 0,
+                "streak_days"       => progress.DailyStreak,
+                "worlds_completed"  => progress.Worlds?.Values.Count(w => w.AllComplete) ?? 0,
+                "world_1_completed" => (progress.Worlds != null && progress.Worlds.TryGetValue("world-1", out var w1) && w1.AllComplete) ? 1 : 0,
+                "world_2_completed" => (progress.Worlds != null && progress.Worlds.TryGetValue("world-2", out var w2) && w2.AllComplete) ? 1 : 0,
+                "world_3_completed" => (progress.Worlds != null && progress.Worlds.TryGetValue("world-3", out var w3) && w3.AllComplete) ? 1 : 0,
+                "world_4_completed" => (progress.Worlds != null && progress.Worlds.TryGetValue("world-4", out var w4) && w4.AllComplete) ? 1 : 0,
+                "world_5_completed" => (progress.Worlds != null && progress.Worlds.TryGetValue("world-5", out var w5) && w5.AllComplete) ? 1 : 0,
+                "world_6_completed" => (progress.Worlds != null && progress.Worlds.TryGetValue("world-6", out var w6) && w6.AllComplete) ? 1 : 0,
                 _ => 0
             };
 
