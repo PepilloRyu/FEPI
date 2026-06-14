@@ -32,6 +32,22 @@ function matrixify(text) {
     : tableHTML;
 }
 
+// Reemplaza TODAS las ocurrencias de notación matricial dentro de texto libre.
+// A diferencia de matrixify(), no requiere que el texto sea solo matrices —
+// localiza cada [n, n | n] embebida y la convierte a tabla inline, dejando el resto.
+function matrixifyInline(text) {
+  return text.replace(/\[[\d\s.,|−-]+\]/g, match => {
+    const tokens = match.slice(1, -1).trim()
+      .split(/\s+/).map(t => t.replace(/,+$/, "")).filter(Boolean);
+    const cells = tokens.map(n =>
+      n === "|"
+        ? `<span class="mg-mc mg-mc-sep">|</span>`
+        : `<span class="mg-mc">${n}</span>`
+    ).join("");
+    return `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${tokens.length}">${cells}</span></span>`;
+  });
+}
+
 async function getToken(user) {
   return user.getIdToken();
 }
@@ -837,7 +853,7 @@ export async function initEngine({
           <span class="mg-tag" style="margin-bottom:0;">${c.tag ?? ""}</span>
           <button onclick="MG.openTheoryModal(${P.levelIdx})" style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px solid var(--mg-border);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--mg-primary);cursor:pointer;font-family:inherit;flex-shrink:0;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i>Ver teoría</button>
         </div>
-        <p class="mg-prompt">${c.prompt}</p>
+        <p class="mg-prompt">${matrixifyInline(c.prompt)}</p>
         ${mid}
         ${c.hint ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : ""}
       </div>
@@ -941,7 +957,7 @@ export async function initEngine({
       <button onclick="MG.openTheoryModal()" style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px solid var(--mg-border);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--mg-primary);cursor:pointer;font-family:inherit;flex-shrink:0;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i>Ver teoría</button>
     </div>`;
     app.innerHTML = `<div class="mg-player">${top}<div class="mg-content mg-fade ${S.result === "no" ? "mg-shake" : ""}">
-      ${tagRow}<p class="mg-prompt">${c.prompt}</p>${mid}${hint}</div>
+      ${tagRow}<p class="mg-prompt">${matrixifyInline(c.prompt)}</p>${mid}${hint}</div>
       <div class="mg-footer">${footer}</div></div>`;
     bindDrag();
   }
@@ -1061,7 +1077,7 @@ export async function initEngine({
         </div>
         <div class="mg-content">
           <span class="mg-tag">${c.tag ?? ""}</span>
-          <p class="mg-prompt">${c.prompt}</p>
+          <p class="mg-prompt">${matrixifyInline(c.prompt)}</p>
           ${mid}${hint}
         </div>
         <div class="mg-footer">${footer}</div>
