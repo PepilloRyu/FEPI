@@ -173,6 +173,35 @@
     }
     .banner-msg.error   { color: var(--mg-danger, #ef4444); }
     .banner-msg.success { color: var(--mg-success, #22c55e); }
+    .title-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .title-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 14px 14px;
+      text-align: center;
+    }
+    .title-rank-label {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 20px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .title-rank-label:first-child { margin-top: 4px; }
+    .title-rank-label-common    { color: var(--mg-success); }
+    .title-rank-label-rare      { color: #60a5fa; }
+    .title-rank-label-epic      { color: #a78bfa; }
+    .title-rank-label-legendary { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -240,6 +269,16 @@
         </div>
       </div>
 
+      <!-- Sección: Títulos -->
+      <div class="shop-section-title">
+        <i class="fa-solid fa-id-badge" style="color:var(--mg-primary);"></i> Títulos
+      </div>
+      <div class="mg-card" style="padding: 20px;">
+        <div id="title-container">
+          <!-- Renderizado por JS -->
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -252,6 +291,7 @@
       doc, getDoc, runTransaction, updateDoc, arrayUnion
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
     import { BANNER_CATALOG } from '../js/banner-catalog.js';
+    import { TITLE_CATALOG, getTitleById } from '../js/title-catalog.js';
 
     const MAX_LIVES = 15;
     let boostTimer = null;
@@ -287,6 +327,16 @@
 
     // Estado compartido de banners
     let bannerState = { owned: [], equipped: null };
+
+    // Estado compartido de títulos
+    let titleState = { owned: [], equipped: null };
+
+    const RANK_CONFIG = {
+      common:    { label: 'Común',      icon: 'fa-solid fa-star'   },
+      rare:      { label: 'Raro',       icon: 'fa-solid fa-gem'    },
+      epic:      { label: 'Épico',      icon: 'fa-solid fa-crown'  },
+      legendary: { label: 'Legendario', icon: 'fa-solid fa-dragon' },
+    };
 
     function renderBanners() {
       const grid = document.getElementById('banner-grid');
@@ -400,6 +450,141 @@
       renderBanners();
     }
 
+    function renderTitles() {
+      const container = document.getElementById('title-container');
+      const ranks = ['common', 'rare', 'epic', 'legendary'];
+
+      container.innerHTML = ranks.map(rank => {
+        const rc = RANK_CONFIG[rank];
+        const titlesOfRank = TITLE_CATALOG.filter(t => t.rank === rank);
+
+        const cardsHtml = titlesOfRank.map(t => {
+          const isOwned    = titleState.owned.includes(t.id);
+          const isEquipped = titleState.equipped === t.id;
+
+          let actionHtml;
+          if (!isOwned) {
+            actionHtml = `
+              <button class="mg-btn mg-btn-primary" style="width:100%; font-size:13px;"
+                data-title-buy="${t.id}">
+                <i class="fa-solid fa-cart-shopping"></i> Comprar
+              </button>`;
+          } else if (isEquipped) {
+            actionHtml = `
+              <span class="banner-equipped-badge">
+                <i class="fa-solid fa-check"></i> Equipado
+              </span>
+              <button class="mg-btn" style="width:100%; font-size:13px; background:rgba(0,0,0,0.06); color:var(--mg-muted);"
+                data-title-unequip="${t.id}">
+                <i class="fa-solid fa-xmark"></i> Quitar
+              </button>`;
+          } else {
+            actionHtml = `
+              <button class="mg-btn mg-btn-primary" style="width:100%; font-size:13px; background:var(--mg-success);"
+                data-title-equip="${t.id}">
+                <i class="fa-solid fa-id-badge"></i> Equipar
+              </button>`;
+          }
+
+          return `
+            <div class="mg-card title-card">
+              <div><span class="mg-title-name mg-title-${rank}">${t.name}</span></div>
+              ${!isOwned ? `<div class="banner-cost"><i class="fa-solid fa-gem"></i> ${t.cost}</div>` : ''}
+              <div class="banner-msg" id="title-msg-${t.id}"></div>
+              ${actionHtml}
+            </div>`;
+        }).join('');
+
+        return `
+          <div class="title-rank-label title-rank-label-${rank}">
+            <i class="${rc.icon}"></i> ${rc.label}
+          </div>
+          <div class="title-grid">${cardsHtml}</div>`;
+      }).join('');
+
+      container.querySelectorAll('[data-title-buy]').forEach(btn => {
+        btn.addEventListener('click', () => buyTitle(btn.dataset.titleBuy, btn));
+      });
+      container.querySelectorAll('[data-title-equip]').forEach(btn => {
+        btn.addEventListener('click', () => equipTitle(btn.dataset.titleEquip));
+      });
+      container.querySelectorAll('[data-title-unequip]').forEach(btn => {
+        btn.addEventListener('click', () => unequipTitle());
+      });
+    }
+
+    async function buyTitle(titleId, btn) {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const catalog = getTitleById(titleId);
+      if (!catalog) return;
+
+      const msgEl = document.getElementById(`title-msg-${titleId}`);
+      btn.disabled = true;
+      msgEl.textContent = '';
+      msgEl.className = 'banner-msg';
+
+      try {
+        let newGems;
+        await runTransaction(db, async tx => {
+          const progressRef = doc(db, 'mathgo_progress', uid);
+          const userRef     = doc(db, 'users', uid);
+          const [progressSnap, userSnap] = await Promise.all([tx.get(progressRef), tx.get(userRef)]);
+
+          const gems  = progressSnap.exists() ? (progressSnap.data().gems ?? 0) : 0;
+          const owned = userSnap.exists() ? (userSnap.data().ownedTitles ?? []) : [];
+
+          if (owned.includes(titleId)) throw new Error('Ya tienes este título.');
+          if (gems < catalog.cost) throw new Error('Gemas insuficientes.');
+
+          newGems = gems - catalog.cost;
+          tx.update(progressRef, { gems: newGems });
+          tx.update(userRef, { ownedTitles: arrayUnion(titleId) });
+        });
+
+        document.getElementById('gems-count').textContent = newGems;
+        titleState.owned = [...titleState.owned, titleId];
+        renderTitles();
+        const newMsg = document.getElementById(`title-msg-${titleId}`);
+        if (newMsg) { newMsg.textContent = '¡Título desbloqueado!'; newMsg.className = 'banner-msg success'; }
+      } catch (err) {
+        msgEl.textContent = err.message || 'Error al comprar.';
+        msgEl.className = 'banner-msg error';
+        btn.disabled = false;
+      }
+    }
+
+    function updateSidebarTitle(titleId) {
+      const titleEl = document.getElementById('sb-equipped-title');
+      if (!titleEl) return;
+      if (!titleId) {
+        titleEl.innerHTML = '';
+        return;
+      }
+      const titleDef = getTitleById(titleId);
+      if (titleDef) {
+        titleEl.innerHTML = `<span class="mg-title-name mg-title-${titleDef.rank}" style="font-size:11px; padding:2px 8px;">${titleDef.name}</span>`;
+      }
+    }
+
+    async function equipTitle(titleId) {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      await updateDoc(doc(db, 'users', uid), { equippedTitle: titleId });
+      titleState.equipped = titleId;
+      renderTitles();
+      updateSidebarTitle(titleId);
+    }
+
+    async function unequipTitle() {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      await updateDoc(doc(db, 'users', uid), { equippedTitle: null });
+      titleState.equipped = null;
+      renderTitles();
+      updateSidebarTitle(null);
+    }
+
     async function load() {
       await initSidebar('tienda');
 
@@ -425,12 +610,15 @@
         }
 
         if (userSnap.exists()) {
-          bannerState.owned    = userSnap.data().ownedBanners  ?? [];
+          bannerState.owned    = userSnap.data().ownedBanners   ?? [];
           bannerState.equipped = userSnap.data().equippedBanner ?? null;
+          titleState.owned     = userSnap.data().ownedTitles    ?? [];
+          titleState.equipped  = userSnap.data().equippedTitle  ?? null;
         }
       }
 
       renderBanners();
+      renderTitles();
 
       // Botón: +1 Vida
       document.getElementById('btn-buy-life').addEventListener('click', async () => {

@@ -1931,3 +1931,41 @@ body.mg-player-mode #app .mg-content {
   color: var(--mg-text-2);
   font-weight: 600;
 }
+
+/* ───────────────────────────────────────────
+   29. SISTEMA DE TÍTULOS
+   ─────────────────────────────────────────── */
+.mg-title-name {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 800 !important;
+  border-radius: 8px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.mg-title-common {
+  color: var(--mg-success) !important;
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+.mg-title-rare {
+  color: #60a5fa !important;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1.5px solid rgba(59, 130, 246, 0.35);
+}
+.mg-title-epic {
+  color: #e9d5ff !important;
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+}
+.mg-title-legendary {
+  color: #7c2d12 !important;
+  background: linear-gradient(90deg, #fcd34d, #f59e0b, #fbbf24, #f59e0b, #fcd34d);
+  background-size: 300% 100%;
+  animation: mgTitleShimmer 2.4s linear infinite;
+}
+@keyframes mgTitleShimmer {
+  0%   { background-position: 200% 50%; }
+  100% { background-position: -200% 50%; }
+}

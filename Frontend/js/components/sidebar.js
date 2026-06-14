@@ -9,6 +9,7 @@ import { logout, getInitials } from '../services/auth.js';
 import { getProfile } from '../services/api.js';
 import { auth, db } from '../firebaseConfig.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+import { getTitleById } from '../title-catalog.js';
 
 const NAV_ITEMS = [
   { id: 'learn',       icon: 'fa-solid fa-graduation-cap',  label: 'Aprender',      href: 'learn.html' },
@@ -58,6 +59,7 @@ function buildSidebar(activeId, basePath, userName, userXp, userStreak) {
         </div>
         <div class="mg-profile-card-info">
           <h3 id="sb-name" style="font-size:14px;">${userName || 'Cargando...'}</h3>
+          <div id="sb-equipped-title" style="margin:2px 0;"></div>
           <span><i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i> <strong id="sb-xp">${userXp ?? '–'}</strong> XP &nbsp;<i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i> <strong id="sb-streak">${userStreak ?? '–'}</strong> &nbsp;<i class="fa-solid fa-heart" style="color:var(--mg-hearts);"></i> <strong id="sb-hearts">–</strong></span>
         </div>
       </div>
@@ -151,6 +153,16 @@ export async function initSidebar(activeId = 'learn') {
   const userRole = roleSnap?.exists?.() ? roleSnap.data().role : null;
   const isAdminUser   = userRole === 'admin';
   const isTeacherUser = userRole === 'teacher';
+
+  // Mostrar título equipado bajo el nombre
+  const equippedTitleId = roleSnap?.exists?.() ? (roleSnap.data().equippedTitle ?? null) : null;
+  if (equippedTitleId) {
+    const titleDef = getTitleById(equippedTitleId);
+    const titleEl  = document.getElementById('sb-equipped-title');
+    if (titleEl && titleDef) {
+      titleEl.innerHTML = `<span class="mg-title-name mg-title-${titleDef.rank}" style="font-size:11px; padding:2px 8px;">${titleDef.name}</span>`;
+    }
+  }
 
   const heartsEl = document.getElementById('sb-hearts');
   if (heartsEl) heartsEl.textContent = isAdminUser ? '∞' : (profile?.hearts ?? 15);
