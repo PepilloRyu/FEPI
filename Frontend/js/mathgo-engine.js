@@ -867,11 +867,23 @@ export async function initEngine({
       const nextBtn = nextIdx < totalLevels
         ? `<div class="mg-btn-wrap green" style="max-width:280px;width:100%"><button class="mg-btn" onclick="MG.press(this,()=>MG.startLevel(${nextIdx}))">Siguiente nivel →</button></div>`
         : ``;
+      const totalChallenges = lv.challenges.length;
+      const precision = totalChallenges > 0 ? Math.round((S.correctCount / totalChallenges) * 100) : 100;
+      const precColor = precision === 100 ? 'var(--mg-success)' : precision >= 70 ? 'var(--mg-xp)' : 'var(--mg-danger)';
+      const precBorder = precision === 100 ? 'rgba(34,197,94,0.35)' : precision >= 70 ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.35)';
+      const precBg = precision === 100 ? 'rgba(34,197,94,0.08)' : precision >= 70 ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
+      const precisionCard = totalChallenges > 0 ? `
+        <div class="mg-card-xp" style="border-color:${precBorder};background:${precBg};border-bottom-color:${precBorder};">
+          <div style="font-size:12px;font-weight:800;color:rgb(var(--hare));letter-spacing:1px">PRECISIÓN</div>
+          <div class="n" style="color:${precColor};font-size:36px;"><i class="fa-solid fa-bullseye" style="margin-right:8px;"></i>${precision}%</div>
+          <div style="font-size:13px;font-weight:700;color:rgb(var(--wolf));margin-top:2px;">${S.correctCount} de ${totalChallenges} ejercicios correctos</div>
+        </div>` : "";
       app.innerHTML = `<div class="mg-player"><div class="mg-center mg-fade">
         <div style="font-size:60px"><i class="fa-solid fa-trophy" style="color:#fcd34d;"></i></div>
         <h1 style="font-family:'din-round-bold';font-weight:800;font-size:30px;margin:0">¡Nivel ${lv.id} completado!</h1>
         <p class="mg-sub">${lv.title}</p>
         <div class="mg-card-xp"><div style="font-size:12px;font-weight:800;color:rgb(var(--hare));letter-spacing:1px">XP TOTAL</div><div class="n"><i class="fa-solid fa-star" style="color:#fcd34d; margin-right:4px;"></i>${S.xp}</div></div>
+        ${precisionCard}
         ${S.firstCompletion ? `<div style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:14px;border:2px solid rgba(6,182,212,0.35);background:rgba(6,182,212,0.08);font-weight:800;font-size:16px;color:var(--mg-gems);"><i class="fa-solid fa-gem"></i>+${GEMS_PER_LEVEL} GEMAS</div>` : ""}
         ${nextBtn}
         <div class="mg-btn-wrap blue" style="max-width:280px;width:100%"><button class="mg-btn" onclick="MG.press(this,MG.home)">Volver al mapa</button></div>
@@ -1121,7 +1133,7 @@ export async function initEngine({
     },
     startLevel(l) {
       S.level = l;
-      Object.assign(S, { phase: "play", step: 0, selected: [], chosen: null, placed: {}, result: null, showHint: false, streak: 0 });
+      Object.assign(S, { phase: "play", step: 0, selected: [], chosen: null, placed: {}, result: null, showHint: false, streak: 0, correctCount: 0, failedExercises: new Set() });
       render();
     },
 
@@ -1166,9 +1178,11 @@ export async function initEngine({
         S.result = correct ? "ok" : "no";
         if (correct) {
           S.xp += xpAwarded; S.streak++;
+          if (!S.failedExercises.has(exIdx)) S.correctCount++;
           render(); confetti();
         } else {
           S.showHint = true; S.streak = 0;
+          S.failedExercises.add(exIdx);
           if (!isAdmin && remainingLives !== undefined) {
             livesCount = remainingLives;
             updateLivesUI(livesCount);

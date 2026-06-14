@@ -43,9 +43,10 @@
           <div class="mg-stat-label">Gemas</div>
         </div>
         <div class="mg-stat-box">
-          <div style="font-size:24px; color:var(--mg-success); margin-bottom:6px;"><i class="fa-solid fa-bullseye"></i></div>
+          <div id="d-accuracy-icon" style="font-size:24px; color:var(--mg-success); margin-bottom:6px;"><i class="fa-solid fa-bullseye"></i></div>
           <div class="mg-stat-value" id="d-accuracy" style="color: var(--mg-success);">–</div>
-          <div class="mg-stat-label">Precisión</div>
+          <div class="mg-stat-label">Precisión global</div>
+          <div id="d-accuracy-sub" style="font-size:11px; font-weight:700; color:var(--mg-muted); margin-top:3px;"></div>
         </div>
       </div>
 
@@ -127,7 +128,7 @@
     import { initSidebar } from '../js/components/sidebar.js';
     import { getDashboard, getMissions, getAnalytics } from '../js/services/api.js';
     import { db } from '../js/firebaseConfig.js';
-    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+    import { doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
     const WORLD_NAMES = {
       '1': 'Las Bases del Álgebra',
@@ -221,9 +222,10 @@ function updateXpRing(xp, xpNeeded = 1000) {
       document.getElementById('dash-greeting').textContent = `${greeting}, ${displayName.split(' ')[0]}!`;
 
       // Cargar datos de Firestore (fallback local)
-      const [progressSnap, userSnap] = await Promise.allSettled([
+      const [progressSnap, userSnap, attemptsSnap] = await Promise.allSettled([
         getDoc(doc(db, 'mathgo_progress', user.uid)),
         getDoc(doc(db, 'users', user.uid)),
+        getDocs(query(collection(db, 'attempts'), where('userId', '==', user.uid))),
       ]);
       const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
       const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
@@ -254,17 +256,29 @@ function updateXpRing(xp, xpNeeded = 1000) {
       updateXpRing(xp);
       renderTopics(progress.worlds);
 
-      // Intentar cargar analytics del backend
-      const { data: analytics } = await getAnalytics();
-      if (analytics) {
-        const acc = analytics.accuracyRate ?? analytics.accuracy;
-        if (acc !== undefined) document.getElementById('d-accuracy').textContent = `${Math.round(acc * 100)}%`;
-        if (analytics.weeklyXp) renderActivityChart(analytics.weeklyXp);
-        else renderActivityChart([0, 20, 45, 30, 0, 80, xp % 100]);
-      } else {
-        document.getElementById('d-accuracy').textContent = '–';
-        renderActivityChart([0, 20, 45, 30, 0, 80, xp % 100]);
+      // Precisión global desde colección 'attempts'
+      if (attemptsSnap.status === 'fulfilled') {
+        const docs = attemptsSnap.value.docs;
+        const totalAttempts = docs.length;
+        if (totalAttempts === 0) {
+          document.getElementById('d-accuracy').textContent = '–';
+          document.getElementById('d-accuracy-sub').textContent = 'Sin datos aún';
+        } else {
+          const correctAttempts = docs.filter(d => d.data().isCorrect === true).length;
+          const precisionGlobal = Math.round((correctAttempts / totalAttempts) * 100);
+          const precColor = precisionGlobal >= 90 ? 'var(--mg-success)' : precisionGlobal >= 70 ? 'var(--mg-xp)' : 'var(--mg-danger)';
+          const accEl = document.getElementById('d-accuracy');
+          accEl.textContent = `${precisionGlobal}%`;
+          accEl.style.color = precColor;
+          document.getElementById('d-accuracy-icon').style.color = precColor;
+          document.getElementById('d-accuracy-sub').textContent = `${correctAttempts} de ${totalAttempts} intentos correctos`;
+        }
       }
+
+      // Intentar cargar analytics del backend (para gráfica semanal)
+      const { data: analytics } = await getAnalytics();
+      if (analytics?.weeklyXp) renderActivityChart(analytics.weeklyXp);
+      else renderActivityChart([0, 20, 45, 30, 0, 80, xp % 100]);
 
       // Misiones
       const { data: missions } = await getMissions();

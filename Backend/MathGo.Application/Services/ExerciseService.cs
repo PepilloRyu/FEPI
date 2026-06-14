@@ -1,6 +1,7 @@
 using MathGo.Application.DTOs.Responses;
 using MathGo.Application.Interfaces.Repositories;
 using MathGo.Application.Interfaces.Services;
+using MathGo.Domain.Entities;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -14,6 +15,7 @@ public class ExerciseService : IExerciseService
     private readonly IGamificationService _gamificationService;
     private readonly IMissionService _missionService;
     private readonly IAchievementService _achievementService;
+    private readonly IAttemptRepository _attemptRepository;
 
     public ExerciseService(
         IExerciseRepository exerciseRepository,
@@ -21,7 +23,8 @@ public class ExerciseService : IExerciseService
         IProgressRepository progressRepository,
         IGamificationService gamificationService,
         IMissionService missionService,
-        IAchievementService achievementService)
+        IAchievementService achievementService,
+        IAttemptRepository attemptRepository)
     {
         _exerciseRepository = exerciseRepository;
         _cache = cache;
@@ -29,6 +32,7 @@ public class ExerciseService : IExerciseService
         _gamificationService = gamificationService;
         _missionService = missionService;
         _achievementService = achievementService;
+        _attemptRepository = attemptRepository;
     }
 
     public async Task<List<ExerciseDto>> GetExercisesByWorldAsync(int worldId, bool isAdmin = false)
@@ -156,6 +160,26 @@ public class ExerciseService : IExerciseService
             // Si ya tenía timer activo: no tocarlo (preserva el countdown existente)
             await _progressRepository.UpdateAsync(uid, progress);
         }
+
+        // Log attempt — fire-and-forget, nunca bloquea la respuesta al usuario
+        var parts = exerciseId.Split('_');
+        int worldId = parts.Length > 0 && int.TryParse(parts[0], out var wid) ? wid : 0;
+        int levelId = parts.Length > 1 && int.TryParse(parts[1], out var lid) ? lid : 0;
+        var attempt = new AttemptLog
+        {
+            Id           = Guid.NewGuid().ToString(),
+            UserId       = uid,
+            ExerciseId   = exerciseId,
+            WorldId      = worldId,
+            LevelId      = levelId,
+            IsCorrect    = isCorrect,
+            XpEarned     = xpAwarded,
+            UserAnswer   = userAnswer.ValueKind != JsonValueKind.Undefined ? userAnswer.GetRawText() : "",
+            CompletedAt  = DateTime.UtcNow,
+        };
+        _ = _attemptRepository.AddAsync(attempt, attempt.Id)
+            .ContinueWith(t => Debug.WriteLine($"[AttemptRepository] AddAsync error: {t.Exception}"),
+                          TaskContinuationOptions.OnlyOnFaulted);
 
         return new AnswerResultDto
         {
