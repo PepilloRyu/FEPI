@@ -1810,6 +1810,23 @@ body.mg-player-mode #app .mg-content {
 .btn-role.to-student:hover { background: rgba(239,68,68,0.14); }
 .btn-role:disabled  { opacity: 0.5; cursor: not-allowed; }
 
+/* Role select */
+.role-select {
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px; font-weight: 700;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all var(--mg-transition);
+  outline: none;
+  max-width: 130px;
+}
+.role-select.admin   { background: rgba(90,18,54,0.08);    color: var(--mg-primary); border-color: rgba(90,18,54,0.2); }
+.role-select.teacher { background: rgba(180,83,9,0.10);    color: #b45309;           border-color: rgba(180,83,9,0.3); }
+.role-select.student { background: rgba(100,116,139,0.10); color: var(--mg-muted);   border-color: rgba(100,116,139,0.2); }
+.role-select:hover   { filter: brightness(0.94); }
+.role-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* World progress bar */
 .world-bar {
   height: 8px; min-width: 100px;
