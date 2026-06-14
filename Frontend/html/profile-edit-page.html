@@ -21,21 +21,10 @@
         </h2>
         
         <form id="edit-profile-form" style="display: flex; flex-direction: column; gap: 20px; margin-top: 24px;">
-          <!-- Foto de perfil -->
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-weight: 800; font-size: 14px; color: var(--mg-text-2);">Imagen de perfil</label>
-            <div style="display: flex; align-items: center; gap: 16px;">
-              <!-- Avatar circular grande -->
-              <div id="avatar-preview" style="width: 80px; height: 80px; border-radius: 50%; background: var(--mg-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900;">
-                ?
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
-                <label class="mg-btn mg-btn-secondary mg-btn-sm" style="display: inline-block; cursor: pointer; text-align: center; width: fit-content; margin: 0;">
-                  <i class="fa-solid fa-upload"></i> Seleccionar archivo
-                  <input id="choose-file-input" type="file" accept="image/*" style="display: none;" />
-                </label>
-                <span id="selected-file-name" style="font-size: 12px; color: var(--mg-muted); font-weight: 700;">Ningún archivo seleccionado</span>
-              </div>
+          <!-- Avatar (solo lectura) -->
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div id="avatar-preview" style="width: 80px; height: 80px; border-radius: 50%; background: var(--mg-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900;">
+              ?
             </div>
           </div>
 

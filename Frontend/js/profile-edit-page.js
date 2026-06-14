@@ -1,10 +1,7 @@
-import { app } from './firebaseConfig.js';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
 import { getProfile, updateProfile } from './services/api.js';
 import { requireAuth, getInitials, showToast, sendPasswordReset } from './services/auth.js';
 import { initSidebar } from './components/sidebar.js';
 
-const storage = getStorage(app);
 let currentUser = null;
 let currentAvatarUrl = "";
 
@@ -38,32 +35,10 @@ async function load(user) {
   }
 }
 
-// Escuchar cambios en el input de imagen
-document.getElementById('choose-file-input').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  const fileNameSpan = document.getElementById('selected-file-name');
-  const avatarPreview = document.getElementById('avatar-preview');
-
-  if (file) {
-    fileNameSpan.textContent = file.name;
-    
-    // Crear preview local
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      avatarPreview.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`;
-    };
-    reader.readAsDataURL(file);
-  } else {
-    fileNameSpan.textContent = 'Ningún archivo seleccionado';
-  }
-});
-
 // Guardar cambios
 document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const fileInput = document.getElementById('choose-file-input');
-  const file = fileInput.files[0];
   const nameVal = document.getElementById('name').value.trim();
 
   if (!nameVal) {
@@ -78,19 +53,10 @@ document.getElementById('edit-profile-form').addEventListener('submit', async (e
   document.getElementById('go-back').disabled = true;
 
   try {
-    let finalAvatarUrl = currentAvatarUrl;
-
-    if (file) {
-      // Subir archivo a Firebase Storage
-      const storageRef = ref(storage, `profile_images/${currentUser.uid}/${file.name}`);
-      await uploadBytes(storageRef, file);
-      finalAvatarUrl = await getDownloadURL(storageRef);
-    }
-
     // Actualizar perfil a través del backend C#
     const { data: updated, error } = await updateProfile({
       name: nameVal,
-      avatarUrl: finalAvatarUrl
+      avatarUrl: currentAvatarUrl
     });
 
     if (error) {
