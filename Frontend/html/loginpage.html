@@ -155,8 +155,7 @@
       signInWithEmailAndPassword,
       onAuthStateChanged,
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
-    import { showToast } from '../js/services/auth.js';
-    import { forgotPassword } from '../js/services/api.js';
+    import { showToast, sendPasswordReset } from '../js/services/auth.js';
 
     // Redirigir si ya hay sesion activa y verificada
     onAuthStateChanged(auth, (user) => {
@@ -238,7 +237,7 @@
         return;
       }
       try {
-        const { error } = await forgotPassword(email);
+        const { error } = await sendPasswordReset(email);
         if (error) {
           showToast(error, 'error');
         } else {

@@ -8,6 +8,7 @@ import {
   signOut,
   onAuthStateChanged,
   sendEmailVerification,
+  sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
 import { logoutBackend } from './api.js';
 
@@ -85,6 +86,20 @@ export async function resendVerificationEmail() {
   
   try {
     await sendEmailVerification(user);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Envia el correo de recuperacion de contraseña via Firebase.
+ * @param {string} email
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function sendPasswordReset(email) {
+  try {
+    await sendPasswordResetEmail(auth, email);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };

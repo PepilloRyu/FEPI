@@ -1,7 +1,7 @@
 import { app } from './firebaseConfig.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
-import { getProfile, updateProfile, forgotPassword } from './services/api.js';
-import { requireAuth, getInitials, showToast } from './services/auth.js';
+import { getProfile, updateProfile } from './services/api.js';
+import { requireAuth, getInitials, showToast, sendPasswordReset } from './services/auth.js';
 import { initSidebar } from './components/sidebar.js';
 
 const storage = getStorage(app);
@@ -127,7 +127,7 @@ document.getElementById('send-reset-btn').addEventListener('click', async () => 
   document.getElementById('reset-spinner').style.display = 'block';
   document.getElementById('send-reset-btn').disabled = true;
 
-  const { error } = await forgotPassword(currentUser.email);
+  const { error } = await sendPasswordReset(currentUser.email);
 
   document.getElementById('reset-btn-label').style.display = 'inline';
   document.getElementById('reset-spinner').style.display = 'none';
