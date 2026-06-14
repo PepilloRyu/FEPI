@@ -202,6 +202,145 @@
     .title-rank-label-rare      { color: #60a5fa; }
     .title-rank-label-epic      { color: #a78bfa; }
     .title-rank-label-legendary { color: #f59e0b; }
+
+    /* === Cofre Algebraico === */
+    .specials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+    .chest-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 32px 24px 24px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(250,204,21,0.04));
+      border: 1px solid rgba(245,158,11,0.22);
+    }
+    .don-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 28px 20px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(99,102,241,0.07), rgba(139,92,246,0.04));
+      border: 1px solid rgba(99,102,241,0.22);
+    }
+    .don-active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(34,197,94,0.12);
+      color: var(--mg-success);
+      border: 1px solid rgba(34,197,94,0.30);
+      border-radius: 999px;
+      padding: 4px 12px;
+    }
+    .don-days-label {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--mg-text);
+    }
+    .don-progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(99,102,241,0.12);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .don-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #a78bfa);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .don-meta-row {
+      font-size: 13px;
+      color: var(--mg-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+    }
+    .chest-icon-wrap {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: rgba(245,158,11,0.12);
+      border: 2px solid rgba(245,158,11,0.30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: var(--mg-xp, #facc15);
+      animation: chest-pulse 2s ease-in-out infinite;
+    }
+    @keyframes chest-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.50); }
+      50%       { box-shadow: 0 0 0 14px rgba(245,158,11,0); }
+    }
+    .chest-icon-wrap.opening {
+      animation: chest-open-flash 0.8s ease-out forwards;
+    }
+    @keyframes chest-open-flash {
+      0%   { filter: brightness(1);   transform: scale(1);    box-shadow: 0 0  0px  0px rgba(245,158,11,0.8); }
+      35%  { filter: brightness(2.8); transform: scale(1.18); box-shadow: 0 0 48px 24px rgba(245,158,11,0.55); }
+      65%  { filter: brightness(1.6); transform: scale(1.06); }
+      100% { filter: brightness(1);   transform: scale(1);    box-shadow: 0 0  0px  0px rgba(245,158,11,0); }
+    }
+    /* Modal revelación */
+    #chest-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 900;
+      align-items: center;
+      justify-content: center;
+    }
+    #chest-modal.active { display: flex; }
+    .chest-modal-inner {
+      background: var(--mg-card, #1e293b);
+      border: 2px solid rgba(245,158,11,0.35);
+      border-radius: 20px;
+      padding: 40px 32px 32px;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      animation: modal-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modal-pop {
+      from { transform: scale(0.65); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .chest-reward-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 20px;
+    }
+    .chest-reward-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--mg-text);
+      margin-bottom: 8px;
+    }
+    .chest-reward-desc {
+      font-size: 14px;
+      color: var(--mg-muted);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -259,6 +398,40 @@
 
       </div>
 
+      <!-- Sección: Especiales -->
+      <div class="shop-section-title">
+        <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--mg-xp);"></i> Especiales
+      </div>
+      <div class="specials-grid">
+
+        <!-- Cofre Algebraico -->
+        <div class="mg-card chest-card">
+          <div class="chest-icon-wrap" id="chest-icon-wrap">
+            <i class="fa-solid fa-box" id="chest-icon"></i>
+          </div>
+          <div class="shop-item-name">Cofre Algebraico</div>
+          <p class="shop-item-desc">Contiene una recompensa misteriosa: XP, vidas, un banner o un Boost XP x2.</p>
+          <div class="shop-item-cost">
+            <i class="fa-solid fa-gem"></i> 75
+          </div>
+          <div class="shop-msg" id="chest-msg"></div>
+          <button class="mg-btn mg-btn-primary" id="btn-open-chest" style="width:100%;">
+            <i class="fa-solid fa-lock-open"></i> Abrir Cofre
+          </button>
+        </div>
+
+        <!-- Doble o Nada -->
+        <div class="mg-card don-card">
+          <div class="shop-item-icon" style="background:rgba(99,102,241,0.12); color:#a78bfa;">
+            <i class="fa-solid fa-dice"></i>
+          </div>
+          <div class="shop-item-name">Doble o Nada</div>
+          <p class="shop-item-desc">Mantén tu racha 7 días y duplica tus gemas apostadas. Si fallas, las pierdes.</p>
+          <div id="don-body"><!-- JS renderiza aquí --></div>
+        </div>
+
+      </div>
+
       <!-- Sección: Personalización (Banners) -->
       <div class="shop-section-title">
         <i class="fa-solid fa-palette" style="color:var(--mg-primary);"></i> Personalización
@@ -282,8 +455,24 @@
     </main>
   </div>
 
+  <div class="mg-toast-container" id="mg-toast-container"></div>
+
+  <!-- Modal: Revelación del Cofre -->
+  <div id="chest-modal">
+    <div class="chest-modal-inner">
+      <div class="chest-reward-icon" id="chest-reward-icon">
+        <i class="fa-solid fa-star" id="chest-reward-icon-i"></i>
+      </div>
+      <div class="chest-reward-title" id="chest-reward-title">¡Recompensa!</div>
+      <div class="chest-reward-desc" id="chest-reward-desc"></div>
+      <button class="mg-btn mg-btn-primary" id="btn-chest-close" style="width:100%; max-width:200px;">
+        <i class="fa-solid fa-check"></i> Genial
+      </button>
+    </div>
+  </div>
+
   <script type="module">
-    import { requireAuth } from '../js/services/auth.js';
+    import { requireAuth, showToast } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
     import { getProfile, buyLife, buyXpBoost } from '../js/services/api.js';
     import { auth, db } from '../js/firebaseConfig.js';
@@ -606,6 +795,283 @@
       updateSidebarTitle(null);
     }
 
+    // ── Doble o Nada ──────────────────────────────────────
+    function todayStr() {
+      return new Date().toISOString().slice(0, 10);
+    }
+    function daysBetween(d1, d2) {
+      return Math.round((new Date(d2) - new Date(d1)) / 86400000);
+    }
+    function formatDateStr(dateStr) {
+      const [y, m, d] = dateStr.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    let donState = null;
+
+    function renderDoubleOrNothing() {
+      const body = document.getElementById('don-body');
+      if (!body) return;
+
+      if (!donState?.active) {
+        body.innerHTML = `
+          <div class="shop-item-cost"><i class="fa-solid fa-gem"></i> 20</div>
+          <div class="shop-msg" id="don-msg"></div>
+          <button class="mg-btn mg-btn-primary" id="btn-don-bet" style="width:100%;">
+            <i class="fa-solid fa-handshake"></i> Apostar 20 gemas
+          </button>`;
+        document.getElementById('btn-don-bet').addEventListener('click', activateDoubleOrNothing);
+        return;
+      }
+
+      const today      = todayStr();
+      const daysPassed = Math.min(7, Math.max(0, daysBetween(donState.startDate, today)));
+      const currentDay = daysPassed + 1;
+      const pct        = Math.round((currentDay / 7) * 100);
+
+      body.innerHTML = `
+        <span class="don-active-badge"><i class="fa-solid fa-fire"></i> Apuesta activa</span>
+        <div class="don-days-label">Día ${currentDay} de 7</div>
+        <div class="don-progress-bar">
+          <div class="don-progress-fill" style="width:${pct}%;"></div>
+        </div>
+        <div class="don-meta-row">
+          <i class="fa-solid fa-calendar-days"></i> Vence: ${formatDateStr(donState.targetDate)}
+        </div>
+        <div class="don-meta-row">
+          <i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i>
+          Racha actual: <strong id="don-streak-live">–</strong> días
+        </div>
+        <button class="mg-btn" disabled style="width:100%; opacity:0.5; cursor:not-allowed;">
+          <i class="fa-solid fa-lock"></i> Apuesta en curso
+        </button>`;
+
+      const sbStreak = document.getElementById('sb-streak');
+      const donStreak = document.getElementById('don-streak-live');
+      if (sbStreak && donStreak) donStreak.textContent = sbStreak.textContent;
+    }
+
+    async function activateDoubleOrNothing() {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const btn   = document.getElementById('btn-don-bet');
+      const msgEl = document.getElementById('don-msg');
+      btn.disabled      = true;
+      msgEl.textContent = '';
+      msgEl.className   = 'shop-msg';
+
+      try {
+        const today      = todayStr();
+        const target     = new Date(today + 'T00:00:00Z');
+        target.setUTCDate(target.getUTCDate() + 7);
+        const targetStr  = target.toISOString().slice(0, 10);
+
+        const result = await runTransaction(db, async tx => {
+          const progressRef = doc(db, 'mathgo_progress', uid);
+          const snap        = await tx.get(progressRef);
+          const data        = snap.exists() ? snap.data() : {};
+
+          const gems = data.gems ?? 0;
+          if (gems < 20) throw new Error('Gemas insuficientes.');
+          if (data.doubleOrNothing?.active) throw new Error('Ya tienes una apuesta activa.');
+
+          const newGems    = gems - 20;
+          const startStreak = data.dailyStreak ?? 0;
+          tx.update(progressRef, {
+            gems: newGems,
+            doubleOrNothing: {
+              active: true, startDate: today, targetDate: targetStr,
+              startStreak, gemsStaked: 20,
+            },
+          });
+          return { newGems, startStreak };
+        });
+
+        document.getElementById('gems-count').textContent = result.newGems;
+        donState = {
+          active: true, startDate: today, targetDate: targetStr,
+          startStreak: result.startStreak, gemsStaked: 20,
+        };
+        renderDoubleOrNothing();
+
+      } catch (err) {
+        if (msgEl) { msgEl.textContent = err.message || 'Error al apostar.'; msgEl.className = 'shop-msg error'; }
+        btn.disabled = false;
+      }
+    }
+
+    async function checkDoubleOrNothing(progressData) {
+      const don = progressData.doubleOrNothing;
+      if (!don?.active) return;
+
+      const uid        = auth.currentUser?.uid;
+      const today      = todayStr();
+      const streak     = progressData.dailyStreak ?? 0;
+      const lastDate   = progressData.lastActiveDate ?? '';
+
+      const dateReached  = today >= don.targetDate;
+      const earlyWin     = streak >= (don.startStreak + 7);
+      const streakIntact = streak >= don.startStreak;
+      const gapDays      = lastDate ? daysBetween(lastDate, today) : 999;
+      const streakBroken = gapDays > 1;
+
+      if (!dateReached && !earlyWin && !streakBroken) return;
+
+      const progressRef = doc(db, 'mathgo_progress', uid);
+
+      if ((dateReached || earlyWin) && streakIntact && !streakBroken) {
+        const newGems = (progressData.gems ?? 0) + 40;
+        await updateDoc(progressRef, { gems: newGems, doubleOrNothing: null });
+        document.getElementById('gems-count').textContent = newGems;
+        donState = null;
+        showToast('<i class="fa-solid fa-trophy" style="margin-right:6px;"></i> ¡Ganaste la apuesta! +40 gemas', 'success', 5000);
+      } else if (streakBroken) {
+        await updateDoc(progressRef, { doubleOrNothing: null });
+        donState = null;
+        showToast('<i class="fa-solid fa-heart-crack" style="margin-right:6px;"></i> Racha rota — perdiste tu apuesta', 'error', 5000);
+      }
+    }
+    // ── fin Doble o Nada ──────────────────────────────────
+
+    const CHEST_REWARD_CFG = {
+      xp:     { icon: 'fa-solid fa-star',  color: 'var(--mg-xp)',      bg: 'rgba(250,204,21,0.15)', border: 'rgba(250,204,21,0.45)'  },
+      lives:  { icon: 'fa-solid fa-heart', color: 'var(--mg-danger)',   bg: 'rgba(239,68,68,0.15)',  border: 'rgba(239,68,68,0.45)'   },
+      banner: { icon: 'fa-solid fa-image', color: 'var(--mg-primary)',  bg: 'rgba(90,18,54,0.15)',   border: 'rgba(90,18,54,0.45)'    },
+      boost:  { icon: 'fa-solid fa-bolt',  color: 'var(--mg-success)',  bg: 'rgba(34,197,94,0.15)',  border: 'rgba(34,197,94,0.45)'   },
+    };
+
+    function showChestModal(rewardType, rewardData) {
+      const cfg     = CHEST_REWARD_CFG[rewardType];
+      const iconEl  = document.getElementById('chest-reward-icon-i');
+      const wrapEl  = document.getElementById('chest-reward-icon');
+      const titleEl = document.getElementById('chest-reward-title');
+      const descEl  = document.getElementById('chest-reward-desc');
+
+      iconEl.className         = cfg.icon;
+      wrapEl.style.color       = cfg.color;
+      wrapEl.style.background  = cfg.bg;
+      wrapEl.style.border      = `2px solid ${cfg.border}`;
+
+      if (rewardType === 'xp') {
+        titleEl.textContent = `¡+${rewardData.xp} XP!`;
+        descEl.textContent  = `Ganaste ${rewardData.xp} puntos de experiencia.`;
+      } else if (rewardType === 'lives') {
+        const word = rewardData.add === 1 ? 'vida' : 'vidas';
+        titleEl.textContent = `¡+${rewardData.add} ${word}!`;
+        descEl.textContent  = `Ahora tienes ${rewardData.newLives} vidas.`;
+      } else if (rewardType === 'banner') {
+        titleEl.textContent = '¡Banner desbloqueado!';
+        descEl.textContent  = `Obtuviste el banner "${rewardData.banner.name}".`;
+      } else {
+        titleEl.textContent = '¡Boost XP x2!';
+        descEl.textContent  = 'XP doble activo por los próximos 15 minutos.';
+      }
+
+      document.getElementById('chest-modal').classList.add('active');
+    }
+
+    async function openChest() {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const btn      = document.getElementById('btn-open-chest');
+      const msgEl    = document.getElementById('chest-msg');
+      const iconWrap = document.getElementById('chest-icon-wrap');
+      const iconEl   = document.getElementById('chest-icon');
+
+      btn.disabled          = true;
+      msgEl.textContent     = '';
+      msgEl.className       = 'shop-msg';
+      iconEl.className      = 'fa-solid fa-box-open';
+      iconWrap.classList.add('opening');
+
+      try {
+        const result = await runTransaction(db, async tx => {
+          const progressRef = doc(db, 'mathgo_progress', uid);
+          const userRef     = doc(db, 'users', uid);
+          const [progressSnap, userSnap] = await Promise.all([tx.get(progressRef), tx.get(userRef)]);
+
+          const progress = progressSnap.exists() ? progressSnap.data() : {};
+          const user     = userSnap.exists()     ? userSnap.data()     : {};
+
+          const gems = progress.gems ?? 0;
+          if (gems < 75) throw new Error('Gemas insuficientes.');
+
+          const newGems       = gems - 75;
+          const roll          = Math.random();
+          const progressUpd   = { gems: newGems };
+          const userUpd       = {};
+          let rewardType, rewardData;
+
+          if (roll < 0.25) {
+            const xpPool    = [100, 150, 200, 250, 300, 350, 400];
+            const xp        = xpPool[Math.floor(Math.random() * xpPool.length)];
+            const newTotalXp = (progress.totalXp ?? 0) + xp;
+            progressUpd.totalXp = newTotalXp;
+            rewardType = 'xp';
+            rewardData = { xp, newTotalXp };
+          } else if (roll < 0.50) {
+            const lives    = progress.lives ?? 0;
+            const add      = lives < MAX_LIVES ? 2 : 1;
+            const newLives = Math.min(MAX_LIVES, lives + add);
+            progressUpd.lives = newLives;
+            if (newLives >= MAX_LIVES) progressUpd.lastLifeLostAt = null;
+            rewardType = 'lives';
+            rewardData = { add, newLives };
+          } else if (roll < 0.75) {
+            const owned     = user.ownedBanners ?? [];
+            const available = BANNER_CATALOG.filter(b => !owned.includes(b.id));
+            if (available.length > 0) {
+              const banner = available[Math.floor(Math.random() * available.length)];
+              userUpd.ownedBanners = arrayUnion(banner.id);
+              rewardType = 'banner';
+              rewardData = { banner };
+            } else {
+              const xp         = 200;
+              const newTotalXp = (progress.totalXp ?? 0) + xp;
+              progressUpd.totalXp = newTotalXp;
+              rewardType = 'xp';
+              rewardData = { xp, newTotalXp };
+            }
+          } else {
+            const boostUntil = new Date(Date.now() + 15 * 60 * 1000);
+            progressUpd.xpBoostUntil = boostUntil;
+            rewardType = 'boost';
+            rewardData = { boostUntil };
+          }
+
+          tx.update(progressRef, progressUpd);
+          if (Object.keys(userUpd).length > 0) tx.update(userRef, userUpd);
+          return { newGems, rewardType, rewardData };
+        });
+
+        document.getElementById('gems-count').textContent = result.newGems;
+
+        if (result.rewardType === 'xp') {
+          const sbXp = document.getElementById('sb-xp');
+          if (sbXp) sbXp.textContent = result.rewardData.newTotalXp;
+        } else if (result.rewardType === 'lives') {
+          const sbHearts = document.getElementById('sb-hearts');
+          if (sbHearts) sbHearts.textContent = result.rewardData.newLives;
+        } else if (result.rewardType === 'banner') {
+          bannerState.owned = [...bannerState.owned, result.rewardData.banner.id];
+          renderBanners();
+        } else if (result.rewardType === 'boost') {
+          startBoostCountdown(result.rewardData.boostUntil);
+        }
+
+        setTimeout(() => showChestModal(result.rewardType, result.rewardData), 600);
+
+      } catch (err) {
+        iconEl.className = 'fa-solid fa-box';
+        iconWrap.classList.remove('opening');
+        msgEl.textContent = err.message || 'Error al abrir el cofre.';
+        msgEl.className   = 'shop-msg error';
+        btn.disabled      = false;
+      }
+    }
+
     async function load() {
       await initSidebar('tienda');
 
@@ -624,10 +1090,13 @@
         ]);
 
         if (progressSnap.exists()) {
-          const boostUntil = progressSnap.data().xpBoostUntil?.toDate?.();
-          if (boostUntil && boostUntil > new Date()) {
-            startBoostCountdown(boostUntil);
-          }
+          const pd = progressSnap.data();
+
+          const boostUntil = pd.xpBoostUntil?.toDate?.();
+          if (boostUntil && boostUntil > new Date()) startBoostCountdown(boostUntil);
+
+          donState = pd.doubleOrNothing?.active ? pd.doubleOrNothing : null;
+          await checkDoubleOrNothing(pd);
         }
 
         if (userSnap.exists()) {
@@ -640,6 +1109,7 @@
 
       renderBanners();
       renderTitles();
+      renderDoubleOrNothing();
 
       // Botón: +1 Vida
       document.getElementById('btn-buy-life').addEventListener('click', async () => {
@@ -692,6 +1162,17 @@
         btn.disabled = false;
 
         startBoostCountdown(new Date(data.xpBoostUntil));
+      });
+
+      // Cofre Algebraico
+      document.getElementById('btn-open-chest').addEventListener('click', openChest);
+      document.getElementById('btn-chest-close').addEventListener('click', () => {
+        document.getElementById('chest-modal').classList.remove('active');
+        const iconWrap = document.getElementById('chest-icon-wrap');
+        const iconEl   = document.getElementById('chest-icon');
+        iconEl.className = 'fa-solid fa-box';
+        iconWrap.classList.remove('opening');
+        document.getElementById('btn-open-chest').disabled = false;
       });
     }
 
