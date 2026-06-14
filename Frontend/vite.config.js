@@ -26,6 +26,10 @@ export default defineConfig({
         world4: resolve(__dirname, 'html/world-4.html'),
         world5: resolve(__dirname, 'html/world-5.html'),
         world6: resolve(__dirname, 'html/world-6.html'),
+        amigos: resolve(__dirname, 'html/amigos.html'),
+        assignments: resolve(__dirname, 'html/assignments.html'),
+        teacher: resolve(__dirname, 'html/teacher.html'),
+        tienda: resolve(__dirname, 'html/tienda.html'),
       }
     }
   }
