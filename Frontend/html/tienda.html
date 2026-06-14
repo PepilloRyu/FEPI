@@ -290,7 +290,7 @@
     import {
       doc, getDoc, runTransaction, updateDoc, arrayUnion
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
-    import { BANNER_CATALOG } from '../js/banner-catalog.js';
+    import { BANNER_CATALOG, getBannerStyle } from '../js/banner-catalog.js';
     import { TITLE_CATALOG, getTitleById } from '../js/title-catalog.js';
 
     const MAX_LIVES = 15;
@@ -325,6 +325,15 @@
       boostTimer = setInterval(tick, 1000);
     }
 
+    const CATEGORY_META = {
+      clasicos:    { label: 'Clásicos',           icon: 'fa-solid fa-palette'             },
+      elementales: { label: 'Temas Elementales',  icon: 'fa-solid fa-leaf'                },
+      academicos:  { label: 'Temas Académicos',   icon: 'fa-solid fa-calculator'          },
+      prestigio:   { label: 'Temas de Prestigio', icon: 'fa-solid fa-crown'               },
+      especiales:  { label: 'Temas Especiales',   icon: 'fa-solid fa-wand-magic-sparkles' },
+    };
+    const CATEGORY_ORDER = ['clasicos', 'elementales', 'academicos', 'prestigio', 'especiales'];
+
     // Estado compartido de banners
     let bannerState = { owned: [], equipped: null };
 
@@ -340,53 +349,65 @@
 
     function renderBanners() {
       const grid = document.getElementById('banner-grid');
-      grid.innerHTML = BANNER_CATALOG.map(b => {
-        const isOwned    = bannerState.owned.includes(b.id);
-        const isEquipped = bannerState.equipped === b.id;
+      let html = '';
 
-        let actionHtml;
-        if (!isOwned) {
-          actionHtml = `
-            <button class="mg-btn mg-btn-primary" style="width:100%; font-size:13px;"
-              data-banner-buy="${b.id}">
-              <i class="fa-solid fa-cart-shopping"></i> Comprar
-            </button>`;
-        } else if (isEquipped) {
-          actionHtml = `
-            <span class="banner-equipped-badge">
-              <i class="fa-solid fa-check"></i> Equipado
-            </span>
-            <button class="mg-btn" style="width:100%; font-size:13px; background:rgba(0,0,0,0.06); color:var(--mg-muted);"
-              data-banner-unequip="${b.id}">
-              <i class="fa-solid fa-xmark"></i> Quitar
-            </button>`;
-        } else {
-          actionHtml = `
-            <button class="mg-btn mg-btn-primary" style="width:100%; font-size:13px; background:var(--mg-success);"
-              data-banner-equip="${b.id}">
-              <i class="fa-solid fa-image"></i> Equipar
-            </button>`;
-        }
+      for (const cat of CATEGORY_ORDER) {
+        const meta = CATEGORY_META[cat];
+        const banners = BANNER_CATALOG.filter(b => b.category === cat);
+        if (!banners.length) continue;
 
-        return `
-          <div class="mg-card banner-card">
-            <div class="banner-preview" style="background:${b.gradient};"></div>
-            <div class="banner-name">${b.name}</div>
-            ${!isOwned ? `<div class="banner-cost"><i class="fa-solid fa-gem"></i> ${b.cost}</div>` : ''}
-            <div class="banner-msg" id="banner-msg-${b.id}"></div>
-            ${actionHtml}
+        html += `
+          <div style="grid-column:1/-1; font-size:11px; font-weight:900; color:var(--mg-muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:12px; display:flex; align-items:center; gap:6px;">
+            <i class="${meta.icon}" style="font-size:11px;"></i> ${meta.label}
           </div>`;
-      }).join('');
 
-      // Botones comprar
+        html += banners.map(b => {
+          const isOwned    = bannerState.owned.includes(b.id);
+          const isEquipped = bannerState.equipped === b.id;
+
+          let actionHtml;
+          if (!isOwned) {
+            actionHtml = `
+              <button class="mg-btn mg-btn-primary" style="width:100%; font-size:13px;"
+                data-banner-buy="${b.id}">
+                <i class="fa-solid fa-cart-shopping"></i> Comprar
+              </button>`;
+          } else if (isEquipped) {
+            actionHtml = `
+              <span class="banner-equipped-badge">
+                <i class="fa-solid fa-check"></i> Equipado
+              </span>
+              <button class="mg-btn" style="width:100%; font-size:13px; background:rgba(0,0,0,0.06); color:var(--mg-muted);"
+                data-banner-unequip="${b.id}">
+                <i class="fa-solid fa-xmark"></i> Quitar
+              </button>`;
+          } else {
+            actionHtml = `
+              <button class="mg-btn mg-btn-primary" style="width:100%; font-size:13px; background:var(--mg-success);"
+                data-banner-equip="${b.id}">
+                <i class="fa-solid fa-image"></i> Equipar
+              </button>`;
+          }
+
+          return `
+            <div class="mg-card banner-card">
+              <div class="banner-preview" style="${getBannerStyle(b)};"></div>
+              <div class="banner-name">${b.name}</div>
+              ${!isOwned ? `<div class="banner-cost"><i class="fa-solid fa-gem"></i> ${b.cost}</div>` : ''}
+              <div class="banner-msg" id="banner-msg-${b.id}"></div>
+              ${actionHtml}
+            </div>`;
+        }).join('');
+      }
+
+      grid.innerHTML = html;
+
       grid.querySelectorAll('[data-banner-buy]').forEach(btn => {
         btn.addEventListener('click', () => buyBanner(btn.dataset.bannerBuy, btn));
       });
-      // Botones equipar
       grid.querySelectorAll('[data-banner-equip]').forEach(btn => {
         btn.addEventListener('click', () => equipBanner(btn.dataset.bannerEquip));
       });
-      // Botones quitar
       grid.querySelectorAll('[data-banner-unequip]').forEach(btn => {
         btn.addEventListener('click', () => unequipBanner());
       });

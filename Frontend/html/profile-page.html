@@ -97,7 +97,7 @@
     import { initSidebar } from '../js/components/sidebar.js';
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
-    import { BANNER_CATALOG } from '../js/banner-catalog.js';
+    import { BANNER_CATALOG, getBannerStyle } from '../js/banner-catalog.js';
 
     function renderObjetivos(objetivos, uid) {
       const lista = document.getElementById('objetivos-lista');
@@ -151,7 +151,13 @@
       if (equippedBanner) {
         const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
         if (bannerEntry) {
-          document.querySelector('.profile-hero').style.background = bannerEntry.gradient;
+          const heroEl = document.querySelector('.profile-hero');
+          const styleStr = getBannerStyle(bannerEntry);
+          styleStr.split(';').filter(Boolean).forEach(decl => {
+            const [prop, ...rest] = decl.split(':');
+            const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+            heroEl.style[camel] = rest.join(':').trim();
+          });
         }
       }
 
