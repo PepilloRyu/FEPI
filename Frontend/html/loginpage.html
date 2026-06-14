@@ -89,6 +89,16 @@
       gap: 8px;
     }
 
+    .pw-toggle-wrap { position: relative; }
+    .pw-toggle-wrap .mg-input { padding-right: 44px; width: 100%; box-sizing: border-box; }
+    .pw-toggle-btn {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--mg-muted); font-size: 16px; padding: 4px;
+      display: flex; align-items: center;
+    }
+    .pw-toggle-btn:hover { color: var(--mg-text); }
+
     @media (max-width: 768px) {
       .auth-page { grid-template-columns: 1fr; }
       .auth-left  { display: none; }
@@ -134,8 +144,13 @@
 
         <div class="mg-input-group">
           <label class="mg-label" for="password-input">Contraseña</label>
-          <input class="mg-input" type="password" id="password-input"
-            placeholder="Tu contraseña" autocomplete="current-password" required />
+          <div class="pw-toggle-wrap">
+            <input class="mg-input" type="password" id="password-input"
+              placeholder="Tu contraseña" autocomplete="current-password" required />
+            <button type="button" class="pw-toggle-btn" data-target="password-input" aria-label="Mostrar contraseña">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
           <span class="mg-error-msg" id="password-error"></span>
         </div>
 
@@ -230,6 +245,19 @@
         document.getElementById('password-error').textContent = msg;
         document.getElementById('password-input').classList.add('error');
       }
+    });
+
+    // Toggle visibilidad de contraseña
+    document.querySelectorAll('.pw-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        const icon  = btn.querySelector('i');
+        const show  = input.type === 'password';
+        input.type  = show ? 'text' : 'password';
+        icon.classList.toggle('fa-eye',       !show);
+        icon.classList.toggle('fa-eye-slash',  show);
+        btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      });
     });
 
     // Recuperar contraseña
