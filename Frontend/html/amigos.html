@@ -184,6 +184,23 @@
     .friend-item.has-cmp > .mg-avatar { margin-top: 2px; }
     .friend-item.has-cmp > .friend-item-actions { margin-top: 2px; }
 
+    /* ── Requests grid (side-by-side) ── */
+    .requests-grid {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .requests-grid > .mg-card {
+      flex: 1;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+    @media (max-width: 640px) {
+      .requests-grid {
+        flex-direction: column;
+      }
+    }
+
     /* ── Permission denied banner ── */
     .perm-banner {
       display: flex; align-items: flex-start; gap: 10px;
@@ -240,33 +257,7 @@
         </div>
       </div>
 
-      <!-- ── Sección 2: Solicitudes recibidas ─────────────────── -->
-      <div class="mg-card" style="margin-bottom:24px;">
-        <div class="friends-section-hd">
-          <i class="fa-solid fa-inbox" style="color:var(--mg-primary);font-size:18px;"></i>
-          <h2>Solicitudes recibidas</h2>
-          <span class="section-count" id="received-count" style="display:none;"></span>
-        </div>
-        <div id="received-list">
-          <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
-          <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
-        </div>
-      </div>
-
-      <!-- ── Sección 3: Solicitudes enviadas ──────────────────── -->
-      <div class="mg-card" style="margin-bottom:24px;">
-        <div class="friends-section-hd">
-          <i class="fa-solid fa-paper-plane" style="color:var(--mg-primary);font-size:18px;"></i>
-          <h2>Solicitudes enviadas</h2>
-          <span class="section-count" id="sent-count" style="display:none;"></span>
-        </div>
-        <div id="sent-list">
-          <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
-          <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
-        </div>
-      </div>
-
-      <!-- ── Sección 4: Mis amigos ─────────────────────────────── -->
+      <!-- ── Sección 2: Mis amigos ─────────────────────────────── -->
       <div class="mg-card" style="margin-bottom:24px;">
         <div class="friends-section-hd">
           <i class="fa-solid fa-user-group" style="color:var(--mg-primary);font-size:18px;"></i>
@@ -277,6 +268,37 @@
           <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
           <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
         </div>
+      </div>
+
+      <!-- ── Secciones 3 & 4: Solicitudes (side-by-side) ──────── -->
+      <div class="requests-grid">
+
+        <!-- Solicitudes recibidas -->
+        <div class="mg-card">
+          <div class="friends-section-hd">
+            <i class="fa-solid fa-inbox" style="color:var(--mg-primary);font-size:18px;"></i>
+            <h2>Solicitudes recibidas</h2>
+            <span class="section-count" id="received-count" style="display:none;"></span>
+          </div>
+          <div id="received-list">
+            <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
+            <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
+          </div>
+        </div>
+
+        <!-- Solicitudes enviadas -->
+        <div class="mg-card">
+          <div class="friends-section-hd">
+            <i class="fa-solid fa-paper-plane" style="color:var(--mg-primary);font-size:18px;"></i>
+            <h2>Solicitudes enviadas</h2>
+            <span class="section-count" id="sent-count" style="display:none;"></span>
+          </div>
+          <div id="sent-list">
+            <div class="mg-skeleton" style="height:58px;border-radius:10px;margin-bottom:8px;"></div>
+            <div class="mg-skeleton" style="height:58px;border-radius:10px;"></div>
+          </div>
+        </div>
+
       </div>
 
     </main>
