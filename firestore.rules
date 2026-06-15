@@ -101,7 +101,7 @@ service cloud.firestore {
     // ── classrooms/{classroomId} ──────────────────────────────────────────────
     // Lectura:   el profesor dueño del salón o un admin.
     // Creación:  solo usuarios con role == 'teacher'; teacherId debe ser su propio uid.
-    // Actualiz.: solo el profesor dueño (agregar/quitar alumnos de studentIds).
+    // Actualiz.: el profesor dueño, o un alumno que se agrega a sí mismo (no estaba antes).
     // Borrado:   solo el profesor dueño.
     match /classrooms/{classroomId} {
       allow read: if request.auth != null && (
@@ -112,8 +112,11 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.resource.data.teacherId == request.auth.uid &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
-      allow update: if request.auth != null &&
-        request.auth.uid == resource.data.teacherId;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.teacherId ||
+        (request.auth.uid in request.resource.data.studentIds &&
+         !(request.auth.uid in resource.data.studentIds))
+      );
       allow delete: if request.auth != null &&
         request.auth.uid == resource.data.teacherId;
     }
@@ -161,6 +164,36 @@ service cloud.firestore {
         request.auth.uid == resource.data.fromUid ||
         request.auth.uid == resource.data.toUid
       );
+    }
+
+    // ── classroomInvites/{inviteId} ───────────────────────────────────────────
+    // Lectura:   el profesor que creó la invitación, el alumno destinatario, o admin.
+    // Creación:  solo teachers, y teacherId debe ser su propio uid.
+    // Actualiz.: el alumno puede cambiar pending → accepted/rejected;
+    //            el profesor puede marcar teacherSeen = true al ver la respuesta.
+    // Borrado:   el profesor puede cancelar una invitación en cualquier estado.
+    match /classroomInvites/{inviteId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.teacherId ||
+        request.auth.uid == resource.data.studentId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      allow create: if request.auth != null &&
+        request.resource.data.teacherId == request.auth.uid &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+      allow update: if request.auth != null && (
+        // Alumno responde su invitación pendiente
+        (request.auth.uid == resource.data.studentId &&
+         resource.data.status == 'pending' &&
+         request.resource.data.status in ['accepted', 'rejected']) ||
+        // Profesor marca la respuesta como vista
+        (request.auth.uid == resource.data.teacherId &&
+         resource.data.status in ['accepted', 'rejected'] &&
+         request.resource.data.teacherSeen == true &&
+         request.resource.data.status == resource.data.status)
+      );
+      allow delete: if request.auth != null &&
+        request.auth.uid == resource.data.teacherId;
     }
 
     // ── Resto de colecciones ──────────────────────────────────────────────────

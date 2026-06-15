@@ -217,6 +217,16 @@
     .btn-edit-assignment:hover { background: rgba(90,18,54,.2); }
     .btn-del-assignment:disabled,
     .btn-edit-assignment:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Cancel invite button ── */
+    .btn-cancel-invite {
+      padding: 6px 10px; border: none; border-radius: 8px;
+      background: rgba(239,68,68,.1); color: var(--mg-error, #ef4444);
+      font-size: 13px; cursor: pointer; transition: background .15s;
+      display: flex; align-items: center; gap: 6px; white-space: nowrap;
+    }
+    .btn-cancel-invite:hover { background: rgba(239,68,68,.2); }
+    .btn-cancel-invite:disabled { opacity: .5; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -293,7 +303,7 @@
             <h2 id="detail-name"></h2>
           </div>
           <button class="btn-create" id="btn-open-add-student">
-            <i class="fa-solid fa-user-plus"></i> Agregar alumno
+            <i class="fa-solid fa-envelope"></i> Invitar alumno
           </button>
         </div>
 
@@ -313,10 +323,21 @@
           <div class="search-results" id="search-results"></div>
           <div class="form-actions">
             <button class="btn-form-primary" id="btn-confirm-add" disabled>
-              <i class="fa-solid fa-user-plus"></i> Agregar
+              <i class="fa-solid fa-paper-plane"></i> Enviar invitación
             </button>
             <button class="btn-form-cancel" id="btn-cancel-add">Cancelar</button>
           </div>
+        </div>
+
+        <!-- Invitaciones pendientes -->
+        <div class="mg-card" id="pending-invites-card" style="display:none">
+          <div class="teacher-section-hd" style="margin-bottom:12px;">
+            <div class="teacher-section-hd-left">
+              <i class="fa-solid fa-envelope-open-text" style="color:var(--mg-primary);font-size:18px;"></i>
+              <span style="font-size:16px;font-weight:700;">Invitaciones pendientes</span>
+            </div>
+          </div>
+          <div id="pending-invites-list"></div>
         </div>
 
         <!-- Tabla de alumnos -->
@@ -452,6 +473,7 @@
 
     // ── Estado ────────────────────────────────────────────
     let currentUid          = null;
+    let teacherName         = null;
     let currentClassroom    = null;  // { id, name, studentIds[] }
     let currentStudents     = [];    // alumnos cargados por renderDetailStudents
     let currentAssignments  = null;  // null = pendiente; array = ya cargadas
@@ -470,6 +492,7 @@
         window.location.replace('learn.html');
         return;
       }
+      teacherName = selfSnap.data().name || '';
 
       await initSidebar('teacher');
       await loadClassrooms();
@@ -633,6 +656,7 @@
       showDetailView();
       renderDetailStudents();
       loadAssignments();
+      loadPendingInvites();
     }
 
     async function renderDetailStudents() {
@@ -1128,7 +1152,7 @@
       document.getElementById('btn-cancel-add').addEventListener('click', closeAddStudentPanel);
 
       document.getElementById('btn-confirm-add').addEventListener('click', () => {
-        if (selectedStudent) addStudent(selectedStudent.uid, selectedStudent.name);
+        if (selectedStudent) sendInvitation();
       });
 
       document.getElementById('btn-open-assignment').addEventListener('click', openAssignmentPanel);
@@ -1171,7 +1195,9 @@
 
       selectedStudent = null;
       document.getElementById('btn-open-add-student').disabled = false;
-      document.getElementById('btn-confirm-add').disabled = true;
+      const confirmBtn = document.getElementById('btn-confirm-add');
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar invitación';
     }
 
     function onSearchInput() {
@@ -1254,24 +1280,117 @@
       document.getElementById('btn-confirm-add').disabled = false;
     }
 
-    async function addStudent(uid, displayName) {
+    async function sendInvitation() {
+      if (!selectedStudent) return;
       const confirmBtn = document.getElementById('btn-confirm-add');
       confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agregando...';
+      confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
       try {
-        await updateDoc(doc(db, 'classrooms', currentClassroom.id), {
-          studentIds: arrayUnion(uid),
+        const existingSnap = await getDocs(query(
+          collection(db, 'classroomInvites'),
+          where('classroomId', '==', currentClassroom.id),
+          where('teacherId',   '==', currentUid),
+          where('studentId',   '==', selectedStudent.uid),
+          where('status',      '==', 'pending'),
+        ));
+        if (!existingSnap.empty) {
+          showToast('Ya hay una invitación pendiente para este alumno', 'error');
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar invitación';
+          return;
+        }
+        await addDoc(collection(db, 'classroomInvites'), {
+          classroomId:   currentClassroom.id,
+          classroomName: currentClassroom.name,
+          teacherId:     currentUid,
+          teacherName,
+          studentId:     selectedStudent.uid,
+          studentEmail:  selectedStudent.email,
+          studentName:   selectedStudent.name,
+          status:        'pending',
+          teacherSeen:   false,
+          createdAt:     serverTimestamp(),
         });
-        currentClassroom.studentIds = [...currentClassroom.studentIds, uid];
-        showToast(`Alumno agregado al salón`, 'success');
+        showToast(`Invitación enviada a ${selectedStudent.name}`, 'success');
         closeAddStudentPanel();
-        await renderDetailStudents();
+        await loadPendingInvites();
       } catch (err) {
-        console.error('Error al agregar alumno:', err);
-        showToast('Error al agregar al alumno', 'error');
+        console.error('Error al enviar invitación:', err);
+        showToast('Error al enviar la invitación', 'error');
         confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Agregar';
+        confirmBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar invitación';
+      }
+    }
+
+    async function loadPendingInvites() {
+      if (!currentClassroom) return;
+      const card   = document.getElementById('pending-invites-card');
+      const listEl = document.getElementById('pending-invites-list');
+      card.style.display = '';
+      listEl.innerHTML = '<div style="padding:8px 0;color:var(--mg-muted);font-size:14px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
+
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'classroomInvites'),
+          where('classroomId', '==', currentClassroom.id),
+          where('teacherId',   '==', currentUid),
+          where('status',      '==', 'pending'),
+        ));
+        const invites = [];
+        snap.forEach(d => invites.push({ id: d.id, ...d.data() }));
+        renderPendingInvites(invites);
+      } catch (err) {
+        console.error('Error al cargar invitaciones:', err);
+        listEl.innerHTML = '<div style="padding:8px 0;color:var(--mg-error,#ef4444);font-size:14px;">Error al cargar invitaciones.</div>';
+      }
+    }
+
+    function renderPendingInvites(invites) {
+      const listEl = document.getElementById('pending-invites-list');
+      if (!listEl) return;
+
+      if (!invites.length) {
+        listEl.innerHTML = `
+          <div class="mg-empty" style="padding:20px 0 8px;">
+            <div class="mg-empty-icon"><i class="fa-solid fa-envelope-open"></i></div>
+            <div class="mg-empty-title">No hay invitaciones pendientes</div>
+          </div>`;
+        return;
+      }
+
+      const rows = invites.map(inv => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--mg-border);">
+          <div class="mg-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0;">${escHtml(getInitials(inv.studentName || ''))}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:14px;">${escHtml(inv.studentName || '(sin nombre)')}</div>
+            <div style="font-size:12px;color:var(--mg-muted);">${escHtml(inv.studentEmail || '')}</div>
+          </div>
+          <button class="btn-cancel-invite" data-id="${inv.id}" data-name="${escHtml(inv.studentName || '')}" title="Cancelar invitación">
+            <i class="fa-solid fa-xmark"></i> Cancelar
+          </button>
+        </div>`).join('');
+
+      listEl.innerHTML = `<div style="padding:0 4px;">${rows}</div>`;
+
+      listEl.querySelectorAll('.btn-cancel-invite').forEach(btn => {
+        btn.addEventListener('click', () => cancelInvite(btn.dataset.id, btn.dataset.name, btn));
+      });
+    }
+
+    async function cancelInvite(inviteId, studentName, btn) {
+      if (!confirm(`¿Cancelar la invitación a "${studentName}"?`)) return;
+      btn.disabled  = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      try {
+        await deleteDoc(doc(db, 'classroomInvites', inviteId));
+        showToast('Invitación cancelada', 'success');
+        await loadPendingInvites();
+      } catch (err) {
+        console.error('Error al cancelar invitación:', err);
+        showToast('Error al cancelar la invitación', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Cancelar';
       }
     }
 

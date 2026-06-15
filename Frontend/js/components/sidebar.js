@@ -12,6 +12,7 @@ import { auth, db } from '../firebaseConfig.js';
 import {
   doc, getDoc,
   collection, getDocs, query, where,
+  updateDoc, arrayUnion,
 } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 import { getTitleById } from '../title-catalog.js';
 
@@ -128,6 +129,19 @@ function injectNotifStyles() {
       padding: 32px 16px; text-align: center; color: var(--mg-muted); font-size: 14px;
     }
     .mg-notif-empty i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
+    .mg-notif-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .mg-notif-action-btn {
+      padding: 5px 12px; border: none; border-radius: 7px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: var(--mg-font); transition: opacity .15s; line-height: 1.4;
+    }
+    .mg-notif-action-btn:hover { opacity: .85; }
+    .mg-notif-action-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .mg-notif-action-accept { background: var(--mg-primary); color: #fff; }
+    .mg-notif-action-reject {
+      background: rgba(239,68,68,.12); color: var(--mg-error, #ef4444);
+      border: 1px solid rgba(239,68,68,.3);
+    }
   `;
   document.head.appendChild(style);
 }
@@ -135,6 +149,7 @@ function injectNotifStyles() {
 let _notifPanel   = null;
 let _panelOpen    = false;
 let _notifData    = [];
+let _userRole     = 'student';
 
 function positionPanel() {
   const btn = document.getElementById('mg-notif-btn');
@@ -172,14 +187,57 @@ function renderNotifList(notifications) {
     return;
   }
 
-  listEl.innerHTML = notifications.map(n => `
-    <a class="mg-notif-item${n.isNew ? ' is-new' : ''}" href="${n.href}" data-notif-type="${n.type}" data-notif-id="${n.id}">
-      <div class="mg-notif-item-icon"><i class="fa-solid ${n.icon}"></i></div>
-      <div class="mg-notif-item-body">
-        <div class="mg-notif-item-text">${n.text}</div>
-        ${n.isNew ? '<div class="mg-notif-item-dot"></div>' : ''}
-      </div>
-    </a>`).join('');
+  listEl.innerHTML = notifications.map(n => {
+    if (n.actions) {
+      const actionsHtml = n.actions.map((a, i) =>
+        `<button class="mg-notif-action-btn mg-notif-action-${a.style}" data-notif-id="${n.id}" data-action-idx="${i}">${a.label}</button>`
+      ).join('');
+      return `
+        <div class="mg-notif-item${n.isNew ? ' is-new' : ''}" data-notif-type="${n.type}" data-notif-id="${n.id}">
+          <div class="mg-notif-item-icon"><i class="fa-solid ${n.icon}"></i></div>
+          <div class="mg-notif-item-body" style="flex-direction:column;align-items:flex-start;gap:0;">
+            <div style="display:flex;align-items:flex-start;gap:8px;width:100%;">
+              <div class="mg-notif-item-text">${n.text}</div>
+              ${n.isNew ? '<div class="mg-notif-item-dot"></div>' : ''}
+            </div>
+            <div class="mg-notif-actions">${actionsHtml}</div>
+          </div>
+        </div>`;
+    }
+    return `
+      <a class="mg-notif-item${n.isNew ? ' is-new' : ''}" href="${n.href}" data-notif-type="${n.type}" data-notif-id="${n.id}">
+        <div class="mg-notif-item-icon"><i class="fa-solid ${n.icon}"></i></div>
+        <div class="mg-notif-item-body">
+          <div class="mg-notif-item-text">${n.text}</div>
+          ${n.isNew ? '<div class="mg-notif-item-dot"></div>' : ''}
+        </div>
+      </a>`;
+  }).join('');
+
+  // Wire up inline action buttons
+  listEl.querySelectorAll('.mg-notif-action-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const notifId   = btn.dataset.notifId;
+      const actionIdx = parseInt(btn.dataset.actionIdx);
+      const notif     = _notifData.find(n => n.id === notifId);
+      if (!notif?.actions?.[actionIdx]) return;
+
+      listEl.querySelectorAll(`.mg-notif-action-btn[data-notif-id="${notifId}"]`)
+        .forEach(b => { b.disabled = true; });
+
+      try {
+        await notif.actions[actionIdx].fn();
+        _notifData = _notifData.filter(n => n.id !== notifId);
+        updateBadge(_notifData.filter(n => n.isNew).length);
+        renderNotifList(_notifData);
+      } catch (err) {
+        console.error('[sidebar] Invite action failed:', err);
+        listEl.querySelectorAll(`.mg-notif-action-btn[data-notif-id="${notifId}"]`)
+          .forEach(b => { b.disabled = false; });
+      }
+    });
+  });
 }
 
 function updateBadge(count) {
@@ -193,7 +251,8 @@ function updateBadge(count) {
   }
 }
 
-async function loadNotifications(uid, basePath) {
+async function loadNotifications(uid, basePath, role = 'student') {
+  _userRole = role;
   injectNotifStyles();
 
   // Reveal the bell button (hidden by default until role confirmed)
@@ -233,8 +292,17 @@ async function loadNotifications(uid, basePath) {
     });
 
     // Mark all as read
-    document.getElementById('mg-notif-mark-all')?.addEventListener('click', e => {
+    document.getElementById('mg-notif-mark-all')?.addEventListener('click', async e => {
       e.stopPropagation();
+      const responseNotifs = _notifData.filter(n => n.type === 'classroomInviteResponse');
+      if (responseNotifs.length) {
+        await Promise.all(
+          responseNotifs.map(n =>
+            updateDoc(doc(db, 'classroomInvites', n.id), { teacherSeen: true })
+              .catch(err => console.error('[sidebar] Error marking invite seen:', n.id, err.code, err))
+          )
+        );
+      }
       saveSeenState({
         friendReqIds:  _notifData.filter(n => n.type === 'friendRequest').map(n => n.id),
         classroomIds:  _notifData.filter(n => n.type === 'classroom').map(n => n.id),
@@ -248,11 +316,26 @@ async function loadNotifications(uid, basePath) {
     // Mark individual notification as read on click
     const keyMap = { friendRequest: 'friendReqIds', classroom: 'classroomIds', assignment: 'assignmentIds' };
     _notifPanel.addEventListener('click', e => {
+      if (e.target.closest('.mg-notif-action-btn')) return;
       const item = e.target.closest('.mg-notif-item');
       if (!item) return;
       const type = item.dataset.notifType;
       const id   = item.dataset.notifId;
       if (!type || !id) return;
+
+      if (type === 'classroomInviteResponse') {
+        updateDoc(doc(db, 'classroomInvites', id), { teacherSeen: true })
+          .catch(err => console.error('[sidebar] Error marking response as seen:', id, err.code, err));
+        const notif = _notifData.find(n => n.id === id && n.type === type);
+        if (notif?.isNew) {
+          notif.isNew = false;
+          updateBadge(_notifData.filter(n => n.isNew).length);
+          item.classList.remove('is-new');
+          item.querySelector('.mg-notif-item-dot')?.remove();
+        }
+        return;
+      }
+
       const key = keyMap[type];
       if (!key) return;
       const state = getSeenState();
@@ -271,95 +354,158 @@ async function loadNotifications(uid, basePath) {
     });
   }
 
-  // ── Fetch all data in parallel ────────────────────────────────────────────
+  // ── Fetch data based on role ──────────────────────────────────────────────
   try {
-    const [progressSnap, friendReqSnap, classroomsSnap] = await Promise.all([
-      getDoc(doc(db, 'mathgo_progress', uid)),
-      getDocs(query(collection(db, 'friendRequests'), where('toUid', '==', uid))),
-      getDocs(query(collection(db, 'classrooms'), where('studentIds', 'array-contains', uid))),
-    ]);
+    if (role === 'teacher') {
+      const responseSnap = await getDocs(query(
+        collection(db, 'classroomInvites'),
+        where('teacherId',   '==', uid),
+        where('status',      'in', ['accepted', 'rejected']),
+        where('teacherSeen', '==', false),
+      ));
 
-    const progress = progressSnap.exists() ? progressSnap.data() : {};
-
-    // Pending friend requests only
-    const friendReqs = [];
-    friendReqSnap.forEach(d => {
-      const data = d.data();
-      if (data.status === 'pending') friendReqs.push({ id: d.id, ...data });
-    });
-
-    const classrooms = [];
-    classroomsSnap.forEach(d => classrooms.push({ id: d.id, ...d.data() }));
-
-    // Assignments for all student classrooms in parallel
-    const assignSnaps = classrooms.length
-      ? await Promise.all(
-          classrooms.map(c =>
-            getDocs(query(collection(db, 'assignments'), where('classroomId', '==', c.id)))
-          )
-        )
-      : [];
-
-    const allAssignments = [];
-    assignSnaps.forEach((snap, i) => {
-      snap.forEach(d => allAssignments.push({ id: d.id, _classroomId: classrooms[i].id, ...d.data() }));
-    });
-
-    // Only non-completed assignments
-    const pendingAssignments = allAssignments.filter(a => {
-      const wp = progress?.worlds?.[String(a.worldId)] ?? {};
-      return a.levelId == null
-        ? wp.allComplete !== true
-        : !(wp.levelsCompleted ?? []).includes(Number(a.levelId));
-    });
-
-    // ── Build notification list ───────────────────────────────────────────
-    const seen           = getSeenState();
-    const seenFriendReqs = seen.friendReqIds  ?? [];
-    const seenClassrooms = seen.classroomIds  ?? [];
-    const seenAssignments= seen.assignmentIds ?? [];
-
-    const notifications = [];
-
-    friendReqs.forEach(r => {
-      notifications.push({
-        type:  'friendRequest',
-        id:    r.id,
-        icon:  'fa-user-plus',
-        text:  `<strong>${escHtml(r.fromName || 'Alguien')}</strong> te envió una solicitud de amistad`,
-        href:  `${basePath}amigos.html`,
-        isNew: !seenFriendReqs.includes(r.id),
-      });
-    });
-
-    // Classrooms only shown once (disappear once seen)
-    classrooms.forEach(c => {
-      if (!seenClassrooms.includes(c.id)) {
+      const notifications = [];
+      responseSnap.forEach(d => {
+        const data       = d.data();
+        const isAccepted = data.status === 'accepted';
         notifications.push({
-          type:  'classroom',
-          id:    c.id,
-          icon:  'fa-chalkboard',
-          text:  `Estás en el salón <strong>${escHtml(c.name || 'sin nombre')}</strong>`,
-          href:  `${basePath}assignments.html`,
+          type:  'classroomInviteResponse',
+          id:    d.id,
+          icon:  isAccepted ? 'fa-check' : 'fa-xmark',
+          text:  isAccepted
+            ? `<strong>${escHtml(data.studentName || 'Un alumno')}</strong> aceptó unirse a tu salón <strong>${escHtml(data.classroomName || 'sin nombre')}</strong>`
+            : `<strong>${escHtml(data.studentName || 'Un alumno')}</strong> rechazó la invitación al salón <strong>${escHtml(data.classroomName || 'sin nombre')}</strong>`,
+          href:  `${basePath}teacher.html`,
           isNew: true,
         });
-      }
-    });
-
-    pendingAssignments.forEach(a => {
-      notifications.push({
-        type:  'assignment',
-        id:    a.id,
-        icon:  'fa-clipboard-list',
-        text:  `Tienes una asignación pendiente: <strong>${escHtml(a.title || 'sin título')}</strong>`,
-        href:  `${basePath}assignments.html`,
-        isNew: !seenAssignments.includes(a.id),
       });
-    });
 
-    _notifData = notifications;
-    updateBadge(notifications.filter(n => n.isNew).length);
-    renderNotifList(notifications);
+      _notifData = notifications;
+      updateBadge(notifications.filter(n => n.isNew).length);
+      renderNotifList(notifications);
+
+    } else {
+      const [progressSnap, friendReqSnap, classroomsSnap, inviteSnap] = await Promise.all([
+        getDoc(doc(db, 'mathgo_progress', uid)),
+        getDocs(query(collection(db, 'friendRequests'), where('toUid', '==', uid))),
+        getDocs(query(collection(db, 'classrooms'), where('studentIds', 'array-contains', uid))),
+        getDocs(query(collection(db, 'classroomInvites'), where('studentId', '==', uid), where('status', '==', 'pending'))),
+      ]);
+
+      const progress = progressSnap.exists() ? progressSnap.data() : {};
+
+      // Pending friend requests only
+      const friendReqs = [];
+      friendReqSnap.forEach(d => {
+        const data = d.data();
+        if (data.status === 'pending') friendReqs.push({ id: d.id, ...data });
+      });
+
+      const classrooms = [];
+      classroomsSnap.forEach(d => classrooms.push({ id: d.id, ...d.data() }));
+
+      // Assignments for all student classrooms in parallel
+      const assignSnaps = classrooms.length
+        ? await Promise.all(
+            classrooms.map(c =>
+              getDocs(query(collection(db, 'assignments'), where('classroomId', '==', c.id)))
+            )
+          )
+        : [];
+
+      const allAssignments = [];
+      assignSnaps.forEach((snap, i) => {
+        snap.forEach(d => allAssignments.push({ id: d.id, _classroomId: classrooms[i].id, ...d.data() }));
+      });
+
+      // Only non-completed assignments
+      const pendingAssignments = allAssignments.filter(a => {
+        const wp = progress?.worlds?.[String(a.worldId)] ?? {};
+        return a.levelId == null
+          ? wp.allComplete !== true
+          : !(wp.levelsCompleted ?? []).includes(Number(a.levelId));
+      });
+
+      // ── Build notification list ───────────────────────────────────────────
+      const seen            = getSeenState();
+      const seenFriendReqs  = seen.friendReqIds  ?? [];
+      const seenClassrooms  = seen.classroomIds  ?? [];
+      const seenAssignments = seen.assignmentIds ?? [];
+
+      const notifications = [];
+
+      // Pending classroom invites for this student
+      const pendingInvites = [];
+      inviteSnap.forEach(d => pendingInvites.push({ id: d.id, ...d.data() }));
+      pendingInvites.forEach(inv => {
+        notifications.push({
+          type:  'classroomInvite',
+          id:    inv.id,
+          icon:  'fa-chalkboard-user',
+          text:  `<strong>Prof. ${escHtml(inv.teacherName || 'Desconocido')}</strong> te invita a unirte al salón <strong>${escHtml(inv.classroomName || 'sin nombre')}</strong>`,
+          isNew: true,
+          actions: [
+            {
+              label: '<i class="fa-solid fa-check"></i> Aceptar',
+              style: 'accept',
+              fn: async () => {
+                await Promise.all([
+                  updateDoc(doc(db, 'classroomInvites', inv.id), { status: 'accepted' }),
+                  updateDoc(doc(db, 'classrooms', inv.classroomId), { studentIds: arrayUnion(uid) }),
+                ]);
+              },
+            },
+            {
+              label: '<i class="fa-solid fa-xmark"></i> Rechazar',
+              style: 'reject',
+              fn: async () => {
+                await updateDoc(doc(db, 'classroomInvites', inv.id), { status: 'rejected' });
+              },
+            },
+          ],
+        });
+      });
+
+      friendReqs.forEach(r => {
+        notifications.push({
+          type:  'friendRequest',
+          id:    r.id,
+          icon:  'fa-user-plus',
+          text:  `<strong>${escHtml(r.fromName || 'Alguien')}</strong> te envió una solicitud de amistad`,
+          href:  `${basePath}amigos.html`,
+          isNew: !seenFriendReqs.includes(r.id),
+        });
+      });
+
+      // Classrooms only shown once (disappear once seen)
+      classrooms.forEach(c => {
+        if (!seenClassrooms.includes(c.id)) {
+          notifications.push({
+            type:  'classroom',
+            id:    c.id,
+            icon:  'fa-chalkboard',
+            text:  `Estás en el salón <strong>${escHtml(c.name || 'sin nombre')}</strong>`,
+            href:  `${basePath}assignments.html`,
+            isNew: true,
+          });
+        }
+      });
+
+      pendingAssignments.forEach(a => {
+        notifications.push({
+          type:  'assignment',
+          id:    a.id,
+          icon:  'fa-clipboard-list',
+          text:  `Tienes una asignación pendiente: <strong>${escHtml(a.title || 'sin título')}</strong>`,
+          href:  `${basePath}assignments.html`,
+          isNew: !seenAssignments.includes(a.id),
+        });
+      });
+
+      _notifData = notifications;
+      updateBadge(notifications.filter(n => n.isNew).length);
+      renderNotifList(notifications);
+    }
 
   } catch (err) {
     console.error('[sidebar] Error al cargar notificaciones:', err);
@@ -588,9 +734,9 @@ export async function initSidebar(activeId = 'learn') {
     bottomNavEl.appendChild(teacherBottom);
   }
 
-  // Cargar notificaciones solo para estudiantes
-  if (isStudentUser && currentUser) {
-    loadNotifications(currentUser.uid, basePath).catch(err =>
+  // Cargar notificaciones para estudiantes y profesores
+  if ((isStudentUser || isTeacherUser) && currentUser) {
+    loadNotifications(currentUser.uid, basePath, userRole).catch(err =>
       console.warn('[sidebar] loadNotifications falló silenciosamente:', err)
     );
   }
