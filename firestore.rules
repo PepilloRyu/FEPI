@@ -92,12 +92,9 @@ service cloud.firestore {
 
     // ── attempts/{attemptId} ──────────────────────────────────────────────────
     // El backend escribe via Admin SDK (bypasa estas reglas).
-    // Lectura: el propio dueño del intento o un usuario con role == 'admin'.
+    // Lectura: cualquier usuario autenticado (para permitir ver precisión a amigos/profesores).
     match /attempts/{attemptId} {
-      allow read: if request.auth != null && (
-        resource.data.userId == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
+      allow read: if request.auth != null;
       allow write: if false;
     }
 
