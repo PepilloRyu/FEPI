@@ -136,10 +136,18 @@ public class ExerciseService : IExerciseService
                     uid, progress.LastActiveDate);
                 progress.LastActiveDate = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
-                int dayOfWeek = (int)DateTime.UtcNow.DayOfWeek;
+                var mexicoNow = DateTime.UtcNow.Add(TimeSpan.FromHours(-6));
+                var today = mexicoNow.Date;
+                int daysFromMonday = ((int)today.DayOfWeek + 6) % 7;
+                string currentWeekMonday = today.AddDays(-daysFromMonday).ToString("yyyy-MM-dd");
+                if (progress.WeeklyActivityStart != currentWeekMonday)
+                {
+                    progress.WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 };
+                    progress.WeeklyActivityStart = currentWeekMonday;
+                }
                 if (progress.WeeklyActivity == null || progress.WeeklyActivity.Count != 7)
                     progress.WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 };
-                progress.WeeklyActivity[dayOfWeek] += xpAwarded;
+                progress.WeeklyActivity[(int)today.DayOfWeek] += xpAwarded;
 
                 await _progressRepository.UpdateAsync(uid, progress);
 

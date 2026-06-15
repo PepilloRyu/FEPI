@@ -25,10 +25,19 @@ public class AnalyticsService : IAnalyticsService
         await Task.WhenAll(attemptsTask, progressTask);
 
         var userAttempts = (await attemptsTask).ToList();
-        var xpTotal = (await progressTask)?.TotalXp ?? 0;
+        var progress = await progressTask;
+        var xpTotal = progress?.TotalXp ?? 0;
+
+        var mexicoNow = DateTime.UtcNow.Add(TimeSpan.FromHours(-6));
+        var today = mexicoNow.Date;
+        int daysFromMonday = ((int)today.DayOfWeek + 6) % 7;
+        string currentWeekMonday = today.AddDays(-daysFromMonday).ToString("yyyy-MM-dd");
+        int[] weeklyXp = progress?.WeeklyActivityStart == currentWeekMonday && progress.WeeklyActivity?.Count == 7
+            ? progress.WeeklyActivity.ToArray()
+            : new int[7];
 
         if (!userAttempts.Any())
-            return new StatsResponse { XpTotal = xpTotal };
+            return new StatsResponse { XpTotal = xpTotal, WeeklyXp = weeklyXp };
 
         return new StatsResponse
         {
@@ -36,7 +45,8 @@ public class AnalyticsService : IAnalyticsService
             CorrectAttempts = userAttempts.Count(a => a.IsCorrect),
             AccuracyPercent = userAttempts.Count(a => a.IsCorrect) * 100.0 / userAttempts.Count,
             AverageTimeMs = userAttempts.Average(a => a.TimeMs),
-            XpTotal = xpTotal
+            XpTotal = xpTotal,
+            WeeklyXp = weeklyXp
         };
     }
 

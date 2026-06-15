@@ -39,6 +39,9 @@ public class UserProgress
     [FirestoreProperty("weeklyActivity")]
     public List<int> WeeklyActivity { get; set; } = new() { 0, 0, 0, 0, 0, 0, 0 };
 
+    [FirestoreProperty("weeklyActivityStart")]
+    public string WeeklyActivityStart { get; set; } = string.Empty;
+
     [FirestoreProperty("worlds")]
     public Dictionary<string, WorldProgress> Worlds { get; set; } = new();
 }

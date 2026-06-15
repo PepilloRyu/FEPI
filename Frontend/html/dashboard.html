@@ -309,7 +309,7 @@ function updateXpRing(xp, xpNeeded = 1000) {
       // Intentar cargar analytics del backend (para gráfica semanal)
       const { data: analytics } = await getAnalytics();
       if (analytics?.weeklyXp) renderActivityChart(analytics.weeklyXp);
-      else renderActivityChart([0, 20, 45, 30, 0, 80, xp % 100]);
+      else renderActivityChart([0, 0, 0, 0, 0, 0, 0]);
 
       // Misiones
       const { data: missions } = await getMissions();

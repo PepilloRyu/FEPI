@@ -75,6 +75,7 @@ public class StatsResponse
     public int XpTotal { get; set; }
     public List<string> DominatedTopics { get; set; } = new();
     public List<string> WeakTopics { get; set; } = new();
+    public int[] WeeklyXp { get; set; } = new int[7];
 }
 
 /// <summary>
