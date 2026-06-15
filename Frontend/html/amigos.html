@@ -795,9 +795,13 @@
         // Resolver título equipado
         const titleId = friendUser?.equippedTitle ?? null;
         let titleName = 'Novato';
+        let titleRank = 'common';
         if (titleId) {
           const titleEntry = TITLE_CATALOG.find(t => t.id === titleId);
-          if (titleEntry) titleName = titleEntry.name;
+          if (titleEntry) {
+            titleName = titleEntry.name;
+            titleRank = titleEntry.rank;
+          }
         }
 
         const fXp    = friendProg?.totalXp     ?? 0;
@@ -812,7 +816,9 @@
               </div>
               <div class="friend-card-names">
                 <div class="friend-card-name">${escHtml(name)}</div>
-                <div class="friend-card-title-equipped">${escHtml(titleName)}</div>
+                <div style="margin-top: 2px;">
+                  <span class="mg-title-name mg-title-${titleRank}" style="font-size: 10px; padding: 1px 6px;">${escHtml(titleName)}</span>
+                </div>
               </div>
             </div>
             <div class="friend-card-kpis">
@@ -893,9 +899,13 @@
         // Resolve title
         const titleId = userData.equippedTitle ?? null;
         let titleName = 'Novato';
+        let titleRank = 'common';
         if (titleId) {
           const titleEntry = TITLE_CATALOG.find(t => t.id === titleId);
-          if (titleEntry) titleName = titleEntry.name;
+          if (titleEntry) {
+            titleName = titleEntry.name;
+            titleRank = titleEntry.rank;
+          }
         }
         
         // Estimate world
@@ -927,7 +937,9 @@
               ${escHtml(getInitials(name))}
             </div>
             <div class="friend-modal-name">${escHtml(name)}</div>
-            <div class="friend-modal-title">${escHtml(titleName)}</div>
+            <div style="margin-top: 6px;">
+              <span class="mg-title-name mg-title-${titleRank}" style="font-size: 11px; padding: 2px 8px;">${escHtml(titleName)}</span>
+            </div>
             <div class="friend-modal-email">${escHtml(email)}</div>
           </div>
           
