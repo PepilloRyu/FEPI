@@ -173,7 +173,7 @@ function renderNotifList(notifications) {
   }
 
   listEl.innerHTML = notifications.map(n => `
-    <a class="mg-notif-item${n.isNew ? ' is-new' : ''}" href="${n.href}">
+    <a class="mg-notif-item${n.isNew ? ' is-new' : ''}" href="${n.href}" data-notif-type="${n.type}" data-notif-id="${n.id}">
       <div class="mg-notif-item-icon"><i class="fa-solid ${n.icon}"></i></div>
       <div class="mg-notif-item-body">
         <div class="mg-notif-item-text">${n.text}</div>
@@ -243,6 +243,31 @@ async function loadNotifications(uid, basePath) {
       _notifData = _notifData.map(n => ({ ...n, isNew: false }));
       updateBadge(0);
       renderNotifList(_notifData);
+    });
+
+    // Mark individual notification as read on click
+    const keyMap = { friendRequest: 'friendReqIds', classroom: 'classroomIds', assignment: 'assignmentIds' };
+    _notifPanel.addEventListener('click', e => {
+      const item = e.target.closest('.mg-notif-item');
+      if (!item) return;
+      const type = item.dataset.notifType;
+      const id   = item.dataset.notifId;
+      if (!type || !id) return;
+      const key = keyMap[type];
+      if (!key) return;
+      const state = getSeenState();
+      if (!state[key]) state[key] = [];
+      if (!state[key].includes(id)) {
+        state[key].push(id);
+        saveSeenState(state);
+      }
+      const notif = _notifData.find(n => n.id === id && n.type === type);
+      if (notif && notif.isNew) {
+        notif.isNew = false;
+        updateBadge(_notifData.filter(n => n.isNew).length);
+        item.classList.remove('is-new');
+        item.querySelector('.mg-notif-item-dot')?.remove();
+      }
     });
   }
 

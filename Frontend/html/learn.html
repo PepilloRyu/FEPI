@@ -100,6 +100,7 @@
     import { initSidebar } from '../js/components/sidebar.js';
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+    import { BANNER_CATALOG, getBannerStyle } from '../js/banner-catalog.js';
 
     const WORLD_DATA = [
       { id: '1', icon: 'fa-solid fa-drafting-compass', title: 'Las Bases del Álgebra',           sub: 'Del pensamiento aritmético al algebraico',   href: 'world-1.html' },
@@ -151,6 +152,22 @@
 
       const isAdmin = userData.role === 'admin';
       const displayName = userData.name || user.email?.split('@')[0] || 'Usuario';
+
+      // Aplicar banner equipado al hero
+      const equippedBanner = userData.equippedBanner ?? null;
+      const heroEl = document.querySelector('.mg-hero-banner');
+      if (heroEl) heroEl.classList.add('has-banner');
+      if (equippedBanner) {
+        const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
+        if (bannerEntry && heroEl) {
+          const styleStr = getBannerStyle(bannerEntry);
+          styleStr.split(';').filter(Boolean).forEach(decl => {
+            const [prop, ...rest] = decl.split(':');
+            const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+            heroEl.style[camel] = rest.join(':').trim();
+          });
+        }
+      }
 
       // Racha diaria (solo lectura — el backend la actualiza al completar ejercicios)
       const streak = progress.dailyStreak ?? 0;

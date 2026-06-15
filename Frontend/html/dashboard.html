@@ -277,18 +277,17 @@ function updateXpRing(xp, xpNeeded = 1000) {
 
       // Aplicar banner equipado si existe
       const equippedBanner = userData.equippedBanner ?? null;
+      const welcomeEl = document.getElementById('dash-welcome');
+      if (welcomeEl) welcomeEl.classList.add('has-banner');
       if (equippedBanner) {
         const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
-        if (bannerEntry) {
-          const welcomeEl = document.getElementById('dash-welcome');
-          if (welcomeEl) {
-            const styleStr = getBannerStyle(bannerEntry);
-            styleStr.split(';').filter(Boolean).forEach(decl => {
-              const [prop, ...rest] = decl.split(':');
-              const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-              welcomeEl.style[camel] = rest.join(':').trim();
-            });
-          }
+        if (bannerEntry && welcomeEl) {
+          const styleStr = getBannerStyle(bannerEntry);
+          styleStr.split(';').filter(Boolean).forEach(decl => {
+            const [prop, ...rest] = decl.split(':');
+            const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+            welcomeEl.style[camel] = rest.join(':').trim();
+          });
         }
       }
 

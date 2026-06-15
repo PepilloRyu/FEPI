@@ -186,10 +186,11 @@
 
       // Banner equipado
       const equippedBanner = userData.equippedBanner ?? null;
+      const heroEl = document.querySelector('.profile-hero');
+      if (heroEl) heroEl.classList.add('has-banner');
       if (equippedBanner) {
         const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
-        if (bannerEntry) {
-          const heroEl = document.querySelector('.profile-hero');
+        if (bannerEntry && heroEl) {
           const styleStr = getBannerStyle(bannerEntry);
           styleStr.split(';').filter(Boolean).forEach(decl => {
             const [prop, ...rest] = decl.split(':');

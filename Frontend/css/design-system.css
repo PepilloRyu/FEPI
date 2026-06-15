@@ -1691,6 +1691,7 @@ body.mg-player-mode #app .mg-content {
   background: rgba(255,255,255,0.08);
   pointer-events: none;
 }
+.has-banner::before { display: none; }
 .profile-hero-avatar {
   width: 90px;
   height: 90px;
