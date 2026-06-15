@@ -2,19 +2,44 @@
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 import { BASE_URL } from "./services/api.js";
 
+// Normaliza diferentes representaciones de matrices en el sistema:
+// 1. Doble corchete con comas: [[ 5 2 ], [ 3 1 ]] -> [ 5 2 ] / [ 3 1 ]
+// 2. Punto y coma: [1 -2; -3 5] -> [ 1 -2 ] / [ -3 5 ]
+function normalizeMatrixNotation(text) {
+  if (!text) return "";
+  let result = text;
+  
+  // 1. Doble corchete: [[5, 2], [3, 1]] o [[ 5 2 ], [ 3 1 ]]
+  result = result.replace(/\[\[([\s\d\w.,|−\[\]\-]+?)\]\]/g, match => {
+    const inner = match.slice(2, -2).trim();
+    // Separar por filas: "], [" o "],[" o " ] , [ "
+    const rows = inner.split(/\]\s*,?\s*\[/);
+    return rows.map(r => `[ ${r.replace(/,/g, ' ').trim()} ]`).join(' / ');
+  });
+
+  // 2. Punto y coma: [1 -2; -3 5] o [1, -2; -3, 5]
+  result = result.replace(/\[([\w\d\s.,|−\-]*;[\w\d\s.,|−\-;&]*)\]/g, match => {
+    const inner = match.slice(1, -1).trim();
+    const rows = inner.split(';');
+    return rows.map(r => `[ ${r.replace(/,/g, ' ').trim()} ]`).join(' / ');
+  });
+
+  return result;
+}
+
 // Convierte notación de matriz en HTML de tabla con .mg-matrix-wrap/.mg-matrix-inner/.mg-mc
 // Soporta: "[ 1 0 ] / [ 2 3 ]" y "Prefijo texto: [ 2 1 | 8 ] / [ 1 −1 | 1 ]"
 // También soporta variables (letras) dentro de matrices: [ x y ] / [ a b ]
 function matrixify(text) {
-  const firstBracket = text.indexOf('[');
-  if (firstBracket === -1) return text;
+  const normalized = normalizeMatrixNotation(text);
+  const firstBracket = normalized.indexOf('[');
+  if (firstBracket === -1) return normalized;
 
-  const prefix = text.slice(0, firstBracket).trim();
-  const matrixText = text.slice(firstBracket);
+  const prefix = normalized.slice(0, firstBracket).trim();
+  const matrixText = normalized.slice(firstBracket);
 
   const parts = matrixText.split(/\s*\/\s*/);
-  // charset: dígitos, letras, espacios, punto, coma, | (pipe), − (U+2212), - (guion)
-  if (!parts.every(p => /^\s*\[[\w\d\s.,|−-]+\]\s*$/.test(p))) return text;
+  if (!parts.every(p => /^\s*\[[\w\d\s.,|−\-]+\]\s*$/.test(p))) return normalized;
 
   const rows = parts.map(p =>
     p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim()
@@ -24,7 +49,7 @@ function matrixify(text) {
   const cells = rows.flat().map(n =>
     n === "|"
       ? `<span class="mg-mc mg-mc-sep">|</span>`
-      : `<span class="mg-mc">${n}</span>`
+      : `<span class="mg-mc">${mathVars(n)}</span>`
   ).join("");
   const tableHTML = `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${cols}">${cells}</span></span>`;
 
@@ -34,19 +59,40 @@ function matrixify(text) {
 }
 
 // Reemplaza TODAS las ocurrencias de notación matricial dentro de texto libre.
-// A diferencia de matrixify(), no requiere que el texto sea solo matrices —
-// localiza cada [n, n | n] embebida y la convierte a tabla inline, dejando el resto.
+// Soporta matrices simples, multi-fila y convierte notaciones alternativas de manera inline.
 function matrixifyInline(text) {
-  return text.replace(/\[[\w\d\s.,|−-]+\]/g, match => {
+  if (!text) return "";
+  let normalized = normalizeMatrixNotation(text);
+
+  // 1. Matrices multi-fila: [ a b ] / [ c d ]
+  normalized = normalized.replace(/\[[\w\d\s.,|−\-]+\](\s*\/\s*\[[\w\d\s.,|−\-]+\])+/g, match => {
+    const parts = match.split(/\s*\/\s*/);
+    const rows = parts.map(p =>
+      p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim()
+       .split(/\s+/).map(t => t.replace(/,+$/, ""))
+    );
+    const cols = rows[0].length;
+    const cells = rows.flat().map(n =>
+      n === "|"
+        ? `<span class="mg-mc mg-mc-sep">|</span>`
+        : `<span class="mg-mc">${mathVars(n)}</span>`
+    ).join("");
+    return `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${cols}">${cells}</span></span>`;
+  });
+
+  // 2. Matrices uni-fila: [ a b ]
+  normalized = normalized.replace(/\[[\w\d\s.,|−\-]+\]/g, match => {
     const tokens = match.slice(1, -1).trim()
       .split(/\s+/).map(t => t.replace(/,+$/, "")).filter(Boolean);
     const cells = tokens.map(n =>
       n === "|"
         ? `<span class="mg-mc mg-mc-sep">|</span>`
-        : `<span class="mg-mc">${n}</span>`
+        : `<span class="mg-mc">${mathVars(n)}</span>`
     ).join("");
     return `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${tokens.length}">${cells}</span></span>`;
   });
+
+  return normalized;
 }
 
 // Envuelve variables algebraicas individuales (x, y, a, b, A, B, etc.) en itálica.
@@ -72,16 +118,10 @@ function mathVars(text) {
   return varified.replace(new RegExp(placeholder, 'g'), () => htmlParts[idx++]);
 }
 
-// Combinador: aplica matrixify si contiene "/" y "[", de lo contrario matrixifyInline, y luego mathVars
+// Combinador: aplica matrixifyInline primero y luego mathVars
 function mathFormat(text) {
   if (!text) return "";
-  let formatted = text;
-  if (text.includes('[') && text.includes('/') && text.includes(']')) {
-    formatted = matrixify(text);
-  } else {
-    formatted = matrixifyInline(text);
-  }
-  return mathVars(formatted);
+  return mathVars(matrixifyInline(text));
 }
 
 async function getToken(user) {
@@ -981,9 +1021,9 @@ export async function initEngine({
         : `<div class="mg-footer"><div class="mg-btn-wrap blue"><button class="mg-btn" onclick="MG.press(this,MG.next)">Continuar</button></div></div>`;
       app.innerHTML = `<div class="mg-player">${top}<div class="mg-content mg-fade">
         <span class="mg-tag">${t.tag}</span><div class="mg-icon">${getIconHTML(t.icon)}</div>
-        <h2 class="mg-title">${t.title}</h2><p class="mg-body">${t.body}</p>
+        <h2 class="mg-title">${t.title}</h2><p class="mg-body">${mathFormat(t.body)}</p>
         ${getVisual(t.visual)}
-        <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary); margin-right:4px;"></i>Idea clave</div><div class="txt">${t.key}</div></div>
+        <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary); margin-right:4px;"></i>Idea clave</div><div class="txt">${mathFormat(t.key)}</div></div>
       </div>${theoryFooter}</div>`;
       return;
     }
@@ -1161,9 +1201,9 @@ export async function initEngine({
           <span class="mg-tag">${t.tag}</span>
           <div class="mg-icon">${getIconHTML(t.icon)}</div>
           <h2 class="mg-title">${t.title}</h2>
-          <p class="mg-body">${t.body}</p>
+          <p class="mg-body">${mathFormat(t.body)}</p>
           ${getVisual(t.visual)}
-          <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary);margin-right:4px;"></i>Idea clave</div><div class="txt">${t.key}</div></div>
+          <div class="mg-note key"><div class="lbl"><i class="fa-solid fa-lightbulb" style="color:var(--mg-primary);margin-right:4px;"></i>Idea clave</div><div class="txt">${mathFormat(t.key)}</div></div>
         </div>
         <div class="mg-footer" style="display:flex;gap:12px;border-radius:0 0 20px 20px;flex-shrink:0;">
           <div class="mg-btn-wrap" style="flex:1;${prevDis ? 'opacity:.4;pointer-events:none;' : ''}">
