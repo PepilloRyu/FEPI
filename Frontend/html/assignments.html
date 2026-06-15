@@ -197,7 +197,18 @@
 
         const progress   = progressSnap.exists() ? progressSnap.data() : {};
         const classrooms = [];
-        classroomsSnap.forEach(d => classrooms.push({ id: d.id, name: d.data().name || '—' }));
+        classroomsSnap.forEach(d => classrooms.push({ id: d.id, name: d.data().name || '—', teacherId: d.data().teacherId || null }));
+
+        // Fetch teacher names (deduplicated, parallel)
+        const teacherIds = [...new Set(classrooms.map(c => c.teacherId).filter(Boolean))];
+        const teacherSnaps = await Promise.all(teacherIds.map(tid => getDoc(doc(db, 'users', tid))));
+        const teacherNames = {};
+        teacherSnaps.forEach((snap, i) => {
+          teacherNames[teacherIds[i]] = snap.exists() ? (snap.data().name || 'Profesor') : 'Profesor';
+        });
+        classrooms.forEach(c => {
+          c.teacherName = c.teacherId ? (teacherNames[c.teacherId] ?? 'Profesor') : 'Profesor';
+        });
 
         if (!classrooms.length) {
           renderEmpty(container);
@@ -215,7 +226,8 @@
         const assignments = [];
         snapshots.forEach((snap, i) => {
           const cName = classrooms[i].name;
-          snap.forEach(d => assignments.push({ id: d.id, _classroomName: cName, ...d.data() }));
+          const tName = classrooms[i].teacherName;
+          snap.forEach(d => assignments.push({ id: d.id, _classroomName: cName, _teacherName: tName, ...d.data() }));
         });
 
         if (!assignments.length) {
@@ -326,6 +338,10 @@
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mg-muted);">
             <i class="fa-solid fa-chalkboard" style="font-size:11px;"></i>
             <span>${escHtml(a._classroomName)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mg-muted);">
+            <i class="fa-solid fa-chalkboard-user" style="font-size:11px;"></i>
+            <span>Prof. ${escHtml(a._teacherName || 'Profesor')}</span>
           </div>
           <div class="assign-card-footer">
             <span class="assign-card-date">
