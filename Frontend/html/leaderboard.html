@@ -18,9 +18,13 @@
 
       <!-- Header -->
       <div class="league-header">
-        <div style="font-size:48px; margin-bottom:8px;"><i class="fa-solid fa-trophy" style="color:#fcd34d;"></i></div>
-        <h1>Liga de Álgebra</h1>
-        <p>Compite con otros estudiantes y sube de posición</p>
+        <div class="lh-left">
+          <div class="lh-icon"><i class="fa-solid fa-trophy"></i></div>
+          <div class="lh-text">
+            <h1>Liga de Álgebra</h1>
+            <p>Compite con otros estudiantes y sube de posición</p>
+          </div>
+        </div>
       </div>
 
       <!-- Podio -->
@@ -79,15 +83,17 @@
 
       podium.innerHTML = ordered.map((u) => {
         const rank = top3.indexOf(u) + 1;
-        const height = rank === 1 ? 100 : rank === 2 ? 70 : 55;
+        const height = rank === 1 ? 72 : rank === 2 ? 50 : 38;
         const isMe = u.uid === currentUid;
+        const xp = u.xpTotal ?? u.totalXp ?? 0;
         return `
           <div class="podium-slot">
             <div class="podium-avatar" style="${isMe ? 'border: 3px solid #fff;' : ''}">
               ${getInitials(u.name || u.displayName || u.email || '?')}
             </div>
             <div class="podium-name">${u.name || u.displayName || 'Usuario'} ${isMe ? '(Tú)' : ''}</div>
-            <div class="podium-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${u.xpTotal ?? u.totalXp ?? 0} XP</div>
+            <div class="podium-xp"><i class="fa-solid fa-bolt" style="color:var(--mg-xp); margin-right:4px;"></i>${xp} XP</div>
+            <div class="podium-league" style="font-size:10px; font-weight:800; color:var(--mg-primary); opacity:0.85; text-transform:uppercase; margin-top:2px;">${getLeague(xp)}</div>
             <div class="podium-block" style="height:${height}px;">${MEDALS[rank-1]}</div>
           </div>
         `;

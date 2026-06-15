@@ -35,13 +35,17 @@
       <div class="profile-stats-grid">
         <div class="profile-stat-box">
           <div class="profile-stat-icon"><i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i></div>
-          <div class="profile-stat-value mg-text-xp" id="stat-xp">–</div>
-          <div class="profile-stat-label">XP Total</div>
+          <div class="profile-stat-content">
+            <div class="profile-stat-value mg-text-xp" id="stat-xp">–</div>
+            <div class="profile-stat-label">XP Total</div>
+          </div>
         </div>
         <div class="profile-stat-box">
           <div class="profile-stat-icon"><i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i></div>
-          <div class="profile-stat-value mg-text-streak" id="stat-streak">–</div>
-          <div class="profile-stat-label">Racha actual</div>
+          <div class="profile-stat-content">
+            <div class="profile-stat-value mg-text-streak" id="stat-streak">–</div>
+            <div class="profile-stat-label">Racha actual</div>
+          </div>
         </div>
       </div>
 
@@ -52,21 +56,32 @@
         </h2>
         <div class="mg-stats-grid">
           <div class="mg-stat-box">
-            <div id="stat-accuracy-icon" style="font-size:20px; color:var(--mg-success); margin-bottom:4px;"><i class="fa-solid fa-bullseye"></i></div>
-            <div class="mg-stat-value" id="stat-accuracy" style="color:var(--mg-success)">–</div>
-            <div class="mg-stat-label">Precisión</div>
+            <div class="stat-box-icon" id="stat-accuracy-icon" style="color:var(--mg-success)"><i class="fa-solid fa-bullseye"></i></div>
+            <div class="stat-box-content">
+              <div class="mg-stat-value" id="stat-accuracy" style="color:var(--mg-success)">–</div>
+              <div class="mg-stat-label">Precisión</div>
+            </div>
           </div>
           <div class="mg-stat-box">
-            <div class="mg-stat-value mg-text-primary" id="stat-level">–</div>
-            <div class="mg-stat-label">Nivel actual</div>
+            <div class="stat-box-icon" style="color:var(--mg-primary)"><i class="fa-solid fa-star"></i></div>
+            <div class="stat-box-content">
+              <div class="mg-stat-value mg-text-primary" id="stat-level">–</div>
+              <div class="mg-stat-label">Nivel actual</div>
+            </div>
           </div>
           <div class="mg-stat-box">
-            <div class="mg-stat-value" id="stat-completed">–</div>
-            <div class="mg-stat-label">Niveles completados</div>
+            <div class="stat-box-icon" style="color:var(--mg-success)"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-box-content">
+              <div class="mg-stat-value" id="stat-completed">–</div>
+              <div class="mg-stat-label">Niveles completados</div>
+            </div>
           </div>
           <div class="mg-stat-box">
-            <div class="mg-stat-value mg-text-streak" id="stat-best-streak">–</div>
-            <div class="mg-stat-label">Mejor racha</div>
+            <div class="stat-box-icon" style="color:var(--mg-streak)"><i class="fa-solid fa-fire"></i></div>
+            <div class="stat-box-content">
+              <div class="mg-stat-value mg-text-streak" id="stat-best-streak">–</div>
+              <div class="mg-stat-label">Mejor racha</div>
+            </div>
           </div>
         </div>
       </div>

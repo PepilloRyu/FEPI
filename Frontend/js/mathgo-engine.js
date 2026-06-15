@@ -4,6 +4,7 @@ import { BASE_URL } from "./services/api.js";
 
 // Convierte notación de matriz en HTML de tabla con .mg-matrix-wrap/.mg-matrix-inner/.mg-mc
 // Soporta: "[ 1 0 ] / [ 2 3 ]" y "Prefijo texto: [ 2 1 | 8 ] / [ 1 −1 | 1 ]"
+// También soporta variables (letras) dentro de matrices: [ x y ] / [ a b ]
 function matrixify(text) {
   const firstBracket = text.indexOf('[');
   if (firstBracket === -1) return text;
@@ -12,8 +13,8 @@ function matrixify(text) {
   const matrixText = text.slice(firstBracket);
 
   const parts = matrixText.split(/\s*\/\s*/);
-  // charset: dígitos, espacios, punto, coma, | (pipe), − (U+2212), - (guion)
-  if (!parts.every(p => /^\s*\[[\d\s.,|−-]+\]\s*$/.test(p))) return text;
+  // charset: dígitos, letras, espacios, punto, coma, | (pipe), − (U+2212), - (guion)
+  if (!parts.every(p => /^\s*\[[\w\d\s.,|−-]+\]\s*$/.test(p))) return text;
 
   const rows = parts.map(p =>
     p.replace(/^\s*\[\s*/, "").replace(/\s*\]\s*$/, "").trim()
@@ -36,7 +37,7 @@ function matrixify(text) {
 // A diferencia de matrixify(), no requiere que el texto sea solo matrices —
 // localiza cada [n, n | n] embebida y la convierte a tabla inline, dejando el resto.
 function matrixifyInline(text) {
-  return text.replace(/\[[\d\s.,|−-]+\]/g, match => {
+  return text.replace(/\[[\w\d\s.,|−-]+\]/g, match => {
     const tokens = match.slice(1, -1).trim()
       .split(/\s+/).map(t => t.replace(/,+$/, "")).filter(Boolean);
     const cells = tokens.map(n =>
@@ -46,6 +47,41 @@ function matrixifyInline(text) {
     ).join("");
     return `<span class="mg-matrix-wrap"><span class="mg-matrix-inner cols-${tokens.length}">${cells}</span></span>`;
   });
+}
+
+// Envuelve variables algebraicas individuales (x, y, a, b, A, B, etc.) en itálica.
+// Solo aplica a letras sueltas que estén entre operadores, espacios, signos, paréntesis o bordes de texto.
+// No aplica a palabras completas (ej. "de", "la", "es") ni a texto dentro de tags HTML.
+function mathVars(text) {
+  if (!text) return "";
+  // Primero protegemos los tags HTML ya presentes para no modificarlos
+  const htmlParts = [];
+  const placeholder = '\x00';
+  const withPlaceholders = text.replace(/<[^>]+>/g, match => {
+    htmlParts.push(match);
+    return placeholder;
+  });
+  // Buscar letras sueltas (una sola letra) que estén rodeadas por bordes de "contexto matemático"
+  // Contexto: inicio/fin de string, espacios, operadores (+−–-*/=≠≤≥<>), paréntesis, comas, dos puntos, o placeholders de tag HTML (\x00)
+  const varified = withPlaceholders.replace(
+    /(?<=^|[\s+\-−–*/=≠≤≥<>(),;:¿?¡!\x00])([a-zA-Z])(?=$|[\s+\-−–*/=≠≤≥<>(),;:¿?¡!²³⁻¹⁰\x00])/g,
+    '<em class="mg-var">$1</em>'
+  );
+  // Restaurar tags HTML
+  let idx = 0;
+  return varified.replace(new RegExp(placeholder, 'g'), () => htmlParts[idx++]);
+}
+
+// Combinador: aplica matrixify si contiene "/" y "[", de lo contrario matrixifyInline, y luego mathVars
+function mathFormat(text) {
+  if (!text) return "";
+  let formatted = text;
+  if (text.includes('[') && text.includes('/') && text.includes(']')) {
+    formatted = matrixify(text);
+  } else {
+    formatted = matrixifyInline(text);
+  }
+  return mathVars(formatted);
 }
 
 async function getToken(user) {
@@ -568,7 +604,7 @@ export async function initEngine({
         }
         const disabled = isPreview || st.result === "ok";
         const clickHtml = isPreview ? "" : ` onclick="${h.pick}(${i})"`;
-        const displayLabel = matrixify(o.label);
+        const displayLabel = mathFormat(o.label);
         const label = (isPreview && o.correct) ? `${displayLabel} ✓` : displayLabel;
         return `<button class="mg-opt ${btnCls}" ${disabled ? "disabled" : ""}${clickHtml}>${label}</button>`;
       }).join("") + `</div>`;
@@ -576,18 +612,18 @@ export async function initEngine({
     if (c.type === "build" || c.type === "buildSeq") {
       const ans = st.selected.length === 0
         ? `<span class="mg-placeholder">Toca los bloques para construir tu respuesta…</span>`
-        : st.selected.map(s => `<span class="mg-chip in" onclick="${h.unpick}(${s.id})">${matrixify(s.label)}</span>`).join("");
+        : st.selected.map(s => `<span class="mg-chip in" onclick="${h.unpick}(${s.id})">${mathFormat(s.label)}</span>`).join("");
       const rem = c.bank.map((label, i) => ({ id: i, label }))
         .filter(b => !st.selected.find(s => s.id === b.id));
       return `<div class="mg-answer">${ans}</div>
-        <div class="mg-bank">${rem.map(b => `<span class="mg-chip" onclick="${h.put}(${b.id},'${b.label}')">${matrixify(b.label)}</span>`).join("")}</div>`;
+        <div class="mg-bank">${rem.map(b => `<span class="mg-chip" onclick="${h.put}(${b.id},'${b.label}')">${mathFormat(b.label)}</span>`).join("")}</div>`;
     }
     if (c.type === "match") {
       const used = Object.values(st.placed);
       const rows = c.pairs.map((p, i) => {
         const lab = st.placed[i];
         return `<div class="mg-match-row">
-          <span class="mg-match-desc">${matrixify(p.desc)}</span>
+          <span class="mg-match-desc">${mathFormat(p.desc)}</span>
           <div class="dropzone ${lab ? "filled" : ""}" data-zone="${i}">
             ${lab ? `<span class="mg-placed" onclick="${h.takeOut}(${i})">${lab}</span>` : ""}
           </div></div>`;
@@ -625,15 +661,15 @@ export async function initEngine({
       const tokens = c.type === "build" ? c.operands : (c.answers ? c.answers[0] : null);
       if (!tokens) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Respuesta correcta no disponible</div>`;
       const chips = tokens.map(t =>
-        `<span class="mg-chip" style="border-color:var(--owl-green-shadow);background:var(--correct-bg);color:var(--correct-text)">${matrixify(t)}</span>`
+        `<span class="mg-chip" style="border-color:var(--owl-green-shadow);background:var(--correct-bg);color:var(--correct-text)">${mathFormat(t)}</span>`
       ).join("");
       return `<div class="mg-answer" style="border-color:var(--owl-green-shadow);background:var(--correct-bg)">${chips}</div>
-        <div class="mg-bank">${(c.bank || []).map(b => `<span class="mg-chip">${matrixify(b)}</span>`).join("")}</div>`;
+        <div class="mg-bank">${(c.bank || []).map(b => `<span class="mg-chip">${mathFormat(b)}</span>`).join("")}</div>`;
     }
     if (c.type === "match") {
       if (!c.pairs) return `<div class="mg-error-msg" style="color:var(--mg-error);padding:10px;font-weight:700;">Error: Pares no disponibles</div>`;
       const rows = c.pairs.map(p => `<div class="mg-match-row">
-        <span class="mg-match-desc">${matrixify(p.desc)}</span>
+        <span class="mg-match-desc">${mathFormat(p.desc)}</span>
         <div class="dropzone filled" style="border-color:var(--owl-green-shadow)">
           <span class="mg-placed" style="background:var(--correct-bg);border-color:var(--owl-green-shadow);color:var(--correct-text)">${p.sym}</span>
         </div></div>`).join("");
@@ -869,9 +905,9 @@ export async function initEngine({
           <span class="mg-tag" style="margin-bottom:0;">${c.tag ?? ""}</span>
           <button onclick="MG.openTheoryModal(${P.levelIdx})" style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px solid var(--mg-border);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--mg-primary);cursor:pointer;font-family:inherit;flex-shrink:0;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i>Ver teoría</button>
         </div>
-        <p class="mg-prompt">${matrixifyInline(c.prompt)}</p>
+        <p class="mg-prompt">${mathFormat(c.prompt)}</p>
         ${mid}
-        ${c.hint ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : ""}
+        ${c.hint ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${mathFormat(c.hint)}</div></div>` : ""}
       </div>
       <div class="mg-footer" style="display:flex;gap:12px;justify-content:center;align-items:stretch">
         <div class="mg-btn-wrap" style="flex:1;max-width:180px;${prevDisabled ? "opacity:.4;pointer-events:none" : ""}">
@@ -956,7 +992,7 @@ export async function initEngine({
     const h = { pick: "MG.pick", put: "MG.put", unpick: "MG.unpick", takeOut: "MG.takeOut" };
     const mid  = challengeHTML(c, S, h);
     const hint = (S.showHint && S.result !== "ok")
-      ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : "";
+      ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${mathFormat(c.hint)}</div></div>` : "";
 
     let footer;
     if (S.result === "ok")
@@ -973,7 +1009,7 @@ export async function initEngine({
       <button onclick="MG.openTheoryModal()" style="display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px solid var(--mg-border);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--mg-primary);cursor:pointer;font-family:inherit;flex-shrink:0;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i>Ver teoría</button>
     </div>`;
     app.innerHTML = `<div class="mg-player">${top}<div class="mg-content mg-fade ${S.result === "no" ? "mg-shake" : ""}">
-      ${tagRow}<p class="mg-prompt">${matrixifyInline(c.prompt)}</p>${mid}${hint}</div>
+      ${tagRow}<p class="mg-prompt">${mathFormat(c.prompt)}</p>${mid}${hint}</div>
       <div class="mg-footer">${footer}</div></div>`;
     bindDrag();
   }
@@ -1072,7 +1108,7 @@ export async function initEngine({
     const h = { pick: "MG.examPick", put: "MG.examPut", unpick: "MG.examUnpick", takeOut: "MG.examTakeOut" };
     const mid  = challengeHTML(c, E, h);
     const hint = (E.showHint && E.result !== "ok")
-      ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${c.hint}</div></div>` : "";
+      ? `<div class="mg-note hint"><div class="lbl"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i>Pista</div><div class="txt">${mathFormat(c.hint)}</div></div>` : "";
 
     let footer;
     if (E.result === "ok")
@@ -1093,7 +1129,7 @@ export async function initEngine({
         </div>
         <div class="mg-content">
           <span class="mg-tag">${c.tag ?? ""}</span>
-          <p class="mg-prompt">${matrixifyInline(c.prompt)}</p>
+          <p class="mg-prompt">${mathFormat(c.prompt)}</p>
           ${mid}${hint}
         </div>
         <div class="mg-footer">${footer}</div>

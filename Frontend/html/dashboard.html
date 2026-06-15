@@ -28,25 +28,33 @@
       <!-- Metricas principales -->
       <div class="mg-stats-grid mg-mb-6" id="main-stats">
         <div class="mg-stat-box">
-          <div style="font-size:24px; color:var(--mg-xp); margin-bottom:6px;"><i class="fa-solid fa-bolt"></i></div>
-          <div class="mg-stat-value mg-text-xp" id="d-xp">–</div>
-          <div class="mg-stat-label">XP Total</div>
+          <div class="stat-box-icon" style="color:var(--mg-xp);"><i class="fa-solid fa-bolt"></i></div>
+          <div class="stat-box-content">
+            <div class="mg-stat-value mg-text-xp" id="d-xp">–</div>
+            <div class="mg-stat-label">XP Total</div>
+          </div>
         </div>
         <div class="mg-stat-box">
-          <div style="font-size:24px; color:var(--mg-primary); margin-bottom:6px;"><i class="fa-solid fa-star"></i></div>
-          <div class="mg-stat-value mg-text-primary" id="d-level">–</div>
-          <div class="mg-stat-label">Nivel</div>
+          <div class="stat-box-icon" style="color:var(--mg-primary);"><i class="fa-solid fa-star"></i></div>
+          <div class="stat-box-content">
+            <div class="mg-stat-value mg-text-primary" id="d-level">–</div>
+            <div class="mg-stat-label">Nivel</div>
+          </div>
         </div>
         <div class="mg-stat-box">
-          <div style="font-size:24px; color:var(--mg-gems); margin-bottom:6px;"><i class="fa-solid fa-gem"></i></div>
-          <div class="mg-stat-value mg-text-gem" id="d-gems">–</div>
-          <div class="mg-stat-label">Gemas</div>
+          <div class="stat-box-icon" style="color:var(--mg-gems);"><i class="fa-solid fa-gem"></i></div>
+          <div class="stat-box-content">
+            <div class="mg-stat-value mg-text-gem" id="d-gems">–</div>
+            <div class="mg-stat-label">Gemas</div>
+          </div>
         </div>
         <div class="mg-stat-box">
-          <div id="d-accuracy-icon" style="font-size:24px; color:var(--mg-success); margin-bottom:6px;"><i class="fa-solid fa-bullseye"></i></div>
-          <div class="mg-stat-value" id="d-accuracy" style="color: var(--mg-success);">–</div>
-          <div class="mg-stat-label">Precisión global</div>
-          <div id="d-accuracy-sub" style="font-size:11px; font-weight:700; color:var(--mg-muted); margin-top:3px;"></div>
+          <div class="stat-box-icon" id="d-accuracy-icon" style="color:var(--mg-success);"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="stat-box-content">
+            <div class="mg-stat-value" id="d-accuracy" style="color: var(--mg-success);">–</div>
+            <div class="mg-stat-label">Precisión global</div>
+            <div id="d-accuracy-sub" style="font-size:11px; font-weight:700; color:var(--mg-muted); margin-top:3px;"></div>
+          </div>
         </div>
       </div>
 
@@ -136,6 +144,7 @@
     import { requireAuth, getInitials, showToast, animateProgress } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
     import { getDashboard, getMissions, getAnalytics } from '../js/services/api.js';
+    import { BANNER_CATALOG, getBannerStyle } from '../js/banner-catalog.js';
     import { db } from '../js/firebaseConfig.js';
     import { doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
@@ -260,6 +269,23 @@ function updateXpRing(xp, xpNeeded = 1000) {
       ]);
       const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
       const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
+
+      // Aplicar banner equipado si existe
+      const equippedBanner = userData.equippedBanner ?? null;
+      if (equippedBanner) {
+        const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
+        if (bannerEntry) {
+          const welcomeEl = document.getElementById('dash-welcome');
+          if (welcomeEl) {
+            const styleStr = getBannerStyle(bannerEntry);
+            styleStr.split(';').filter(Boolean).forEach(decl => {
+              const [prop, ...rest] = decl.split(':');
+              const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+              welcomeEl.style[camel] = rest.join(':').trim();
+            });
+          }
+        }
+      }
 
       const xp = progress.totalXp ?? 0;
       const streak = progress.dailyStreak ?? 0;

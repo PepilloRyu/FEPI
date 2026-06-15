@@ -211,6 +211,260 @@
       font-size: 13px; color: var(--mg-error, #ef4444); line-height: 1.5;
     }
     .perm-banner i { flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Friends Card Grid ── */
+    #friends-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .friend-card {
+      background: var(--mg-surface-2);
+      border: 1px solid var(--mg-border);
+      border-radius: var(--mg-radius-lg);
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all var(--mg-transition);
+      box-sizing: border-box;
+      position: relative;
+    }
+    .friend-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--mg-shadow);
+      border-color: var(--mg-primary-light);
+      background: var(--mg-surface);
+    }
+    .friend-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .friend-card-names {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .friend-card-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--mg-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .friend-card-title-equipped {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mg-primary);
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .friend-card-kpis {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 8px 12px;
+      border-radius: var(--mg-radius-sm);
+    }
+    .friend-card-kpi {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+    }
+    .friend-card-kpi .kpi-icon {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .friend-card-kpi .kpi-vals {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.1;
+    }
+    .friend-card-kpi .kpi-val {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--mg-text);
+    }
+    .friend-card-kpi .kpi-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--mg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Friend Modal Overlay ── */
+    .friend-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: var(--mg-space-4);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .friend-modal-overlay.visible {
+      display: flex;
+      opacity: 1;
+    }
+    .friend-modal {
+      background: var(--mg-surface-2);
+      border: 1px solid var(--mg-border);
+      border-radius: var(--mg-radius-xl);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+      transform: translateY(20px);
+      transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .friend-modal-overlay.visible .friend-modal {
+      transform: translateY(0);
+    }
+    
+    /* Encabezado del modal (Soporta Banner) */
+    .friend-modal-header {
+      padding: 36px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      background: linear-gradient(135deg, var(--mg-surface) 0%, rgba(90,18,54,.1) 100%);
+      border-bottom: 1px solid var(--mg-border);
+    }
+    .friend-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .friend-modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .friend-modal-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--mg-primary);
+      color: #fff;
+      font-size: 32px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      margin-bottom: 14px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+    .friend-modal-name {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .friend-modal-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--mg-primary-light, #fcd34d);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .friend-modal-email {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    /* Contenido del modal */
+    .friend-modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .friend-modal-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .friend-modal-stat {
+      background: var(--mg-surface);
+      border: 1px solid var(--mg-border);
+      border-radius: var(--mg-radius);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .friend-modal-stat-icon {
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--mg-radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+    .friend-modal-stat-content {
+      display: flex;
+      flex-direction: column;
+    }
+    .friend-modal-stat-val {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--mg-text);
+      line-height: 1.1;
+    }
+    .friend-modal-stat-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--mg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .friend-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid var(--mg-border);
+      padding: 16px 24px 24px;
+    }
   </style>
 </head>
 <body>
@@ -304,6 +558,13 @@
     </main>
   </div>
 
+  <!-- Modal flotante de Amigo -->
+  <div class="friend-modal-overlay" id="friend-modal-overlay" onclick="closeFriendModal(event)">
+    <div class="friend-modal" id="friend-modal">
+      <!-- Contenido inyectado por JS -->
+    </div>
+  </div>
+
   <div class="mg-toast-container" id="mg-toast-container"></div>
 
   <script type="module">
@@ -314,6 +575,8 @@
       doc, getDoc, getDocs, collection, query, where, limit,
       addDoc, updateDoc, deleteDoc, serverTimestamp,
     } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+    import { TITLE_CATALOG } from '../js/title-catalog.js';
+    import { BANNER_CATALOG, getBannerStyle } from '../js/banner-catalog.js';
 
     const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -477,16 +740,21 @@
       countEl.textContent   = friendDocs.length;
       countEl.style.display = '';
 
-      // Leer mathgo_progress de cada amigo
-      let progressMap      = {};
-      let permissionDenied = false;
-
+      // Leer mathgo_progress y user data de cada amigo
+      const uids = friendDocs.map(f => f.friendUid);
       const progressResults = await Promise.allSettled(
-        friendDocs.map(f => getDoc(doc(db, 'mathgo_progress', f.friendUid)))
+        uids.map(uid => getDoc(doc(db, 'mathgo_progress', uid)))
+      );
+      const userResults = await Promise.allSettled(
+        uids.map(uid => getDoc(doc(db, 'users', uid)))
       );
 
+      let progressMap      = {};
+      let userMap          = {};
+      let permissionDenied = false;
+
       progressResults.forEach((result, i) => {
-        const uid = friendDocs[i].friendUid;
+        const uid = uids[i];
         if (result.status === 'fulfilled') {
           progressMap[uid] = result.value.exists() ? result.value.data() : null;
         } else {
@@ -495,18 +763,20 @@
         }
       });
 
-      if (permissionDenied) {
-        console.warn(
-          '[amigos] PERMISO DENEGADO al leer mathgo_progress de un amigo. ' +
-          'Las reglas de mathgo_progress deben revisarse. NO se modificarán sin revisión.'
-        );
-      }
+      userResults.forEach((result, i) => {
+        const uid = uids[i];
+        if (result.status === 'fulfilled') {
+          userMap[uid] = result.value.exists() ? result.value.data() : null;
+        } else {
+          console.warn(`No se pudo leer user de ${uid}:`, result.reason);
+        }
+      });
 
       let html = '';
 
       if (permissionDenied) {
         html += `
-          <div class="perm-banner">
+          <div class="perm-banner" style="grid-column: 1 / -1;">
             <i class="fa-solid fa-triangle-exclamation"></i>
             <div>
               <strong>Progreso de amigos no disponible.</strong><br>
@@ -520,35 +790,251 @@
         const name       = f.friendName  || '(usuario desconocido)';
         const mail       = f.friendEmail || f.friendUid;
         const friendProg = progressMap[f.friendUid] ?? null;
-        const hasCmp     = !permissionDenied;
-        const cmpHtml    = hasCmp ? buildCompareTable(currentUserProgress, friendProg, name) : '';
+        const friendUser = userMap[f.friendUid] ?? null;
+        
+        // Resolver título equipado
+        const titleId = friendUser?.equippedTitle ?? null;
+        let titleName = 'Novato';
+        if (titleId) {
+          const titleEntry = TITLE_CATALOG.find(t => t.id === titleId);
+          if (titleEntry) titleName = titleEntry.name;
+        }
+
+        const fXp    = friendProg?.totalXp     ?? 0;
+        const fNivel = Math.floor(fXp / 100) + 1;
+        const fRacha = friendProg?.dailyStreak ?? 0;
 
         return `
-          <div class="friend-item${hasCmp ? ' has-cmp' : ''}">
-            <div class="mg-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;">
-              ${escHtml(getInitials(name))}
+          <div class="friend-card" onclick="openFriendModal('${f.friendUid}', '${escHtml(name)}', '${escHtml(mail)}')">
+            <div class="friend-card-header">
+              <div class="mg-avatar" style="width:40px;height:40px;font-size:14px;flex-shrink:0;">
+                ${escHtml(getInitials(name))}
+              </div>
+              <div class="friend-card-names">
+                <div class="friend-card-name">${escHtml(name)}</div>
+                <div class="friend-card-title-equipped">${escHtml(titleName)}</div>
+              </div>
             </div>
-            <div class="friend-item-info">
-              <div class="friend-item-name">${escHtml(name)}</div>
-              <div class="friend-item-email">${escHtml(mail)}</div>
-              ${cmpHtml}
-            </div>
-            <div class="friend-item-actions">
-              <button class="btn-remove"
-                data-id="${f.id}"
-                data-name="${escHtml(name)}"
-                title="Eliminar amigo">
-                <i class="fa-solid fa-user-minus"></i>
-              </button>
+            <div class="friend-card-kpis">
+              <div class="friend-card-kpi">
+                <div class="kpi-icon" style="color:var(--mg-primary);"><i class="fa-solid fa-star"></i></div>
+                <div class="kpi-vals">
+                  <span class="kpi-val">${fNivel}</span>
+                  <span class="kpi-lbl">Nivel</span>
+                </div>
+              </div>
+              <div class="friend-card-kpi">
+                <div class="kpi-icon" style="color:var(--mg-xp);"><i class="fa-solid fa-bolt"></i></div>
+                <div class="kpi-vals">
+                  <span class="kpi-val">${fXp}</span>
+                  <span class="kpi-lbl">XP</span>
+                </div>
+              </div>
+              <div class="friend-card-kpi">
+                <div class="kpi-icon" style="color:var(--mg-streak);"><i class="fa-solid fa-fire"></i></div>
+                <div class="kpi-vals">
+                  <span class="kpi-val">${fRacha}</span>
+                  <span class="kpi-lbl">Racha</span>
+                </div>
+              </div>
             </div>
           </div>`;
       }).join('');
 
       listEl.innerHTML = html;
-
-      listEl.querySelectorAll('.btn-remove').forEach(btn =>
-        btn.addEventListener('click', () => removeFriend(btn.dataset.id, btn.dataset.name, btn)));
     }
+
+    // Estima el mundo actual basado en el progreso
+    function estimateCurrentWorld(worldsData) {
+      if (!worldsData) return "Mundo 1: Las Bases";
+      let maxWorld = 1;
+      Object.keys(worldsData).forEach(wId => {
+        const wInt = parseInt(wId);
+        if ((worldsData[wId]?.levelsCompleted ?? []).length > 0) {
+          if (wInt > maxWorld) maxWorld = wInt;
+        }
+      });
+      const WORLD_NAMES = {
+        '1': 'Las Bases del Álgebra',
+        '2': 'Números Reales',
+        '3': 'Funciones Lineales',
+        '4': 'Funciones Cuadráticas',
+        '5': 'Matrices y Sistemas',
+        '6': 'Números Complejos',
+      };
+      return `Mundo ${maxWorld}: ${WORLD_NAMES[maxWorld] || 'Álgebra'}`;
+    }
+
+    // Funciones del Modal flotante
+    window.openFriendModal = async function(friendUid, name, email) {
+      const overlay = document.getElementById('friend-modal-overlay');
+      const modal = document.getElementById('friend-modal');
+      
+      modal.innerHTML = `
+        <div style="padding: 40px; text-align: center;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--mg-primary);"></i>
+        </div>
+      `;
+      
+      overlay.style.display = 'flex';
+      overlay.offsetHeight; // trigger reflow
+      overlay.classList.add('visible');
+      
+      try {
+        const [progDoc, userDoc] = await Promise.all([
+          getDoc(doc(db, 'mathgo_progress', friendUid)),
+          getDoc(doc(db, 'users', friendUid))
+        ]);
+        
+        const myProg = currentUserProgress;
+        const friendProg = progDoc.exists() ? progDoc.data() : null;
+        const userData = userDoc.exists() ? userDoc.data() : {};
+        
+        // Resolve title
+        const titleId = userData.equippedTitle ?? null;
+        let titleName = 'Novato';
+        if (titleId) {
+          const titleEntry = TITLE_CATALOG.find(t => t.id === titleId);
+          if (titleEntry) titleName = titleEntry.name;
+        }
+        
+        // Estimate world
+        const currentWorldText = estimateCurrentWorld(friendProg?.worlds);
+        
+        // Fetch accuracy
+        let accuracyText = 'Privada';
+        try {
+          const attemptsSnap = await getDocs(query(collection(db, 'attempts'), where('userId', '==', friendUid)));
+          const docs = attemptsSnap.docs;
+          if (docs.length > 0) {
+            const correct = docs.filter(d => d.data().isCorrect === true).length;
+            accuracyText = `${Math.round((correct / docs.length) * 100)}%`;
+          } else {
+            accuracyText = 'Sin datos';
+          }
+        } catch (err) {
+          console.warn('Accuracy fetch error:', err);
+        }
+        
+        // Build compare table
+        const cmpHtml = buildCompareTable(myProg, friendProg, name);
+        
+        // Render modal content
+        modal.innerHTML = `
+          <div class="friend-modal-header" id="modal-header-banner">
+            <button class="friend-modal-close" onclick="closeFriendModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="friend-modal-avatar">
+              ${escHtml(getInitials(name))}
+            </div>
+            <div class="friend-modal-name">${escHtml(name)}</div>
+            <div class="friend-modal-title">${escHtml(titleName)}</div>
+            <div class="friend-modal-email">${escHtml(email)}</div>
+          </div>
+          
+          <div class="friend-modal-body">
+            <div class="friend-modal-stats">
+              <div class="friend-modal-stat">
+                <div class="friend-modal-stat-icon" style="color: var(--mg-success);"><i class="fa-solid fa-bullseye"></i></div>
+                <div class="friend-modal-stat-content">
+                  <div class="friend-modal-stat-val">${accuracyText}</div>
+                  <div class="friend-modal-stat-lbl">Precisión</div>
+                </div>
+              </div>
+              <div class="friend-modal-stat">
+                <div class="friend-modal-stat-icon" style="color: var(--mg-primary);"><i class="fa-solid fa-globe"></i></div>
+                <div class="friend-modal-stat-content">
+                  <div class="friend-modal-stat-val">${currentWorldText.split(':')[0]}</div>
+                  <div class="friend-modal-stat-lbl">Progreso</div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="margin-top: 10px;">
+              <div style="font-size: 11px; font-weight: 800; color: var(--mg-muted); text-transform: uppercase; margin-bottom: 8px;">Comparación de rendimiento</div>
+              ${cmpHtml}
+            </div>
+          </div>
+          
+          <div class="friend-modal-actions">
+            <button class="mg-btn btn-remove" style="padding: 10px 16px; font-weight: 700; width: 100%; justify-content: center; display: flex; align-items: center; gap: 8px;" onclick="removeFriendFromModal('${friendUid}', '${escHtml(name)}')">
+              <i class="fa-solid fa-user-minus"></i> Eliminar de mis amigos
+            </button>
+          </div>
+        `;
+        
+        // Apply banner if equipped
+        const equippedBanner = userData.equippedBanner ?? null;
+        if (equippedBanner) {
+          const bannerEntry = BANNER_CATALOG.find(b => b.id === equippedBanner);
+          if (bannerEntry) {
+            const headerBanner = document.getElementById('modal-header-banner');
+            if (headerBanner) {
+              const styleStr = getBannerStyle(bannerEntry);
+              styleStr.split(';').filter(Boolean).forEach(decl => {
+                const [prop, ...rest] = decl.split(':');
+                const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+                headerBanner.style[camel] = rest.join(':').trim();
+              });
+            }
+          }
+        }
+        
+      } catch (err) {
+        console.error('Error loading friend details in modal:', err);
+        modal.innerHTML = `
+          <div style="padding: 24px; text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 32px; color: var(--mg-error); margin-bottom: 12px;"></i>
+            <div style="font-weight: 700; color: var(--mg-text);">Error al cargar detalles</div>
+            <div style="font-size: 12px; color: var(--mg-muted); margin-top: 4px;">${err.message}</div>
+            <button class="mg-btn btn-outline" style="margin-top: 16px;" onclick="closeFriendModal()">Cerrar</button>
+          </div>
+        `;
+      }
+    };
+    
+    window.closeFriendModal = function(e) {
+      if (e && e.target !== document.getElementById('friend-modal-overlay') && !e.target.classList.contains('friend-modal-close') && e.target.closest('.friend-modal-close') === null) {
+        return;
+      }
+      const overlay = document.getElementById('friend-modal-overlay');
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 250);
+    };
+    
+    window.removeFriendFromModal = async function(friendUid, name) {
+      closeFriendModal();
+      
+      const q = query(
+        collection(db, 'friends'),
+        where('userUid', '==', currentUid),
+        where('friendUid', '==', friendUid)
+      );
+      try {
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const docId = snap.docs[0].id;
+          removeFriend(docId, name);
+        } else {
+          // Intentar el caso inverso
+          const q2 = query(
+            collection(db, 'friends'),
+            where('userUid', '==', friendUid),
+            where('friendUid', '==', currentUid)
+          );
+          const snap2 = await getDocs(q2);
+          if (!snap2.empty) {
+            removeFriend(snap2.docs[0].id, name);
+          } else {
+            showToast('No se encontró la relación de amigos para eliminar', 'error');
+          }
+        }
+      } catch (err) {
+        console.error('Error al intentar eliminar amigo:', err);
+        showToast('Error al eliminar amigo: ' + err.message, 'error');
+      }
+    };
 
     // ── Tabla comparativa Tú vs Amigo ─────────────────────
     function buildCompareTable(myProg, friendProg, friendName) {
