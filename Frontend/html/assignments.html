@@ -92,7 +92,8 @@
     /* ── Practicar button ── */
     .btn-practice {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px;
+      padding: 10px 18px;
+      min-height: 44px;
       border: none; border-radius: 8px;
       background: var(--mg-primary); color: #fff;
       font-size: 13px; font-weight: 600;
@@ -101,6 +102,10 @@
       white-space: nowrap;
     }
     .btn-practice:hover { opacity: .88; }
+
+    @media (max-width: 480px) {
+      .assign-card-header { flex-wrap: wrap; gap: 8px; }
+    }
 
     /* ── Skeleton ── */
     .assign-grid-skeleton {

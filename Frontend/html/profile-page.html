@@ -8,6 +8,10 @@
   <link rel="icon" href="../assets/images/favicon.ico" />
   <link rel="stylesheet" href="../css/design-system.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    .profile-mobile-logout { display: none; }
+    @media (max-width: 1024px) { .profile-mobile-logout { display: flex; } }
+  </style>
 </head>
 <body>
 
@@ -116,11 +120,16 @@
           <button id="objetivo-add-btn" class="mg-btn mg-btn-primary mg-btn-sm" aria-label="Agregar objetivo">+</button>
         </div>
       </div>
+
+      <!-- Botón cerrar sesión — solo visible en móvil (sidebar oculto en ≤1024px) -->
+      <button id="mobile-logout-btn" class="mg-logout-btn profile-mobile-logout" style="margin-top:var(--mg-space-6);border-color:var(--mg-border);">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+      </button>
     </main>
   </div>
 
   <script type="module">
-    import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
+    import { requireAuth, getInitials, showToast, logout } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
     import { getAchievements } from '../js/services/api.js';
     import { db } from '../js/firebaseConfig.js';
@@ -157,6 +166,7 @@
 
     async function load(user) {
       await initSidebar('profile');
+      document.getElementById('mobile-logout-btn')?.addEventListener('click', () => logout());
 
       const [userSnap, progressSnap, attemptsSnap] = await Promise.allSettled([
         getDoc(doc(db, 'users', user.uid)),

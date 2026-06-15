@@ -26,6 +26,9 @@ const NAV_ITEMS = [
   { id: 'faq',         icon: 'fa-solid fa-circle-question', label: 'Ayuda',         href: 'faq.html' },
 ];
 
+// Ítems que aparecen en el bottom nav móvil (máx 6 para caber en 375px)
+const BOTTOM_NAV_IDS = new Set(['learn', 'leaderboard', 'amigos', 'dashboard', 'tienda', 'profile']);
+
 const ADMIN_ITEM   = { id: 'admin',   icon: 'fa-solid fa-shield-halved',    label: 'Admin',    href: 'admin.html' };
 const TEACHER_ITEM = { id: 'teacher', icon: 'fa-solid fa-chalkboard-user',  label: 'Profesor', href: 'teacher.html' };
 
@@ -412,15 +415,17 @@ function buildSidebar(activeId, basePath, userName, userXp, userStreak) {
 }
 
 function buildBottomNav(activeId, basePath) {
-  return NAV_ITEMS.map(item => `
-    <a href="${basePath}${item.href}"
-       class="${item.id === activeId ? 'active' : ''}"
-       ${item.id === activeId ? 'aria-current="page"' : ''}
-       title="${item.label}">
-      <i class="${item.icon}"></i>
-      <span class="nav-label">${item.label}</span>
-    </a>
-  `).join('');
+  return NAV_ITEMS
+    .filter(item => BOTTOM_NAV_IDS.has(item.id))
+    .map(item => `
+      <a href="${basePath}${item.href}"
+         class="${item.id === activeId ? 'active' : ''}"
+         ${item.id === activeId ? 'aria-current="page"' : ''}
+         title="${item.label}">
+        <i class="${item.icon}"></i>
+        <span class="nav-label">${item.label}</span>
+      </a>
+    `).join('');
 }
 
 /**

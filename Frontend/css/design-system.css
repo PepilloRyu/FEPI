@@ -912,6 +912,7 @@ input, select, textarea { font-family: inherit; }
     grid-template-columns: var(--mg-sidebar-w) minmax(0, 1fr);
   }
   .mg-right { display: none; }
+  .dash-mobile-cta { display: flex; }
 }
 
 @media (max-width: 768px) {
@@ -928,11 +929,14 @@ input, select, textarea { font-family: inherit; }
   .mg-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .mg-hero-banner h1 { font-size: 24px; }
   .mg-achievement-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid-2 { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
   .mg-hero-banner { padding: var(--mg-space-6); }
   .mg-stats-grid { grid-template-columns: 1fr 1fr; }
+  .mg-bottom-nav { padding: 6px; gap: 2px; }
+  .mg-bottom-nav a { padding: 8px 4px; }
 }
 
 /* ───────────────────────────────────────────
@@ -1417,6 +1421,18 @@ body.mg-player-mode #app .mg-content {
   .lesson.off2 { transform: translateX(58px); }
   .lesson.off1:hover:not(.locked) { transform: translateX(-58px) translateY(-2px); }
   .lesson.off2:hover:not(.locked) { transform: translateX(58px) translateY(-2px); }
+  .mg-chip { min-height: 44px; padding: 10px 16px; font-size: 16px; }
+
+  /* Modal de teoría a pantalla completa en móvil */
+  #mg-theory-modal { padding: 0 !important; }
+  #mg-theory-modal > div {
+    border-radius: 0 !important;
+    max-width: 100% !important;
+    max-height: 100dvh !important;
+    height: 100%;
+  }
+  #mg-theory-modal .mg-footer { padding: 12px; flex-wrap: wrap; gap: 8px !important; }
+  #mg-theory-modal .mg-btn-wrap { flex: 1 1 auto !important; min-width: 0 !important; }
 }
 
 /* ───────────────────────────────────────────
@@ -1526,6 +1542,7 @@ body.mg-player-mode #app .mg-content {
   gap: var(--mg-space-4);
   margin-bottom: var(--mg-space-6);
 }
+.dash-mobile-cta { display: none; }
 
 .dash-streak-badge {
   display: flex;
