@@ -92,9 +92,18 @@
       </div>
 
       <!-- Misiones activas -->
-      <div class="mg-card">
+      <div class="mg-card mg-mb-4">
         <h2 class="mg-card-title"><i class="fa-solid fa-bullseye" style="color:var(--mg-primary);"></i> Misiones de hoy</h2>
         <div id="dash-missions">
+          <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="height:60px;"></div>
+          <div class="mg-skeleton mg-skeleton-text" style="height:60px;"></div>
+        </div>
+      </div>
+
+      <!-- Misiones semanales -->
+      <div class="mg-card">
+        <h2 class="mg-card-title"><i class="fa-solid fa-calendar-week" style="color:var(--mg-xp);"></i> Misiones de la semana</h2>
+        <div id="dash-missions-weekly">
           <div class="mg-skeleton mg-skeleton-text mg-mb-4" style="height:60px;"></div>
           <div class="mg-skeleton mg-skeleton-text" style="height:60px;"></div>
         </div>
@@ -179,26 +188,48 @@
       `).join('');
     }
 
-    function renderMissions(missions) {
-      const container = document.getElementById('dash-missions');
-      if (!missions?.length) {
-        container.innerHTML = `<div class="mg-empty" style="padding:16px 0;">
-          <div class="mg-empty-icon" style="color:var(--mg-muted-2); font-size:32px;"><i class="fa-solid fa-bullseye"></i></div>
-          <div class="mg-empty-text">No hay misiones activas hoy</div>
-        </div>`;
-        return;
-      }
-      container.innerHTML = missions.slice(0,3).map(m => `
-        <div class="mg-mission-item">
+    function missionCard(m) {
+      const pct = Math.min(100, Math.round((m.progress / (m.target || 1)) * 100));
+      const completedBadge = m.completed
+        ? `<i class="fa-solid fa-circle-check" style="color:var(--mg-success);margin-left:6px;" title="Completada"></i>`
+        : '';
+      return `
+        <div class="mg-mission-item${m.completed ? ' mg-mission-done' : ''}">
           <div class="mg-mission-header">
-            <span class="mg-mission-title">${m.description || m.title}</span>
+            <span class="mg-mission-title">${m.description || m.name}${completedBadge}</span>
             <span class="mg-mission-xp">+${m.xpReward ?? 0} XP</span>
           </div>
           <div class="mg-progress">
-            <div class="mg-progress-bar xp" style="width:${Math.min(100,(m.currentProgress/(m.targetProgress||1))*100)}%"></div>
+            <div class="mg-progress-bar xp" style="width:${pct}%"></div>
           </div>
+          <div style="font-size:11px;color:var(--mg-muted);margin-top:3px;">${m.progress} / ${m.target}</div>
         </div>
-      `).join('');
+      `;
+    }
+
+    function renderMissions(allMissions) {
+      const daily = (allMissions ?? []).filter(m => m.type === 'daily');
+      const weekly = (allMissions ?? []).filter(m => m.type === 'weekly');
+
+      const dailyContainer = document.getElementById('dash-missions');
+      if (!daily.length) {
+        dailyContainer.innerHTML = `<div class="mg-empty" style="padding:16px 0;">
+          <div class="mg-empty-icon" style="color:var(--mg-muted-2); font-size:32px;"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="mg-empty-text">No hay misiones diarias activas</div>
+        </div>`;
+      } else {
+        dailyContainer.innerHTML = daily.map(missionCard).join('');
+      }
+
+      const weeklyContainer = document.getElementById('dash-missions-weekly');
+      if (!weekly.length) {
+        weeklyContainer.innerHTML = `<div class="mg-empty" style="padding:16px 0;">
+          <div class="mg-empty-icon" style="color:var(--mg-muted-2); font-size:32px;"><i class="fa-solid fa-calendar-week"></i></div>
+          <div class="mg-empty-text">No hay misiones semanales activas</div>
+        </div>`;
+      } else {
+        weeklyContainer.innerHTML = weekly.map(missionCard).join('');
+      }
     }
 
 function updateXpRing(xp, xpNeeded = 1000) {

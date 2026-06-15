@@ -165,6 +165,7 @@ public class ExerciseService : IExerciseService
         var parts = exerciseId.Split('_');
         int worldId = parts.Length > 0 && int.TryParse(parts[0], out var wid) ? wid : 0;
         int levelId = parts.Length > 1 && int.TryParse(parts[1], out var lid) ? lid : 0;
+        int exIdx   = parts.Length > 2 && int.TryParse(parts[2], out var eidx) ? eidx : -1;
         var attempt = new AttemptLog
         {
             Id           = Guid.NewGuid().ToString(),
@@ -180,6 +181,23 @@ public class ExerciseService : IExerciseService
         _ = _attemptRepository.AddAsync(attempt, attempt.Id)
             .ContinueWith(t => Debug.WriteLine($"[AttemptRepository] AddAsync error: {t.Exception}"),
                           TaskContinuationOptions.OnlyOnFaulted);
+
+        // Detectar si es el último ejercicio del nivel usando el cache en memoria (sin I/O extra).
+        // El último índice del nivel es el máximo que exista en answers.json para ese prefijo.
+        if (isCorrect && exIdx >= 0 && progress != null)
+        {
+            var prefix = $"{worldId}_{levelId}_";
+            int maxIdx = _cache.Answers.Keys
+                .Where(k => k.StartsWith(prefix, StringComparison.Ordinal))
+                .Select(k => int.TryParse(k.AsSpan(prefix.Length), out var i) ? i : -1)
+                .DefaultIfEmpty(-1)
+                .Max();
+
+            if (exIdx == maxIdx)
+                _ = _missionService.EvaluateMissionProgressAsync(uid, "levels_completed", 1)
+                    .ContinueWith(t => Debug.WriteLine($"[MissionService] levels_completed error: {t.Exception}"),
+                                  TaskContinuationOptions.OnlyOnFaulted);
+        }
 
         return new AnswerResultDto
         {

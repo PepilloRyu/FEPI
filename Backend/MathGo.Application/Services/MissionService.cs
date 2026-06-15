@@ -34,21 +34,42 @@ public class MissionService : IMissionService
         var userMissions = await _missionRepository.GetUserMissionsAsync(uid);
         var userMissionsMap = userMissions.ToDictionary(um => um.MissionId);
 
-        return allMissions.Select(m =>
+        var today = DateTime.UtcNow.Date;
+        // Semana actual: lunes al domingo
+        var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
+
+        var results = new List<MissionSummary>();
+        foreach (var m in allMissions)
         {
             userMissionsMap.TryGetValue(m.Id, out var um);
-            return new MissionSummary
+
+            bool needsReset = um != null && (
+                (m.Type == "daily"  && um.DateAssigned.Date < today) ||
+                (m.Type == "weekly" && um.DateAssigned.Date < weekStart)
+            );
+
+            if (needsReset)
+            {
+                um!.Progress = 0;
+                um.Completed = false;
+                um.DateAssigned = DateTime.UtcNow;
+                um.DateCompleted = null;
+                await _missionRepository.SaveUserMissionAsync(uid, um);
+            }
+
+            results.Add(new MissionSummary
             {
                 Id = m.Id,
                 Name = m.Name,
                 Description = m.Description,
                 Type = m.Type,
                 XpReward = m.XpReward,
-                Progress = um?.Progress ?? 0,
+                Progress = needsReset ? 0 : (um?.Progress ?? 0),
                 Target = m.Objective.Target,
-                Completed = um?.Completed ?? false
-            };
-        }).ToList();
+                Completed = !needsReset && (um?.Completed ?? false)
+            });
+        }
+        return results;
     }
 
     public async Task<MissionSummary?> CompleteMissionAsync(string uid, string missionId)
