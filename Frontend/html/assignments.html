@@ -308,8 +308,9 @@
         pending: `<span class="mg-badge" style="color:var(--mg-primary);border-color:var(--mg-primary);gap:4px;white-space:nowrap;"><i class="fa-solid fa-clock" style="font-size:11px;"></i> Pendiente</span>`,
       };
 
+      const practiceHref = lId !== null ? `${wHref}?assignedLevel=${lId}` : `${wHref}?assignedWorld=true`;
       const practiceBtn = status !== 'done'
-        ? `<a href="${wHref}" class="btn-practice"><i class="fa-solid fa-play"></i> Practicar</a>`
+        ? `<a href="${practiceHref}" class="btn-practice"><i class="fa-solid fa-play"></i> Practicar</a>`
         : '';
 
       return `

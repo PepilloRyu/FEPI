@@ -109,6 +109,10 @@ export async function initEngine({
   const uid = user.uid;
   const totalLevels = worldData.levels.length;
 
+  const params = new URLSearchParams(window.location.search);
+  const assignedLevel = params.has('assignedLevel') ? parseInt(params.get('assignedLevel'), 10) : null;
+  const assignedWorld = params.get('assignedWorld') === 'true';
+
   app.innerHTML = `<div class="mg-loading"><div class="mg-loading-inner"><div class="mg-brand-icon">M</div><span>Cargando…</span></div></div>`;
 
   // ---- Guardar retos locales antes de reemplazarlos (necesario para Vista Previa y examen) ----
@@ -159,6 +163,8 @@ export async function initEngine({
   // Admin: acceso total a todos los mundos.
   // Student: progresión normal (nivel anterior completo o examen de salto aprobado).
   const isUnlocked =
+    assignedLevel !== null ||
+    assignedWorld ||
     isAdmin ||
     worldId === 1 ||
     (raw?.worlds?.[prereqWorldId]?.allComplete === true) ||
@@ -277,7 +283,7 @@ export async function initEngine({
 
   function levelState(li) {
     if (S.completed[li]) return "completed";
-    if (isAdmin || li === 0 || S.completed[li - 1]) return "current";
+    if (isAdmin || li === 0 || S.completed[li - 1] || li === assignedLevel) return "current";
     return "locked";
   }
 
@@ -760,9 +766,13 @@ export async function initEngine({
       const st = levelState(li);
       const offClass = li % 2 === 0 ? "" : (Math.floor(li / 2) % 2 === 0 ? "off2" : "off1");
       const icon = st === "completed" ? '<i class="fa-solid fa-check"></i>' : st === "current" ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-lock" style="font-size:24px;"></i>';
-      const bubble = st === "current" ? `<div class="start-bubble">¡EMPIEZA!</div>` : "";
+      const isAssigned = assignedLevel !== null && li === assignedLevel;
+      const bubble = isAssigned
+        ? `<div class="start-bubble" style="background:var(--mg-primary);">¡ASIGNADO!</div>`
+        : (st === "current" ? `<div class="start-bubble">¡EMPIEZA!</div>` : "");
       const click  = st === "locked" ? "" : `onclick="MG.node(${li})"`;
-      return `<div class="lesson ${st} ${offClass}" ${click}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
+      const dataAttr = isAssigned ? ` data-assigned` : ``;
+      return `<div class="lesson ${st} ${offClass}" ${click}${dataAttr}>${bubble}<div class="circle">${icon}</div><p>${lv.node}</p></div>`;
     }).join("");
     const examIdx = totalLevels;
     const examOffClass = examIdx % 2 === 0 ? "" : (Math.floor(examIdx / 2) % 2 === 0 ? "off2" : "off1");
@@ -792,6 +802,12 @@ export async function initEngine({
         <section class="lesson-path">${nodes}${examNode}</section>
       </div>`;
     requestAnimationFrame(injectPathSVG);
+    if (assignedLevel !== null) {
+      requestAnimationFrame(() => {
+        const el = document.querySelector('[data-assigned]');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
   }
 
   function renderNodeOptions(li) {
