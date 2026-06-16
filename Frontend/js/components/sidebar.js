@@ -27,8 +27,8 @@ const NAV_ITEMS = [
   { id: 'faq',         icon: 'fa-solid fa-circle-question', label: 'Ayuda',         href: 'faq.html' },
 ];
 
-// Ítems que aparecen en el bottom nav móvil (máx 6 para caber en 375px)
-const BOTTOM_NAV_IDS = new Set(['learn', 'leaderboard', 'amigos', 'dashboard', 'tienda', 'profile']);
+// Ítems que aparecen en el bottom nav móvil (máx 4 para caber en 375px con el botón "Más")
+const BOTTOM_NAV_IDS = new Set(['learn', 'leaderboard', 'tienda', 'profile']);
 
 const ADMIN_ITEM   = { id: 'admin',   icon: 'fa-solid fa-shield-halved',    label: 'Admin',    href: 'admin.html' };
 const TEACHER_ITEM = { id: 'teacher', icon: 'fa-solid fa-chalkboard-user',  label: 'Profesor', href: 'teacher.html' };
@@ -152,8 +152,14 @@ let _notifData    = [];
 let _userRole     = 'student';
 
 function positionPanel() {
-  const btn = document.getElementById('mg-notif-btn');
+  const btn = document.getElementById('mg-notif-btn') || document.getElementById('mg-mobile-notif-btn');
   if (!btn || !_notifPanel) return;
+  if (window.innerWidth <= 768) {
+    _notifPanel.style.top       = '';
+    _notifPanel.style.left      = '';
+    _notifPanel.style.maxHeight = '';
+    return;
+  }
   const rect        = btn.getBoundingClientRect();
   const panelH      = Math.min(480, window.innerHeight - 40);
   const topIdeal    = rect.top;
@@ -242,12 +248,15 @@ function renderNotifList(notifications) {
 
 function updateBadge(count) {
   const badgeEl = document.getElementById('mg-notif-badge');
-  if (!badgeEl) return;
-  if (count > 0) {
-    badgeEl.textContent    = count > 99 ? '99+' : String(count);
-    badgeEl.style.display  = 'flex';
-  } else {
-    badgeEl.style.display  = 'none';
+  const mobileBadgeEl = document.getElementById('mg-mobile-notif-badge');
+  const countStr = count > 99 ? '99+' : String(count);
+  if (badgeEl) {
+    badgeEl.textContent    = countStr;
+    badgeEl.style.display  = count > 0 ? 'flex' : 'none';
+  }
+  if (mobileBadgeEl) {
+    mobileBadgeEl.textContent    = countStr;
+    mobileBadgeEl.style.display  = count > 0 ? 'flex' : 'none';
   }
 }
 
@@ -586,7 +595,7 @@ function buildSidebar(activeId, basePath, userName, userXp, userStreak) {
 }
 
 function buildBottomNav(activeId, basePath) {
-  return NAV_ITEMS
+  const itemsHtml = NAV_ITEMS
     .filter(item => BOTTOM_NAV_IDS.has(item.id))
     .map(item => `
       <a href="${basePath}${item.href}"
@@ -597,6 +606,85 @@ function buildBottomNav(activeId, basePath) {
         <span class="nav-label">${item.label}</span>
       </a>
     `).join('');
+
+  return itemsHtml + `
+    <a href="#" id="mg-bottom-nav-more" class="" title="Más opciones">
+      <i class="fa-solid fa-bars"></i>
+      <span class="nav-label">Más</span>
+    </a>
+  `;
+}
+
+function buildMobileMenuSheet(activeId, basePath, userRole) {
+  const remainingItems = NAV_ITEMS.filter(item => !BOTTOM_NAV_IDS.has(item.id));
+  
+  let gridHtml = remainingItems.map(item => {
+    const isActive = item.id === activeId;
+    return `
+      <a href="${basePath}${item.href}" class="mg-mobile-menu-item ${isActive ? 'active' : ''}">
+        <i class="${item.icon}"></i>
+        <span>${item.label}</span>
+      </a>
+    `;
+  }).join('');
+
+  if (userRole === 'admin') {
+    const isActive = activeId === 'admin';
+    gridHtml += `
+      <a href="${basePath}admin.html" class="mg-mobile-menu-item ${isActive ? 'active' : ''}">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Admin</span>
+      </a>
+    `;
+  } else if (userRole === 'teacher') {
+    const isActive = activeId === 'teacher';
+    gridHtml += `
+      <a href="${basePath}teacher.html" class="mg-mobile-menu-item ${isActive ? 'active' : ''}">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <span>Profesor</span>
+      </a>
+    `;
+  }
+
+  return `
+    <div class="mg-mobile-menu-sheet">
+      <div class="mg-mobile-menu-header">
+        <h3>Menú principal</h3>
+        <button class="mg-mobile-menu-close" id="mg-mobile-menu-close" aria-label="Cerrar menú">&times;</button>
+      </div>
+      <div class="mg-mobile-menu-grid">
+        ${gridHtml}
+      </div>
+      <div class="mg-mobile-menu-footer">
+        <button class="mg-notif-btn" id="mg-mobile-notif-btn" aria-label="Notificaciones" aria-expanded="false">
+          <div class="mg-notif-btn-icon">
+            <i class="fa-solid fa-bell"></i>
+            <span class="mg-notif-badge" id="mg-mobile-notif-badge" style="display:none;"></span>
+          </div>
+          Notificaciones
+        </button>
+        <button class="mg-mobile-menu-btn mg-mobile-menu-btn-logout" id="mg-mobile-logout-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function setupMobileMenuListeners(overlayEl) {
+  document.getElementById('mg-mobile-menu-close')?.addEventListener('click', () => {
+    overlayEl.classList.remove('open');
+  });
+
+  document.getElementById('mg-mobile-logout-btn')?.addEventListener('click', () => {
+    logout();
+  });
+
+  document.getElementById('mg-mobile-notif-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    setPanel(!_panelOpen);
+  });
 }
 
 /**
@@ -629,6 +717,12 @@ export async function initSidebar(activeId = 'learn') {
   bottomNavEl.setAttribute('aria-label', 'Navegacion movil');
   bottomNavEl.innerHTML = buildBottomNav(activeId, basePath);
 
+  // Crear overlay de menú móvil
+  const overlayEl = document.createElement('div');
+  overlayEl.className = 'mg-mobile-menu-overlay';
+  overlayEl.id = 'mg-mobile-menu-overlay';
+  overlayEl.innerHTML = buildMobileMenuSheet(activeId, basePath, null);
+
   // Inyectar en el layout
   const layout = document.querySelector('.mg-layout, .mg-layout-2col');
   if (layout) {
@@ -637,6 +731,23 @@ export async function initSidebar(activeId = 'learn') {
     document.body.insertBefore(sidebarEl, document.body.firstChild);
   }
   document.body.appendChild(bottomNavEl);
+  document.body.appendChild(overlayEl);
+
+  // Toggle menú móvil
+  document.getElementById('mg-bottom-nav-more')?.addEventListener('click', e => {
+    e.preventDefault();
+    overlayEl.classList.add('open');
+  });
+
+  // Cerrar al hacer click fuera
+  overlayEl.addEventListener('click', e => {
+    if (e.target === overlayEl) {
+      overlayEl.classList.remove('open');
+    }
+  });
+
+  // Bind de listeners iniciales del menú móvil
+  setupMobileMenuListeners(overlayEl);
 
   // Bind de logout
   document.getElementById('mg-logout-btn')?.addEventListener('click', () => {
@@ -671,6 +782,10 @@ export async function initSidebar(activeId = 'learn') {
   const isTeacherUser = userRole === 'teacher';
   const isStudentUser = userRole === 'student';
 
+  // Actualizar el menú móvil con el rol cargado
+  overlayEl.innerHTML = buildMobileMenuSheet(activeId, basePath, userRole);
+  setupMobileMenuListeners(overlayEl);
+
   // Mostrar título equipado bajo el nombre
   const equippedTitleId = roleSnap?.exists?.() ? (roleSnap.data().equippedTitle ?? null) : null;
   if (equippedTitleId) {
@@ -700,13 +815,6 @@ export async function initSidebar(activeId = 'learn') {
         </span>${ADMIN_ITEM.label}`;
       nav.appendChild(adminEl);
     }
-
-    const adminBottom = document.createElement('a');
-    adminBottom.href = `${basePath}${ADMIN_ITEM.href}`;
-    if (isActive) { adminBottom.className = 'active'; adminBottom.setAttribute('aria-current', 'page'); }
-    adminBottom.title = ADMIN_ITEM.label;
-    adminBottom.innerHTML = `<i class="${ADMIN_ITEM.icon}"></i><span class="nav-label">${ADMIN_ITEM.label}</span>`;
-    bottomNavEl.appendChild(adminBottom);
   }
 
   if (isTeacherUser) {
@@ -725,13 +833,6 @@ export async function initSidebar(activeId = 'learn') {
         </span>${TEACHER_ITEM.label}`;
       nav.appendChild(teacherEl);
     }
-
-    const teacherBottom = document.createElement('a');
-    teacherBottom.href = `${basePath}${TEACHER_ITEM.href}`;
-    if (isActive) { teacherBottom.className = 'active'; teacherBottom.setAttribute('aria-current', 'page'); }
-    teacherBottom.title = TEACHER_ITEM.label;
-    teacherBottom.innerHTML = `<i class="${TEACHER_ITEM.icon}"></i><span class="nav-label">${TEACHER_ITEM.label}</span>`;
-    bottomNavEl.appendChild(teacherBottom);
   }
 
   // Cargar notificaciones para estudiantes y profesores

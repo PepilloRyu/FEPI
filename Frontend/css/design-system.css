@@ -2069,3 +2069,154 @@ body.mg-player-mode #app .mg-content {
   0%   { background-position: 200% 50%; }
   100% { background-position: -200% 50%; }
 }
+
+/* ───────────────────────────────────────────
+   24. MOBILE HAMBURGER MENU DRAWER / SHEET
+   ─────────────────────────────────────────── */
+.mg-mobile-menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.mg-mobile-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mg-mobile-menu-sheet {
+  width: 100%;
+  max-width: 500px;
+  background: var(--mg-surface);
+  border-top: 1px solid var(--mg-border);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+.mg-mobile-menu-overlay.open .mg-mobile-menu-sheet {
+  transform: translateY(0);
+}
+.mg-mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.mg-mobile-menu-header h3 {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--mg-text);
+  margin: 0;
+}
+.mg-mobile-menu-close {
+  background: var(--mg-surface-2);
+  border: 1px solid var(--mg-border);
+  color: var(--mg-text);
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.15s;
+}
+.mg-mobile-menu-close:hover {
+  background: var(--mg-border);
+}
+.mg-mobile-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  overflow-y: auto;
+  padding-bottom: 12px;
+}
+.mg-mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--mg-surface-2);
+  border: 2px solid var(--mg-border);
+  text-decoration: none;
+  color: var(--mg-text);
+  font-size: 14px;
+  font-weight: 800;
+  transition: all 0.15s;
+}
+.mg-mobile-menu-item:hover {
+  background: rgba(122, 12, 56, 0.05);
+  border-color: rgba(122, 12, 56, 0.2);
+}
+.mg-mobile-menu-item.active {
+  background: rgba(122, 12, 56, 0.1);
+  color: var(--mg-primary);
+  border-color: var(--mg-primary);
+}
+.mg-mobile-menu-item i {
+  font-size: 16px;
+  color: var(--mg-primary);
+  width: 20px;
+  text-align: center;
+}
+.mg-mobile-menu-footer {
+  margin-top: 16px;
+  border-top: 1px solid var(--mg-border);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mg-mobile-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mg-mobile-menu-btn-logout {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  font-family: var(--mg-font);
+}
+.mg-mobile-menu-btn-logout:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Override responsive behavior of notifications panel */
+@media (max-width: 768px) {
+  .mg-notif-panel {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% - 32px) !important;
+    max-width: 380px !important;
+    height: 80% !important;
+    max-height: 500px !important;
+  }
+}
+
