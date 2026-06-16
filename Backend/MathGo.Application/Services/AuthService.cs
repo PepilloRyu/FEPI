@@ -68,7 +68,7 @@ public class AuthService : IAuthService
             Uid = userRecord.Uid,
             TotalXp = 0,
             DailyStreak = 0,
-            Gems = 500,
+            Gems = 0,
             Lives = 15,
             Level = 1,
             LastActiveDate = DateTime.UtcNow.ToString("yyyy-MM-dd"),
@@ -104,7 +104,7 @@ public class AuthService : IAuthService
             Uid = uid,
             TotalXp = 0,
             DailyStreak = 0,
-            Gems = 500,
+            Gems = 0,
             Lives = 15,
             Level = 1,
             WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 }

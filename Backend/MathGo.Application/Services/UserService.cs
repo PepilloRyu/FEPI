@@ -38,7 +38,7 @@ public class UserService : IUserService
             Uid = uid,
             TotalXp = 0,
             DailyStreak = 0,
-            Gems = 500,
+            Gems = 0,
             Lives = 15,
             Level = 1
         };

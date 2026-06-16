@@ -22,7 +22,7 @@ public class UserProgress
     public string LastActiveDate { get; set; } = string.Empty;
 
     [FirestoreProperty("gems")]
-    public int Gems { get; set; } = 500;
+    public int Gems { get; set; } = 0;
 
     [FirestoreProperty("lives")]
     public int Lives { get; set; } = 15;

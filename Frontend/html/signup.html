@@ -371,6 +371,17 @@
           createdAt: serverTimestamp(),
         });
 
+        // 2.5 Escribir documento de progreso inicial en Firestore para evitar bugs de gemas y XP
+        await setDoc(doc(db, 'mathgo_progress', user.uid), {
+          totalXp: 0,
+          dailyStreak: 0,
+          gems: 0,
+          lives: 15,
+          level: 1,
+          weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
+          worlds: {},
+        });
+
         // 3. Enviar email de verificación
         await sendEmailVerification(user);
 
