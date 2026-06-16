@@ -7,6 +7,128 @@
   <link rel="icon" href="../assets/images/favicon.ico" />
   <link rel="stylesheet" href="../css/design-system.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* ── Modal de gestión de usuario ── */
+    #manage-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 300;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .manage-modal-box {
+      width: 100%; max-width: 520px;
+      max-height: 92vh; overflow-y: auto;
+      border-radius: 22px !important;
+      padding: 0 !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,.28) !important;
+    }
+    .manage-modal-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--mg-border);
+      position: sticky; top: 0;
+      background: var(--mg-surface); z-index: 1;
+      border-radius: 22px 22px 0 0;
+    }
+    .manage-modal-user { flex: 1; min-width: 0; }
+    .manage-modal-user-name {
+      font-weight: 900; font-size: 16px; color: var(--mg-text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .manage-modal-user-email {
+      font-size: 12px; color: var(--mg-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .manage-modal-close {
+      background: var(--mg-surface-2); border: 1px solid var(--mg-border);
+      color: var(--mg-muted); width: 34px; height: 34px;
+      border-radius: 50%; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all var(--mg-transition); flex-shrink: 0;
+    }
+    .manage-modal-close:hover { background: var(--mg-border); color: var(--mg-text); }
+    .manage-modal-body { padding: 0 24px; }
+    .manage-section {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--mg-border-soft);
+    }
+    .manage-section:last-child { border-bottom: none; }
+    .manage-section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--mg-muted); margin-bottom: 12px;
+    }
+    .manage-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .manage-input-num {
+      width: 72px; padding: 8px 10px;
+      border: 1.5px solid var(--mg-border); border-radius: 10px;
+      font-family: var(--mg-font); font-size: 14px; font-weight: 700;
+      color: var(--mg-text); background: var(--mg-surface);
+      outline: none; transition: border-color var(--mg-transition);
+    }
+    .manage-input-num:focus { border-color: var(--mg-primary); box-shadow: 0 0 0 3px var(--mg-primary-glow); }
+    .manage-inline-label {
+      font-size: 12px; font-weight: 700; color: var(--mg-muted); white-space: nowrap;
+    }
+    .manage-select {
+      padding: 8px 12px;
+      border: 1.5px solid var(--mg-border); border-radius: var(--mg-radius);
+      font-family: var(--mg-font); font-size: 13px; font-weight: 700;
+      color: var(--mg-text); background: var(--mg-surface);
+      outline: none; cursor: pointer;
+      transition: border-color var(--mg-transition);
+    }
+    .manage-select:focus { border-color: var(--mg-primary); }
+    .manage-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 15px;
+      border-radius: var(--mg-radius); border: none;
+      font-family: var(--mg-font); font-size: 13px; font-weight: 800;
+      cursor: pointer; transition: all var(--mg-transition); white-space: nowrap;
+    }
+    .manage-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .manage-btn-danger {
+      background: rgba(239,68,68,0.09); color: var(--mg-danger);
+      border: 1.5px solid rgba(239,68,68,0.22);
+    }
+    .manage-btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.17); }
+    .manage-btn-primary {
+      background: var(--mg-primary); color: #fff;
+      box-shadow: 0 3px 0 var(--mg-primary-dark);
+    }
+    .manage-btn-primary:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+    .manage-btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--mg-primary-dark); }
+    .manage-btn-gem {
+      background: rgba(6,182,212,0.09); color: var(--mg-gems);
+      border: 1.5px solid rgba(6,182,212,0.22);
+    }
+    .manage-btn-gem:hover:not(:disabled) { background: rgba(6,182,212,0.17); }
+    .manage-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--mg-border);
+      display: flex; justify-content: flex-end;
+      border-radius: 0 0 22px 22px;
+    }
+    /* Botón de gestión en la tabla */
+    .btn-manage {
+      padding: 7px 11px;
+      border-radius: 10px;
+      font-size: 13px;
+      border: 1.5px solid var(--mg-border);
+      background: var(--mg-surface-2);
+      color: var(--mg-muted);
+      cursor: pointer;
+      transition: all var(--mg-transition);
+    }
+    .btn-manage:hover {
+      background: rgba(90,18,54,0.08);
+      color: var(--mg-primary);
+      border-color: rgba(90,18,54,0.2);
+    }
+  </style>
 </head>
 <body>
 
@@ -61,6 +183,114 @@
 
   <div class="mg-toast-container" id="mg-toast-container"></div>
 
+  <!-- ── Modal de gestión de usuario ── -->
+  <div id="manage-modal" class="mg-hidden" onclick="if(event.target===this)window.closeManageModal()">
+    <div class="manage-modal-box mg-card">
+
+      <div class="manage-modal-header">
+        <div class="mg-avatar" id="manage-avatar" style="width:40px;height:40px;font-size:15px;flex-shrink:0;"></div>
+        <div class="manage-modal-user">
+          <div class="manage-modal-user-name" id="manage-name"></div>
+          <div class="manage-modal-user-email" id="manage-email"></div>
+        </div>
+        <button class="manage-modal-close" onclick="window.closeManageModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="manage-modal-body">
+
+        <!-- Vidas -->
+        <div class="manage-section">
+          <div class="manage-section-title">
+            <i class="fa-solid fa-heart" style="color:var(--mg-hearts);"></i> Vidas
+          </div>
+          <div class="manage-row">
+            <button class="manage-btn manage-btn-danger" onclick="window.adminResetLives(this)">
+              <i class="fa-solid fa-rotate-left"></i> Resetear vidas
+            </button>
+            <span class="manage-inline-label">Asignar:</span>
+            <input type="number" id="assign-lives-input" class="manage-input-num" min="1" max="15" value="5" />
+            <button class="manage-btn manage-btn-primary" onclick="window.adminAssignLives(this)">
+              Aplicar
+            </button>
+          </div>
+        </div>
+
+        <!-- XP -->
+        <div class="manage-section">
+          <div class="manage-section-title">
+            <i class="fa-solid fa-bolt" style="color:var(--mg-xp);"></i> XP
+          </div>
+          <div class="manage-row">
+            <button class="manage-btn manage-btn-danger" onclick="window.adminResetXp(this)">
+              <i class="fa-solid fa-rotate-left"></i> Resetear XP
+            </button>
+          </div>
+        </div>
+
+        <!-- Gemas -->
+        <div class="manage-section">
+          <div class="manage-section-title">
+            <i class="fa-solid fa-gem" style="color:var(--mg-gems);"></i> Gemas
+          </div>
+          <div class="manage-row">
+            <span class="manage-inline-label">Agregar:</span>
+            <input type="number" id="add-gems-input" class="manage-input-num" min="1" value="10" />
+            <button class="manage-btn manage-btn-gem" onclick="window.adminAddGems(this)">
+              <i class="fa-solid fa-plus"></i> Agregar
+            </button>
+            <span class="manage-inline-label" style="margin-left:4px;">Quitar:</span>
+            <input type="number" id="remove-gems-input" class="manage-input-num" min="1" value="10" />
+            <button class="manage-btn manage-btn-danger" onclick="window.adminRemoveGems(this)">
+              <i class="fa-solid fa-minus"></i> Quitar
+            </button>
+          </div>
+        </div>
+
+        <!-- Racha -->
+        <div class="manage-section">
+          <div class="manage-section-title">
+            <i class="fa-solid fa-fire" style="color:var(--mg-streak);"></i> Racha
+          </div>
+          <div class="manage-row">
+            <button class="manage-btn manage-btn-danger" onclick="window.adminResetStreak(this)">
+              <i class="fa-solid fa-rotate-left"></i> Resetear racha
+            </button>
+          </div>
+        </div>
+
+        <!-- Progreso de mundo -->
+        <div class="manage-section">
+          <div class="manage-section-title">
+            <i class="fa-solid fa-map" style="color:var(--mg-primary);"></i> Progreso de mundo
+          </div>
+          <div class="manage-row">
+            <select id="reset-world-select" class="manage-select">
+              <option value="1">Mundo 1 — Las Bases del Álgebra</option>
+              <option value="2">Mundo 2 — Números Reales</option>
+              <option value="3">Mundo 3 — Funciones y Ecuaciones Lineales</option>
+              <option value="4">Mundo 4 — Funciones Cuadráticas</option>
+              <option value="5">Mundo 5 — Matrices y Sistemas Avanzados</option>
+              <option value="6">Mundo 6 — Números Complejos y Vectores</option>
+            </select>
+            <button class="manage-btn manage-btn-danger" onclick="window.adminResetWorld(this)">
+              <i class="fa-solid fa-rotate-left"></i> Resetear mundo
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="manage-modal-footer">
+        <button class="mg-btn mg-btn-secondary mg-btn-sm" onclick="window.closeManageModal()">
+          <i class="fa-solid fa-xmark"></i> Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <script type="module">
     import { requireAuth, getInitials, showToast } from '../js/services/auth.js';
     import { initSidebar } from '../js/components/sidebar.js';
@@ -82,6 +312,7 @@
     let cachedUsers = [];
     let cachedProgressMap = {};
     let currentUser = null;
+    let managedUid = null;
 
     // ── Guard + carga ──────────────────────────────────────
     async function loadAdmin(user) {
@@ -106,7 +337,6 @@
       const cachedAttempts = [];
       attemptsSnap.forEach(d => cachedAttempts.push(d.data()));
 
-      // Calcular estadísticas globales
       let totalLevels = 0;
       let totalXpSum  = 0;
       let topUser     = null;
@@ -214,6 +444,11 @@
                 <option value="admin"   ${role === 'admin'   ? 'selected' : ''}>Admin</option>
               </select>
             </td>
+            <td style="text-align:center;">
+              <button class="btn-manage" title="Gestionar usuario" onclick="window.openManageModal('${u.uid}')">
+                <i class="fa-solid fa-sliders"></i>
+              </button>
+            </td>
           </tr>`;
       }).join('');
 
@@ -227,6 +462,7 @@
                 <th>XP</th>
                 <th>Racha</th>
                 <th>Rol</th>
+                <th style="text-align:center;">Acciones</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -308,7 +544,133 @@
       }
     }
 
-    window.changeRole = changeRole;
+    // ── Modal: abrir / cerrar ──────────────────────────────
+    function openManageModal(uid) {
+      managedUid = uid;
+      const user = cachedUsers.find(u => u.uid === uid);
+      if (!user) return;
+
+      document.getElementById('manage-avatar').textContent = getInitials(user.name || user.email);
+      document.getElementById('manage-name').textContent  = user.name  || '–';
+      document.getElementById('manage-email').textContent = user.email || '–';
+
+      document.getElementById('manage-modal').classList.remove('mg-hidden');
+    }
+
+    function closeManageModal() {
+      document.getElementById('manage-modal').classList.add('mg-hidden');
+      managedUid = null;
+    }
+
+    // ── Helpers ───────────────────────────────────────────
+    function managedUserName() {
+      const u = cachedUsers.find(u => u.uid === managedUid);
+      return u?.name || u?.email || managedUid;
+    }
+
+    async function writeProgress(data, btn) {
+      btn.disabled = true;
+      try {
+        await setDoc(doc(db, 'mathgo_progress', managedUid), data, { merge: true });
+        cachedProgressMap[managedUid] = { ...(cachedProgressMap[managedUid] ?? {}), ...data };
+        return true;
+      } catch (e) {
+        console.error(e);
+        showToast('Error al guardar cambios', 'error');
+        return false;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Vidas ─────────────────────────────────────────────
+    async function adminResetLives(btn) {
+      if (!confirm(`¿Resetear las vidas de ${managedUserName()} a 15?`)) return;
+      const ok = await writeProgress({ lives: 15, lastLifeLostAt: null }, btn);
+      if (ok) { renderUsers(cachedUsers, cachedProgressMap); showToast('Vidas reseteadas a 15', 'success'); }
+    }
+
+    async function adminAssignLives(btn) {
+      const n = parseInt(document.getElementById('assign-lives-input').value, 10);
+      if (isNaN(n) || n < 1 || n > 15) { showToast('Ingresa un valor entre 1 y 15', 'error'); return; }
+      if (!confirm(`¿Asignar ${n} vidas a ${managedUserName()}?`)) return;
+      const ok = await writeProgress({ lives: n }, btn);
+      if (ok) { renderUsers(cachedUsers, cachedProgressMap); showToast(`${n} vidas asignadas`, 'success'); }
+    }
+
+    // ── XP ────────────────────────────────────────────────
+    async function adminResetXp(btn) {
+      if (!confirm(`¿Resetear el XP de ${managedUserName()} a 0? El nivel volverá a 1.`)) return;
+      const ok = await writeProgress({ totalXp: 0 }, btn);
+      if (ok) { renderUsers(cachedUsers, cachedProgressMap); showToast('XP reseteado a 0', 'success'); }
+    }
+
+    // ── Gemas ─────────────────────────────────────────────
+    async function adminAddGems(btn) {
+      const n = parseInt(document.getElementById('add-gems-input').value, 10);
+      if (isNaN(n) || n < 1) { showToast('Ingresa un número mayor a 0', 'error'); return; }
+      const currentGems = cachedProgressMap[managedUid]?.gems ?? 0;
+      const newGems = currentGems + n;
+      if (!confirm(`¿Agregar ${n} gemas a ${managedUserName()}? (${currentGems} → ${newGems})`)) return;
+      const ok = await writeProgress({ gems: newGems }, btn);
+      if (ok) showToast(`+${n} gemas agregadas`, 'success');
+    }
+
+    async function adminRemoveGems(btn) {
+      const n = parseInt(document.getElementById('remove-gems-input').value, 10);
+      if (isNaN(n) || n < 1) { showToast('Ingresa un número mayor a 0', 'error'); return; }
+      const currentGems = cachedProgressMap[managedUid]?.gems ?? 0;
+      const newGems = Math.max(0, currentGems - n);
+      if (!confirm(`¿Quitar ${n} gemas a ${managedUserName()}? (${currentGems} → ${newGems})`)) return;
+      const ok = await writeProgress({ gems: newGems }, btn);
+      if (ok) showToast(`-${n} gemas quitadas`, 'success');
+    }
+
+    // ── Racha ─────────────────────────────────────────────
+    async function adminResetStreak(btn) {
+      if (!confirm(`¿Resetear la racha de ${managedUserName()} a 0?`)) return;
+      const ok = await writeProgress({ dailyStreak: 0, lastActiveDate: null }, btn);
+      if (ok) { renderUsers(cachedUsers, cachedProgressMap); showToast('Racha reseteada a 0', 'success'); }
+    }
+
+    // ── Progreso de mundo ─────────────────────────────────
+    async function adminResetWorld(btn) {
+      const worldId = document.getElementById('reset-world-select').value;
+      if (!confirm(`¿Resetear el progreso del Mundo ${worldId} de ${managedUserName()}? Esta acción no se puede deshacer.`)) return;
+
+      const currentWorlds = { ...(cachedProgressMap[managedUid]?.worlds ?? {}) };
+      currentWorlds[worldId] = {
+        ...(currentWorlds[worldId] ?? {}),
+        levelsCompleted: [],
+        allComplete: false,
+        finalExam: { attempts: 0, score: 0, passed: false },
+      };
+
+      btn.disabled = true;
+      try {
+        await setDoc(doc(db, 'mathgo_progress', managedUid), { worlds: currentWorlds }, { merge: true });
+        cachedProgressMap[managedUid] = { ...(cachedProgressMap[managedUid] ?? {}), worlds: currentWorlds };
+        renderWorlds(cachedUsers, cachedProgressMap);
+        showToast(`Mundo ${worldId} reseteado`, 'success');
+      } catch (e) {
+        console.error(e);
+        showToast('Error al resetear mundo', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Exponer al DOM (onclick handlers) ─────────────────
+    window.changeRole       = changeRole;
+    window.openManageModal  = openManageModal;
+    window.closeManageModal = closeManageModal;
+    window.adminResetLives  = adminResetLives;
+    window.adminAssignLives = adminAssignLives;
+    window.adminResetXp     = adminResetXp;
+    window.adminAddGems     = adminAddGems;
+    window.adminRemoveGems  = adminRemoveGems;
+    window.adminResetStreak = adminResetStreak;
+    window.adminResetWorld  = adminResetWorld;
 
     requireAuth(false).then(user => { currentUser = user; loadAdmin(user); });
   </script>

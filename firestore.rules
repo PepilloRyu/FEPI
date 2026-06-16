@@ -16,10 +16,13 @@ service cloud.firestore {
 
     // ── mathgo_progress/{uid} ─────────────────────────────────────────────────
     // Lectura: cualquier usuario autenticado (XP ya es público en el leaderboard).
-    // Escritura: solo el propio usuario.
+    // Escritura: el propio usuario o un admin (panel de gestión).
     match /mathgo_progress/{uid} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && (
+        request.auth.uid == uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
     }
 
     // ── subjects/ ─────────────────────────────────────────────────────────────
