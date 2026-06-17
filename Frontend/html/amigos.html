@@ -1016,35 +1016,26 @@
     };
     
     window.removeFriendFromModal = async function(friendUid, name) {
+      if (!confirm(`¿Eliminar a "${name}" de tu lista de amigos?`)) return;
       closeFriendModal();
-      
-      const q = query(
-        collection(db, 'friends'),
-        where('userUid', '==', currentUid),
-        where('friendUid', '==', friendUid)
-      );
+
+      const req =
+        allSentRequests.find(r => r.toUid === friendUid && r.status === 'accepted') ||
+        allReceivedRequests.find(r => r.fromUid === friendUid && r.status === 'accepted');
+
+      if (!req) {
+        showToast('No se encontró la relación de amigos para eliminar', 'error');
+        return;
+      }
+
+      console.log('Eliminando friendRequest ID:', req.id);
       try {
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          const docId = snap.docs[0].id;
-          removeFriend(docId, name);
-        } else {
-          // Intentar el caso inverso
-          const q2 = query(
-            collection(db, 'friends'),
-            where('userUid', '==', friendUid),
-            where('friendUid', '==', currentUid)
-          );
-          const snap2 = await getDocs(q2);
-          if (!snap2.empty) {
-            removeFriend(snap2.docs[0].id, name);
-          } else {
-            showToast('No se encontró la relación de amigos para eliminar', 'error');
-          }
-        }
+        await deleteDoc(doc(db, 'friendRequests', req.id));
+        showToast(`${name} eliminado de amigos`, 'success');
+        await loadAllSections();
       } catch (err) {
-        console.error('Error al intentar eliminar amigo:', err);
-        showToast('Error al eliminar amigo: ' + err.message, 'error');
+        console.error('Error al eliminar amigo:', err);
+        showToast('Error al eliminar al amigo: ' + err.message, 'error');
       }
     };
 

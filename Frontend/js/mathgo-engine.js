@@ -95,9 +95,11 @@ function matrixifyInline(text) {
   return normalized;
 }
 
+const STOP_WORDS = new Set(['a','e','y','o','u','de','en','el','la','los','las','un','una','al','del','es','se','su','lo','le','no','si','que','con','por','para','como','pero','más','esto','este','esta']);
+
 // Envuelve variables algebraicas individuales (x, y, a, b, A, B, etc.) en itálica.
 // Solo aplica a letras sueltas que estén entre operadores, espacios, signos, paréntesis o bordes de texto.
-// No aplica a palabras completas (ej. "de", "la", "es") ni a texto dentro de tags HTML.
+// No aplica a palabras funcionales del español ni a texto dentro de tags HTML.
 function mathVars(text) {
   if (!text) return "";
   // Primero protegemos los tags HTML ya presentes para no modificarlos
@@ -111,7 +113,7 @@ function mathVars(text) {
   // Contexto: inicio/fin de string, espacios, operadores (+−–-*/=≠≤≥<>), paréntesis, comas, dos puntos, o placeholders de tag HTML (\x00)
   const varified = withPlaceholders.replace(
     /(?<=^|[\s+\-−–*/=≠≤≥<>(),;:¿?¡!\x00])([a-zA-Z])(?=$|[\s+\-−–*/=≠≤≥<>(),;:¿?¡!²³⁻¹⁰\x00])/g,
-    '<em class="mg-var">$1</em>'
+    (match, letter) => STOP_WORDS.has(letter.toLowerCase()) ? match : `<em class="mg-var">${letter}</em>`
   );
   // Restaurar tags HTML
   let idx = 0;

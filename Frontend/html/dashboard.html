@@ -259,13 +259,6 @@ function updateXpRing(xp, xpNeeded = 1000) {
     async function load(user) {
       await initSidebar('dashboard');
 
-      const displayName = user.displayName || user.email?.split('@')[0] || 'Usuario';
-      document.getElementById('dash-avatar').textContent = getInitials(displayName);
-      
-      const hour = new Date().getHours();
-      const greeting = hour < 12 ? '¡Buenos días' : hour < 18 ? '¡Buenas tardes' : '¡Buenas noches';
-      document.getElementById('dash-greeting').textContent = `${greeting}, ${displayName.split(' ')[0]}!`;
-
       // Cargar datos de Firestore (fallback local)
       const [progressSnap, userSnap, attemptsSnap] = await Promise.allSettled([
         getDoc(doc(db, 'mathgo_progress', user.uid)),
@@ -274,6 +267,12 @@ function updateXpRing(xp, xpNeeded = 1000) {
       ]);
       const progress = (progressSnap.status === 'fulfilled' && progressSnap.value.exists()) ? progressSnap.value.data() : {};
       const userData = (userSnap.status === 'fulfilled' && userSnap.value.exists()) ? userSnap.value.data() : {};
+
+      const displayName = userData.name || user.displayName || user.email?.split('@')[0] || 'Usuario';
+      document.getElementById('dash-avatar').textContent = getInitials(displayName);
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? '¡Buenos días' : hour < 18 ? '¡Buenas tardes' : '¡Buenas noches';
+      document.getElementById('dash-greeting').textContent = `${greeting}, ${displayName.split(' ')[0]}!`;
 
       // Aplicar banner equipado si existe
       const equippedBanner = userData.equippedBanner ?? null;
