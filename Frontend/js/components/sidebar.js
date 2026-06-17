@@ -81,7 +81,7 @@ function injectNotifStyles() {
       border: 2px solid var(--mg-surface);
     }
     .mg-notif-panel {
-      position: fixed; z-index: 500;
+      position: fixed; z-index: 1100;
       width: 340px; max-height: 480px;
       background: var(--mg-surface);
       border: 1px solid var(--mg-border); border-radius: 16px;
@@ -103,6 +103,15 @@ function injectNotifStyles() {
       font-family: var(--mg-font); white-space: nowrap; transition: all 0.15s;
     }
     .mg-notif-mark-all:hover { border-color: var(--mg-primary); color: var(--mg-primary); }
+    .mg-notif-close {
+      width: 28px; height: 28px; flex-shrink: 0;
+      border: 1px solid var(--mg-border); border-radius: 6px;
+      background: none; color: var(--mg-muted);
+      font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .mg-notif-close:hover { border-color: var(--mg-primary); color: var(--mg-primary); }
     .mg-notif-list { overflow-y: auto; flex: 1; }
     .mg-notif-item {
       display: flex; align-items: flex-start; gap: 12px;
@@ -174,10 +183,15 @@ function setPanel(open) {
   if (open) {
     _notifPanel.classList.add('open');
     positionPanel();
+    // On mobile, close the menu overlay so it doesn't overlap the panel
+    if (window.innerWidth <= 768) {
+      document.getElementById('mg-mobile-menu-overlay')?.classList.remove('open');
+    }
   } else {
     _notifPanel.classList.remove('open');
   }
   document.getElementById('mg-notif-btn')?.setAttribute('aria-expanded', open);
+  document.getElementById('mg-mobile-notif-btn')?.setAttribute('aria-expanded', open);
 }
 
 function renderNotifList(notifications) {
@@ -277,7 +291,10 @@ async function loadNotifications(uid, basePath, role = 'student') {
     _notifPanel.innerHTML = `
       <div class="mg-notif-panel-hd">
         <h3><i class="fa-solid fa-bell" style="margin-right:6px;font-size:13px;"></i>Notificaciones</h3>
-        <button class="mg-notif-mark-all" id="mg-notif-mark-all">Marcar como leído</button>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="mg-notif-mark-all" id="mg-notif-mark-all">Marcar como leído</button>
+          <button class="mg-notif-close" id="mg-notif-close" aria-label="Cerrar notificaciones"><i class="fa-solid fa-xmark"></i></button>
+        </div>
       </div>
       <div class="mg-notif-list">
         <div class="mg-notif-empty">
@@ -298,6 +315,12 @@ async function loadNotifications(uid, basePath, role = 'student') {
       if (_panelOpen && _notifPanel && !_notifPanel.contains(e.target)) {
         setPanel(false);
       }
+    });
+
+    // Close button
+    document.getElementById('mg-notif-close')?.addEventListener('click', e => {
+      e.stopPropagation();
+      setPanel(false);
     });
 
     // Mark all as read
