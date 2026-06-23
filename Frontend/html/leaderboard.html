@@ -61,7 +61,7 @@
     const MEDALS = [
       '<i class="fa-solid fa-medal" style="color:#fcd34d; filter: drop-shadow(0 2px 8px rgba(245,158,11,0.5));"></i>',
       '<i class="fa-solid fa-medal" style="color:#cbd5e1;"></i>',
-      '<i class="fa-solid fa-medal" style="color:#fdba74;"></i>'
+      '<i class="fa-solid fa-medal" style="color:#cd7f32;"></i>'
     ];
     const LEAGUES = ['Bronce', 'Plata', 'Oro', 'Diamante', 'Maestro'];
 
@@ -78,11 +78,13 @@
       if (!top3 || top3.length === 0) { podium.style.display = 'none'; return; }
       podium.style.display = 'flex';
 
-      // Orden visual: 2do, 1ro, 3ro
-      const ordered = [top3[1], top3[0], top3[2]].filter(Boolean);
+      // Orden visual: 2do, 1ro, 3ro con rangos fijos (1-based)
+      const ordered = [];
+      if (top3[1]) ordered.push({ user: top3[1], rank: 2 });
+      if (top3[0]) ordered.push({ user: top3[0], rank: 1 });
+      if (top3[2]) ordered.push({ user: top3[2], rank: 3 });
 
-      podium.innerHTML = ordered.map((u) => {
-        const rank = top3.indexOf(u) + 1;
+      podium.innerHTML = ordered.map(({ user: u, rank }) => {
         const height = rank === 1 ? 72 : rank === 2 ? 50 : 38;
         const isMe = u.uid === currentUid;
         const xp = u.xpTotal ?? u.totalXp ?? 0;

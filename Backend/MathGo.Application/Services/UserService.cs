@@ -151,8 +151,8 @@ public class UserService : IUserService
                     Uid = res.User.Uid,
                     Name = res.User.Name,
                     AvatarUrl = res.User.AvatarUrl ?? "",
-                    XpTotal = res.Prog.TotalXp,
-                    League = _gamificationService.CalculateLeague(res.Prog.TotalXp)
+                    XpTotal = res.Prog.WeeklyXp,
+                    League = _gamificationService.CalculateLeague(res.Prog.WeeklyXp)
                 });
             }
         }

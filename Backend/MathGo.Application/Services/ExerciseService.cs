@@ -148,6 +148,7 @@ public class ExerciseService : IExerciseService
                 if (progress.WeeklyActivity == null || progress.WeeklyActivity.Count != 7)
                     progress.WeeklyActivity = new List<int> { 0, 0, 0, 0, 0, 0, 0 };
                 progress.WeeklyActivity[(int)today.DayOfWeek] += xpAwarded;
+                progress.WeeklyXp = progress.WeeklyActivity.Sum();
 
                 await _progressRepository.UpdateAsync(uid, progress);
 

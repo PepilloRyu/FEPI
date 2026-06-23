@@ -13,7 +13,7 @@ public class ProgressRepository : FirestoreRepository<UserProgress>, IProgressRe
     public async Task<IEnumerable<UserProgress>> GetTopByXpAsync(int limit)
     {
         var snapshot = await _firestoreDb.Collection(_collectionName)
-            .OrderByDescending("totalXp")
+            .OrderByDescending("weeklyXp")
             .Limit(limit)
             .GetSnapshotAsync();
 
